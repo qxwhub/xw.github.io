@@ -1,144 +1,816 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>工具汇总</title>
-    <link rel="stylesheet" href="./xzcss/xzy.css">
-    <script>
-        var _hmt = _hmt || [];
-        (function () {
-            var hm = document.createElement("script");
-            hm.src = "https://hm.baidu.com/hm.js?796069f27e9b4492c6fa12052dee5bfd";
-            var s = document.getElementsByTagName("script")[0];
-            s.parentNode.insertBefore(hm, s);
-        })();
-    </script>
+    <title>我的导航页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        /* 精致背景（渐变+纹理） */
+        body {
+            background: 
+                linear-gradient(135deg, #e8f4f8 0%, #f0f8fb 25%, #f5fafe 50%, #eaf6fa 75%, #e8f4f8 100%),
+                url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.06' fill-rule='evenodd'/%3E%3C/svg%3E");
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+            background-attachment: fixed;
+            backdrop-filter: blur(2px);
+            /* 调整底部内边距，适配缩小的底部区域 */
+            padding-bottom: 80px;
+        }
+
+        /* 遮罩层 */
+        .mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.1);
+            z-index: 99;
+            display: none;
+            transform: translateX(300px);
+        }
+        .mask.show {
+            display: block;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 2px 0 20px rgba(0,0,0,0.08);
+            z-index: 100;
+            padding: 20px;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            backdrop-filter: blur(8px);
+            border-right: 1px solid rgba(240, 240, 240, 0.8);
+        }
+        .sidebar.open {
+            left: 0;
+        }
+
+        /* 侧边栏关闭按钮 */
+        .sidebar-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #f8f8f8;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+        .sidebar-close:hover {
+            background: #eee;
+        }
+
+        /* 侧边栏开关按钮 - 打开时隐藏 */
+        .sidebar-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            font-size: 18px;
+            cursor: pointer;
+            z-index: 101;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease;
+        }
+        .sidebar-toggle.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 搜索框容器 - 精准定位到标注位置（核心修改） */
+        .search-container {
+            width: 500px;
+            z-index: 10;
+            position: relative;
+            margin-top: 120px; /* 精准调整到标注位置 */
+            margin-bottom: 120px; /* 增加间距，给插件下移留出空间 */
+            padding: 0;
+            background: none;
+            backdrop-filter: none;
+            box-shadow: none;
+            border-radius: 0;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            padding: 0 12px;
+            height: 48px;
+            width: 100%;
+            border: 1px solid rgba(240, 240, 240, 0.8);
+        }
+
+        /* 搜索框分割线（保留） */
+        .search-divider {
+            width: 1px;
+            height: 24px;
+            background-color: #eee;
+            margin: 0 8px;
+        }
+
+        /* 调整搜索下拉框位置（往下一点） */
+        .engine-select {
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+            outline: none;
+            padding: 0 5px;
+            margin-top: 2px;
+        }
+
+        #search-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 0 10px;
+            font-size: 15px;
+            color: #333;
+            height: 100%;
+            background: transparent;
+        }
+
+        /* 半透明放大镜按钮 */
+        #search-btn {
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: rgba(153, 153, 153, 0.5);
+            cursor: pointer;
+            padding: 0 8px;
+            transition: color 0.2s ease;
+        }
+        #search-btn:hover {
+            color: rgba(45, 179, 155, 0.7);
+        }
+
+        /* 预设链接区域通用样式 */
+        .link-group {
+            margin-bottom: 30px;
+            margin-top: 40px;
+        }
+        .link-group h3 {
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 15px;
+            font-weight: 500;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .link-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        .link-item {
+            background-color: rgba(248, 248, 248, 0.9);
+            padding: 8px 6px;
+            text-align: center;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #333;
+            text-decoration: none;
+            transition: all 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+            border: 1px solid transparent;
+        }
+        .link-item:hover {
+            background-color: #2db39b;
+            color: #fff;
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(45, 179, 155, 0.2);
+            border-color: rgba(45, 179, 155, 0.3);
+        }
+
+        /* 自定义链接区域 */
+        .custom-link-group {
+            margin-top: 40px;
+            margin-bottom: 30px;
+        }
+        .custom-title-bar {
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 15px;
+            font-weight: 500;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .custom-title-text {
+            flex: 1;
+        }
+        .custom-toggle-btn {
+            width: 20px;
+            height: 20px;
+            border: none;
+            background: none;
+            font-size: 16px;
+            color: #666;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            margin: 0;
+            padding: 0;
+        }
+        .custom-toggle-btn.rotate {
+            transform: rotate(90deg);
+        }
+        .custom-add-form {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .custom-add-form.show {
+            display: flex;
+        }
+        #custom-name, #custom-url {
+            padding: 8px 10px;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+        }
+        #custom-name:focus, #custom-url:focus {
+            border-color: #2db39b;
+            box-shadow: 0 0 0 2px rgba(45, 179, 155, 0.1);
+        }
+        #custom-add-btn {
+            padding: 8px 0;
+            border: none;
+            background-color: #2db39b;
+            color: #fff;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        #custom-add-btn:hover {
+            background-color: #279e88;
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(45, 179, 155, 0.2);
+        }
+        #custom-links-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            min-height: 40px;
+        }
+        .custom-link-wrapper {
+            position: relative;
+        }
+        .custom-link-delete {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 16px;
+            height: 16px;
+            border: none;
+            background: #ff6b6b;
+            color: #fff;
+            font-size: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .custom-link-wrapper:hover .custom-link-delete {
+            opacity: 1;
+        }
+
+        /* ========== 天气+诗词模块（尺寸缩小+位置下移） ========== */
+        .info-container {
+            width: 70%; /* 宽度缩小 */
+            max-width: 700px; /* 最大宽度缩小 */
+            margin: 0 auto 60px auto; /* 再往下移，同时底部留出更多空间 */
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px; /* 内部间距缩小 */
+            padding: 15px; /* 内边距缩小 */
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 10px; /* 圆角缩小 */
+            box-shadow: 0 2px 15px rgba(0,0,0,0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+        }
+
+        /* 天气模块 - 尺寸缩小 */
+        .weather-card {
+            flex: 1;
+            min-width: 180px; /* 最小宽度缩小 */
+            padding: 10px; /* 内边距缩小 */
+            border-radius: 6px; /* 圆角缩小 */
+            background: rgba(248, 250, 252, 0.7);
+        }
+        .weather-card h3 {
+            font-size: 14px; /* 字体缩小 */
+            color: #444;
+            margin-bottom: 8px; /* 间距缩小 */
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px; /* 图标间距缩小 */
+        }
+        .weather-info {
+            font-size: 12px; /* 字体缩小 */
+            color: #666;
+            line-height: 1.5; /* 行高缩小 */
+        }
+        .weather-info p {
+            margin: 3px 0; /* 行间距缩小 */
+        }
+
+        /* 诗词模块 - 尺寸缩小 */
+        .poetry-card {
+            flex: 2;
+            min-width: 260px; /* 最小宽度缩小 */
+            padding: 10px; /* 内边距缩小 */
+            border-radius: 6px; /* 圆角缩小 */
+            background: rgba(248, 250, 252, 0.7);
+        }
+        .poetry-card h3 {
+            font-size: 14px; /* 字体缩小 */
+            color: #444;
+            margin-bottom: 8px; /* 间距缩小 */
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px; /* 图标间距缩小 */
+        }
+        .poetry-content {
+            font-size: 13px; /* 字体缩小 */
+            color: #555;
+            line-height: 1.6; /* 行高缩小 */
+            text-align: center;
+            padding: 8px 0; /* 内边距缩小 */
+        }
+        .poetry-title {
+            font-size: 16px; /* 字体缩小 */
+            color: #2db39b;
+            margin-bottom: 6px; /* 间距缩小 */
+            font-weight: 500;
+        }
+        .poetry-author {
+            font-size: 12px; /* 字体缩小 */
+            color: #999;
+            margin-bottom: 8px; /* 间距缩小 */
+        }
+        .poetry-text {
+            font-family: "Microsoft YaHei", serif;
+            white-space: pre-line;
+        }
+
+        /* ========== 底部区域（调小+紧凑间距） ========== */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 8px 0; /* 大幅减少上下内边距，缩小底部高度 */
+            background: rgba(255, 255, 255, 0.9);
+            text-align: center;
+            font-size: 12px; /* 字体调小 */
+            color: #555;
+            border-top: 1px solid rgba(220, 220, 220, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 90;
+            box-shadow: 0 -1px 8px rgba(0,0,0,0.03); /* 阴影也调小 */
+        }
+        /* 底部链接容器 - 紧凑间距 */
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px; /* 减少链接之间的间距 */
+            margin-bottom: 4px; /* 减少与版权信息的间距 */
+            padding: 0 10px;
+        }
+        /* 底部链接样式 - 紧凑内边距 */
+        .footer-link {
+            color: #2db39b;
+            text-decoration: none;
+            padding: 2px 6px; /* 减少链接内边距 */
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            font-size: 11px; /* 链接字体更小 */
+        }
+        .footer-link:hover {
+            background-color: #2db39b;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 1px 4px rgba(45, 179, 155, 0.2);
+        }
+        /* 版权信息 - 更紧凑 */
+        .footer-copyright {
+            font-size: 10px; /* 版权字体更小 */
+            color: #888;
+            margin-top: 2px; /* 减少上边距 */
+            line-height: 1.2; /* 行高更紧凑 */
+        }
+        .footer-copyright a {
+            color: #888;
+            text-decoration: none;
+        }
+        .footer-copyright a:hover {
+            color: #2db39b;
+            text-decoration: underline;
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .info-container {
+                flex-direction: column;
+                width: 85%;
+            }
+            .search-container {
+                width: 90%;
+            }
+            .footer {
+                padding: 6px 0;
+                font-size: 11px;
+            }
+            .footer-links {
+                gap: 8px;
+                margin-bottom: 3px;
+            }
+            .footer-link {
+                font-size: 10px;
+                padding: 1px 4px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div style="display: flex; align-items: center;">
-                <img src="../icon/dade.jpg" alt="Logo">
-                <a href="http://www.jianfa345.com/index.html" target="_blank">返回首页</a>
+    <!-- 侧边栏开关按钮 -->
+    <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+
+    <!-- 遮罩层 -->
+    <div class="mask" id="mask"></div>
+
+    <!-- 左侧侧边栏 -->
+    <div class="sidebar" id="sidebar">
+        <!-- 关闭按钮 -->
+        <button class="sidebar-close" id="sidebarClose">✕</button>
+
+        <!-- 预设链接 -->
+        <div class="link-group">
+            <h3>常用·工作</h3>
+            <div class="link-grid">
+                <a href="https://translate.google.cn/" class="link-item" target="_blank">Google翻译</a>
+                <a href="https://pan.baidu.com/" class="link-item" target="_blank">百度网盘</a>
+                <a href="https://www.baidu.com/" class="link-item" target="_blank">百度</a>
+                <a href="https://note.youdao.com/" class="link-item" target="_blank">有道云笔记</a>
+                <a href="https://www.feishu.cn/" class="link-item" target="_blank">飞书</a>
+                <a href="https://workspace.google.com/" class="link-item" target="_blank">Google文档</a>
             </div>
-            <div class="search-container">
-                <input type="text" id="search" placeholder="本地搜索">
-                <svg height="24" width="24" viewBox="0 0 24 24">
-                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM9.5 14C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
-                </svg>
-            </div>
-        </div>
-        <div class="content" id="content">
-            <!-- Add your links here -->
-            <div class="link-item">
-                <div>AI人工智能图片放大</div>
-                <a href="https://bigjpg.com/" target="_blank">前往</a>
-            </div>
-            <div class="link-item">
-                <div>ChatTTS 中文版</div>
-                <a href="https://chattts.lingandata.com/" target="_blank">前往</a>
-            </div>
-            <div class="link-item">
-                <div>土豆录屏</div>
-                <a href="http://www.tudouluping.com/" target="_blank">前往</a>
-            </div>
-            <div class="link-item">
-                <div>AI抠图</div>
-                <a href="https://arc.tencent.com/zh/ai-demos/humansegmentation" target="_blank">前往</a>
-            </div>
-            <div class="link-item">
-                <div>抠抠抠</div>
-                <a href="https://koukoukou.cn/" target="_blank">前往</a>
-            </div>
-            <div class="link-item">
-                <div>中文词汇量测试</div>
-                <a href="https://www.arealme.com/chinese-vocabulary-size-test/cn/" target="_blank">前往</a>
-            </div>
-            <div class="link-item">
-                <div>微软Edge文本转语音</div>
-                <a href="https://voice.wangwangit.com/" target="_blank">前往</a>
-            </div>
-            <div class="link-item">
-                <div>数字玩家chatgpt免费使用</div>
-                <a href="https://www.opkfc.com/list" target="_blank">前往</a>
-            </div>
-            <div class="link-item">
-                <div>轻松快传</div>
-                <a href="https://easychuan.cn/" target="_blank">前往</a>
-            </div>
-            <div class="link-item">
-                <div>喵闪字库</div>
-                <a href="https://www.miao3.cn" target="_blank">前往</a>
-                <div>字体搬运工</div>
-                <a href="https://font.sucai999.com/" target="_blank">前往</a>
-                <div>快点字库</div>
-                <a href="https://fonts.quickso.cn/" target="_blank">前往</a>
-                <div>fontspace</div>
-                <a href="https://www.fontspace.com" target="_blank">前往</a>
-                <div>洋芋田字体库</div>
-                <a href="https://www.potatofield.cn/fontlibrary" target="_blank">前往</a>
-            </div>
-            <div class="link-item">
-                免费无版权可商用图库
-                <div>搜图神器</div>
-                <a href="https://www.logosc.cn/so/" target="_blank">前往</a>
-                <div>Pixabay</div>
-                <a href="https://pixabay.com/" target="_blank">前往</a>
-                <div>Pexels</div>
-                <a href="https://www.pexels.com/zh-cn/" target="_blank">前往</a>
-            </div>
-            <div class="link-item">
-                <div>Tumblr</div>
-                <a href="https://www.tumblr.com" target="_blank">Visit</a>
-            </div>
-            <div class="link-item">
-                <div>Amazon</div>
-                <a href="https://www.amazon.com" target="_blank">Visit</a>
-            </div>
-            <div class="link-item">
-                <div>eBay</div>
-                <a href="https://www.ebay.com" target="_blank">Visit</a>
-            </div>
-            <div class="link-item">
-                <div>Netflix</div>
-                <a href="https://www.netflix.com" target="_blank">Visit</a>
-            </div>
-            <div class="link-item">
-                <div>GitHub</div>
-                <a href="https://www.github.com" target="_blank">Visit</a>
-            </div>
-            <div class="link-item">
-                <div>Stack Overflow</div>
-                <a href="https://stackoverflow.com" target="_blank">Visit</a>
-            </div>
-            <!-- Add more links in similar format -->
-        </div>
-        <div class="pagination">
-            <a href="#">感谢</a>
-            <a href="#">分享</a>
         </div>
 
-        <div class="sidebar sidebar-left">
-            <div class="sidebar-item">
-                <a href="https://example.com" target="_blank">还没想好</a>
+        <div class="link-group">
+            <h3>常用·社交</h3>
+            <div class="link-grid">
+                <a href="https://weibo.com/" class="link-item" target="_blank">微博</a>
+                <a href="https://www.zhihu.com/" class="link-item" target="_blank">知乎</a>
+                <a href="https://www.douban.com/" class="link-item" target="_blank">豆瓣</a>
+                <a href="https://github.com/" class="link-item" target="_blank">GitHub</a>
+                <a href="https://t.bilibili.com/" class="link-item" target="_blank">B站动态</a>
+                <a href="https://twitter.com/" class="link-item" target="_blank">Twitter</a>
             </div>
-            <div class="sidebar-item">
-                <a href="https://example.com" target="_blank">还没想好</a>
-            </div>
-            <!-- Add more sidebar items here -->
         </div>
 
-        <div class="sidebar sidebar-right">
-            <div class="sidebar-item">
-                <a href="https://example.com" target="_blank">还没想好</a>
+        <div class="link-group">
+            <h3>常用·生活</h3>
+            <div class="link-grid">
+                <a href="https://www.meituan.com/" class="link-item" target="_blank">美团</a>
+                <a href="https://www.12306.cn/" class="link-item" target="_blank">12306</a>
+                <a href="https://www.ctrip.com/" class="link-item" target="_blank">携程</a>
+                <a href="https://www.ele.me/" class="link-item" target="_blank">饿了么</a>
+                <a href="https://www.dianping.com/" class="link-item" target="_blank">大众点评</a>
+                <a href="https://www.airbnb.cn/" class="link-item" target="_blank">爱彼迎</a>
             </div>
-            <div class="sidebar-item">
-                <a href="https://example.com" target="_blank">还没想好</a>
+        </div>
+
+        <div class="link-group">
+            <h3>常用·学习</h3>
+            <div class="link-grid">
+                <a href="https://www.bilibili.com/" class="link-item" target="_blank">B站</a>
+                <a href="https://www.mooc.cn/" class="link-item" target="_blank">中国大学MOOC</a>
+                <a href="https://leetcode.cn/" class="link-item" target="_blank">力扣</a>
+                <a href="https://docs.python.org/" class="link-item" target="_blank">Python文档</a>
+                <a href="https://www.w3school.com.cn/" class="link-item" target="_blank">W3School</a>
+                <a href="https://arxiv.org/" class="link-item" target="_blank">arXiv</a>
             </div>
-            <!-- Add more sidebar items here -->
+        </div>
+
+        <div class="link-group">
+            <h3>常用·工具</h3>
+            <div class="link-grid">
+                <a href="https://www.photopea.com/" class="link-item" target="_blank">Photopea</a>
+                <a href="https://convertio.co/zh/" class="link-item" target="_blank">格式转换</a>
+                <a href="https://smallpdf.com/cn" class="link-item" target="_blank">SmallPDF</a>
+                <a href="https://www.canva.cn/" class="link-item" target="_blank">Canva</a>
+                <a href="https://tool.lu/" class="link-item" target="_blank">在线工具</a>
+                <a href="https://www.ip138.com/" class="link-item" target="_blank">IP查询</a>
+            </div>
+        </div>
+
+        <!-- 自定义链接区域 -->
+        <div class="custom-link-group">
+            <div class="custom-title-bar">
+                <span class="custom-title-text">自定义·我的网站</span>
+                <button class="custom-toggle-btn" id="customToggleBtn">▶</button>
+            </div>
+            <div class="custom-add-form" id="customAddForm">
+                <input type="text" id="custom-name" placeholder="网站名称">
+                <input type="text" id="custom-url" placeholder="网站链接（带http://）">
+                <button id="custom-add-btn">添加网站</button>
+            </div>
+            <div id="custom-links-container"></div>
         </div>
     </div>
-    <script src="./xzjs/xzy.js"></script>
+
+    <!-- 搜索框（精准定位到标注位置） -->
+    <div class="search-container">
+        <div class="search-box">
+            <select id="engine-select" class="engine-select">
+                <option value="https://www.baidu.com/s?wd=">百度</option>
+                <option value="https://www.google.com/search?q=">Google</option>
+                <option value="https://www.bing.com/search?q=">必应</option>
+                <option value="https://www.sogou.com/web?query=">搜狗</option>
+            </select>
+            <div class="search-divider"></div>
+            <input type="text" id="search-input" placeholder="输入关键词搜索">
+            <button id="search-btn">🔍</button>
+        </div>
+    </div>
+
+    <!-- 天气+诗词模块（尺寸缩小+位置下移） -->
+    <div class="info-container">
+        <div class="weather-card">
+            <h3>🌤️ 实时天气</h3>
+            <div class="weather-info" id="weatherInfo">
+                <p>正在加载天气数据...</p>
+            </div>
+        </div>
+        <div class="poetry-card">
+            <h3>📜 每日诗词</h3>
+            <div class="poetry-content" id="poetryContent">
+                <p>正在加载诗词内容...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部区域（调小+紧凑间距） -->
+    <div class="footer">
+        <!-- 底部链接区域（你可以在这里修改链接） -->
+        <div class="footer-links">
+            <a href="D:\cadkfwj\wangz\xz01.html" class="footer-link" target="_blank">资源下载</a>
+            <a href="https://www.baidu.com" class="footer-link" target="_blank">设为主页</a>
+            <a href="https://www.baidu.com" class="footer-link" target="_blank">手机版</a>
+            <a href="https://www.baidu.com" class="footer-link" target="_blank">关于我们</a>
+            <a href="https://www.baidu.com" class="footer-link" target="_blank">隐私政策</a>
+            <a href="https://www.baidu.com" class="footer-link" target="_blank">使用帮助</a>
+            <a href="https://www.baidu.com" class="footer-link" target="_blank">联系我们</a>
+        </div>
+        <!-- 版权信息 -->
+        <div class="footer-copyright">
+            <p>© 2025 我的导航页 | 粤ICP备17112242号 | <a href="https://www.baidu.com" target="_blank">自定义备案链接</a></p>
+        </div>
+    </div>
+
+    <script>
+        // 核心元素获取
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarClose = document.getElementById('sidebarClose');
+        const mask = document.getElementById('mask');
+        const engineSelect = document.getElementById('engine-select');
+        const searchInput = document.getElementById('search-input');
+        const searchBtn = document.getElementById('search-btn');
+        const customToggleBtn = document.getElementById('customToggleBtn');
+        const customAddForm = document.getElementById('customAddForm');
+        const customName = document.getElementById('custom-name');
+        const customUrl = document.getElementById('custom-url');
+        const customAddBtn = document.getElementById('custom-add-btn');
+        const customLinksContainer = document.getElementById('custom-links-container');
+        const weatherInfo = document.getElementById('weatherInfo');
+        const poetryContent = document.getElementById('poetryContent');
+
+        // ========== 侧边栏交互 ==========
+        function openSidebar() {
+            sidebar.classList.add('open');
+            mask.classList.add('show');
+            sidebarToggle.classList.add('hide');
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            mask.classList.remove('show');
+            sidebarToggle.classList.remove('hide');
+        }
+
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+        });
+        sidebarClose.addEventListener('click', closeSidebar);
+        mask.addEventListener('click', closeSidebar);
+
+        // ========== 搜索功能 ==========
+        function search() {
+            const keyword = searchInput.value.trim();
+            if (keyword) {
+                const baseUrl = engineSelect.value;
+                window.open(baseUrl + encodeURIComponent(keyword), '_blank');
+            }
+        }
+        searchInput.addEventListener('keydown', (e) => e.key === 'Enter' && search());
+        searchBtn.addEventListener('click', search);
+
+        // ========== 自定义链接功能 ==========
+        customToggleBtn.addEventListener('click', () => {
+            customAddForm.classList.toggle('show');
+            customToggleBtn.classList.toggle('rotate');
+        });
+
+        function loadCustomLinks() {
+            const links = JSON.parse(localStorage.getItem('customLinks') || '[]');
+            customLinksContainer.innerHTML = '';
+            links.forEach((link, index) => {
+                addLinkToDom(link.name, link.url, index);
+            });
+        }
+
+        function addLinkToDom(name, url, index) {
+            const linkWrapper = document.createElement('div');
+            linkWrapper.className = 'custom-link-wrapper';
+            
+            const linkItem = document.createElement('a');
+            linkItem.href = url;
+            linkItem.className = 'link-item';
+            linkItem.target = '_blank';
+            linkItem.textContent = name;
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'custom-link-delete';
+            deleteBtn.textContent = '✕';
+            deleteBtn.dataset.index = index;
+            
+            deleteBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                deleteCustomLink(this.dataset.index);
+            });
+            
+            linkWrapper.appendChild(linkItem);
+            linkWrapper.appendChild(deleteBtn);
+            customLinksContainer.appendChild(linkWrapper);
+        }
+
+        function saveCustomLink(name, url) {
+            const links = JSON.parse(localStorage.getItem('customLinks') || '[]');
+            links.push({ name, url });
+            localStorage.setItem('customLinks', JSON.stringify(links));
+        }
+
+        function deleteCustomLink(index) {
+            const links = JSON.parse(localStorage.getItem('customLinks') || '[]');
+            links.splice(index, 1);
+            localStorage.setItem('customLinks', JSON.stringify(links));
+            loadCustomLinks();
+        }
+
+        customAddBtn.addEventListener('click', () => {
+            const name = customName.value.trim();
+            const url = customUrl.value.trim();
+            if (name && url) {
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    alert('请输入完整的链接（以http://或https://开头）');
+                    return;
+                }
+                saveCustomLink(name, url);
+                loadCustomLinks();
+                customName.value = '';
+                customUrl.value = '';
+            } else {
+                alert('请填写网站名称和链接');
+            }
+        });
+
+        // ========== 天气模块（自动刷新） ==========
+        const weatherDataList = [
+            { city: '北京', temp: '18℃', weather: '晴转多云', wind: '东风3级', humidity: '45%' },
+            { city: '上海', temp: '22℃', weather: '多云', wind: '南风2级', humidity: '60%' },
+            { city: '广州', temp: '26℃', weather: '雷阵雨', wind: '东南风4级', humidity: '75%' },
+            { city: '深圳', temp: '25℃', weather: '多云转晴', wind: '南风3级', humidity: '70%' },
+            { city: '杭州', temp: '20℃', weather: '小雨', wind: '东北风2级', humidity: '80%' }
+        ];
+
+        function updateWeather() {
+            const randomWeather = weatherDataList[Math.floor(Math.random() * weatherDataList.length)];
+            weatherInfo.innerHTML = `
+                <p>📍 城市：${randomWeather.city}</p>
+                <p>🌡️ 温度：${randomWeather.temp}</p>
+                <p>☁️ 天气：${randomWeather.weather}</p>
+                <p>💨 风向：${randomWeather.wind}</p>
+                <p>💧 湿度：${randomWeather.humidity}</p>
+            `;
+        }
+
+        // ========== 诗词模块（自动刷新） ==========
+        const poetryDataList = [
+            {
+                title: '静夜思',
+                author: '唐·李白',
+                content: '床前明月光，疑是地上霜。举头望明月，低头思故乡。'
+            },
+            {
+                title: '登鹳雀楼',
+                author: '唐·王之涣',
+                content: '白日依山尽，黄河入海流。欲穷千里目，更上一层楼。'
+            },
+            {
+                title: '春晓',
+                author: '唐·孟浩然',
+                content: '春眠不觉晓，处处闻啼鸟。夜来风雨声，花落知多少。'
+            },
+            {
+                title: '相思',
+                author: '唐·王维',
+                content: '红豆生南国，春来发几枝。愿君多采撷，此物最相思。'
+            },
+            {
+                title: '江雪',
+                author: '唐·柳宗元',
+                content: '千山鸟飞绝，万径人踪灭。孤舟蓑笠翁，独钓寒江雪。'
+            }
+        ];
+
+        function updatePoetry() {
+            const randomPoetry = poetryDataList[Math.floor(Math.random() * poetryDataList.length)];
+            poetryContent.innerHTML = `
+                <div class="poetry-title">${randomPoetry.title}</div>
+                <div class="poetry-author">${randomPoetry.author}</div>
+                <div class="poetry-text">${randomPoetry.content}</div>
+            `;
+        }
+
+        // ========== 初始化+自动刷新 ==========
+        window.onload = function() {
+            loadCustomLinks();
+            updateWeather();
+            updatePoetry();
+            
+            // 天气每10分钟刷新一次
+            setInterval(updateWeather, 10 * 60 * 1000);
+            // 诗词每24小时刷新一次
+            setInterval(updatePoetry, 24 * 60 * 60 * 1000);
+        };
+    </script>
 </body>
 </html>
