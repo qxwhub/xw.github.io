@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关于我们 - 我的导航页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.8;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Logo 区域样式 */
+        .header-logo {
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto 20px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .logo-img {
+            width: 60px;  /* 核心尺寸：桌面端Logo容器宽度 */
+            height: 60px; /* 核心尺寸：桌面端Logo容器高度 */
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden; /* 防止图片超出容器 */
+        }
+        /* 强制图片适配容器尺寸，避免变形 */
+        .logo-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* 保持图片比例，完整显示 */
+        }
+        .logo-text {
+            font-size: 22px;
+            font-weight: 700;
+            color: #333;
+        }
+        .logo-subtext {
+            font-size: 14px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        /* 页面主体容器 - 控制宽度和居中 */
+        .container {
+            max-width: 1000px;  /* 调整页面最大宽度，避免过宽 */
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 20px 20px; /* 去掉顶部padding，避免和logo间距重复 */
+        }
+
+        .about-wrapper {
+            background: #ffffff;
+            padding: 30px 40px;
+            border-radius: 4px;
+            box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .about-section {
+            margin-bottom: 30px;  /* 减小模块间距，更紧凑 */
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        /* 最后一个模块去掉底边框和下边距 */
+        .about-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        /* 标题样式 - 去掉红框，仅保留文字样式 */
+        .about-section h2 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .about-section p {
+            font-size: 15px;
+            color: #666;
+            margin-bottom: 10px;
+            line-height: 1.7;
+        }
+
+        .about-section p:last-child {
+            margin-bottom: 0;
+        }
+
+        .github-link {
+            color: #0d6efd;
+            text-decoration: none;
+        }
+
+        .github-link:hover {
+            text-decoration: underline;
+        }
+
+        /* 二维码容器 - 适配页面宽度 */
+        .qrcode-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .qrcode-item {
+            width: 180px;
+            height: 220px;
+            border: 1px solid #eee;
+            padding: 10px;
+            text-align: center;
+            background: #fafafa;
+        }
+
+        .qrcode-img {
+            width: 160px;
+            height: 160px;
+            background: #f5f5f5;
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 12px;
+            border: 1px solid #eee;
+        }
+
+        .qrcode-desc {
+            font-size: 12px;
+            color: #999;
+            line-height: 1.4;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #999;
+            padding: 15px 0;
+            border-top: 1px solid #eee;
+        }
+
+        /* 响应式适配 - 手机端优化 */
+        @media (max-width: 768px) {
+            .header-logo {
+                padding: 10px 15px;
+                justify-content: center; /* 手机端Logo居中 */
+                text-align: center;
+            }
+            .logo-img {
+                width: 50px;  /* 手机端Logo容器宽度 */
+                height: 50px; /* 手机端Logo容器高度 */
+            }
+            .logo-text {
+                font-size: 18px;
+            }
+            .container {
+                padding: 0 10px 10px;
+            }
+            .about-wrapper {
+                padding: 20px;
+            }
+            .qrcode-container {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Logo 区域：已预留图片插入位置 -->
+    <div class="header-logo">
+        <div class="logo-img">
+            <!-- 👇👇👇 这里是Logo图片插入位置 👇👇👇 -->
+            <!-- 替换规则：把下面的 img 标签里的 "tubiao.png" 换成你的图片路径即可 -->
+            <img src="img\tubiao.png" alt="简法导航Logo">
+        </div>
+        <div class="logo-info">
+            <div class="logo-text">简法导航</div>
+            <div class="logo-subtext">简约舒适的上网主页</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="about-wrapper">
+            <!-- 关于本站 -->
+            <div class="about-section">
+                <h2>关于本站</h2>
+                <p>感谢你喜欢简法！</p>
+                <p>简法导航是一个轻电脑主页网站，提供一个清爽干净的上网入口。某柠檬，简法的上网主页，清爽界面，简约导航，希望通过某柠檬导航大家能有一个好的上网浏览心情，以及便捷的上网体验。 我们一直在努力把简法导航做得更好，让更多人接受这个网站！如果你有任何疑问和建议，欢迎反馈给我们。</p>
+                <p>简法的特点有：简约舒适且清新个性的界面、可自定义网站分类和网址、强大的多种搜索引擎切换…</p>
+                <p>欢迎将简法设为浏览器主页或者Ctrl+D键添加到浏览器收藏夹，方便日后快速找到这只可爱帅气的简法。</p>
+                <p>网站第一版上线于2019年，一刻不停地成长中…  简法想和你在一起，昼夜朝夕…</p>
+            </div>
+
+            <!-- 其他声明 -->
+            <div class="about-section">
+                <h2>其他声明</h2>
+                <p>我们重视用户上网隐私，简法不会主动收集记录用户的个人隐私用于任何违法目的；</p>
+                <p>搜索引擎搜索内容由各搜索服务商计算机算法生成，所生成内容本站不保证真实性，搜索结果不代表本站立场，本站不对搜索结果负责；</p>
+                <p>简法为用户免费提供网址导航功能，收集各类别热门网站，所链接网站均与本站无利益相关，外链网站内容或立场与本站无关，本站不能保证外链网站内容真实性，如果外链网站有不当信息，欢迎用户反馈；</p>
+                <p>本站部分文章内容来源于互联网，由于互联网各信息繁杂，无法保证所有文章的真实性，一些情况下也无法获知文章的知识产权所有人，我们尊重合法知识产权，如果本站内容无意触犯了您的合法权益，请联系本站删除；</p>
+                <p>感谢您阅读并同意以上服务条款！请您关注本站法律声明更新，如有变动，恕不另行通知，在法律许可范围内，本站拥有以上条款解释权。</p>
+            </div>
+
+            <!-- 联系方式 -->
+            <div class="about-section">
+                <h2>联系方式</h2>
+                <p>如果你有功能建议、bug反馈或合作意向，可通过以下方式联系我们：</p>
+                <p>邮箱：xxxxxxxxxxxxxx@qq.com</p>
+                
+                <div class="qrcode-container"></div>
+            </div>
+        </div>
+
+        <footer>
+            &copy; 2025 简约导航 | 粤ICP备2023XXXX号-1
+        </footer>
+    </div>
+</body>
+</html>
