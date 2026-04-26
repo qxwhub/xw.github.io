@@ -19,7 +19,7 @@ body {
     margin: 0;
 }
 
-/* 顶部导航栏 - 取消更多按钮，保留搜索 */
+/* 顶部导航栏 */
 .header {
     width: 100%;
     height: 50px;
@@ -54,7 +54,7 @@ body {
 .header .nav a:hover {
     color: #009e5f;
 }
-/* 搜索框 - 仅保留搜索框+搜索按钮 */
+/* 搜索框 - 修复提前触发问题 */
 .header .search-wrap {
     display: flex;
     align-items: center;
@@ -78,41 +78,39 @@ body {
     cursor: pointer;
 }
 
-/* 内容容器 - 适配不同屏幕 */
+/* 内容容器 */
 .container {
     max-width: 1400px;
     margin: 0 auto;
     padding: 20px;
 }
-/* 卡片网格 - 自适应列数（兼容CAD/浏览器） */
+/* 卡片网格 */
 .card-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); /* 适配图文左右布局 */
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
     gap: 15px;
 }
-/* 卡片样式 - 图片左、文字右布局 */
+/* 卡片样式 - 图片左、文字右 */
 .card {
     background-color: #ffffff;
     border-radius: 6px;
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     transition: box-shadow 0.2s;
-    display: flex; /* 横向布局 */
-    height: 120px; /* 固定高度 */
+    display: flex;
+    height: 120px;
 }
 .card:hover {
     box-shadow: 0 3px 8px rgba(0,0,0,0.1);
 }
-/* 图片区 - 左侧固定宽度 */
 .card .card-img {
-    width: 150px; /* 图片固定宽度 */
+    width: 150px;
     height: 100%;
     background-color: #e6e6e6;
-    object-fit: cover; /* 图片自适应 */
+    object-fit: cover;
     display: block;
     flex-shrink: 0;
 }
-/* 文字内容区 - 右侧自适应 */
 .card .card-content {
     flex: 1;
     padding: 10px 15px;
@@ -120,7 +118,6 @@ body {
     flex-direction: column;
     justify-content: space-between;
 }
-/* 标题+推荐标签 */
 .card .card-title {
     font-size: 14px;
     color: #333;
@@ -131,29 +128,17 @@ body {
 .card .card-title:hover {
     color: #009e5f;
 }
-.card .tag {
-    display: inline-block;
-    background-color: #ff4d4f;
-    color: #fff;
-    font-size: 12px;
-    padding: 1px 5px;
-    border-radius: 3px;
-    margin-right: 5px;
-}
-/* 简介文本 */
 .card .card-desc {
     font-size: 12px;
     color: #666;
     line-height: 1.3;
     margin-bottom: 8px;
 }
-/* 下载按钮+时间 - 底部布局 */
 .card .card-meta {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
-/* 下载按钮 - 支持本地下载 */
 .card .download-btn {
     color: #009e5f;
     text-decoration: underline;
@@ -171,7 +156,7 @@ body {
     color: #999;
 }
 
-/* 分页控件 - 支持页码跳转 */
+/* 分页控件 */
 .pagination {
     display: flex;
     justify-content: center;
@@ -199,16 +184,15 @@ body {
     padding: 0 15px;
 }
 
-/* 兼容CAD内嵌控件的样式重置 */
+/* 兼容CAD */
 @media screen and (max-width: 1000px) {
     .card-grid {
-        grid-template-columns: repeat(2, 1fr); /* CAD里固定2列 */
+        grid-template-columns: repeat(2, 1fr);
     }
     .header .search-input {
         width: 180px;
     }
 }
-/* 极小屏幕适配 */
 @media screen and (max-width: 768px) {
     .card-grid {
         grid-template-columns: 1fr;
@@ -217,14 +201,13 @@ body {
 </style>
 </head>
 <body>
-<!-- 顶部导航 - 取消更多按钮 -->
+<!-- 顶部导航 -->
 <div class="header">
     <div class="title">资源推荐</div>
     <div class="nav">
         <a href="#">图库</a>
         <a href="#">插件</a>
         <a href="#">节点</a>
-        
     </div>
     <div class="search-wrap">
         <input type="text" class="search-input" placeholder="搜索资源/内容...">
@@ -234,10 +217,9 @@ body {
 
 <!-- 内容区域 -->
 <div class="container">
-    <!-- 卡片列表 - 图片左、文字右 -->
     <div class="card-grid">
-        <!-- 卡片1 - 带推荐标签+简介+下载 -->
-         <div class="card">
+        <!-- 卡片1 -->
+        <div class="card">
             <img class="card-img" src="https://picsum.photos/id/24/150/120" alt="插件">
             <div class="card-content">
                 <div>
@@ -245,12 +227,10 @@ body {
                     <div class="card-desc">可以统计圆弧 直线 圆的的数量</div>
                 </div>
                 <div class="card-meta">
-                    <button class="download-btn" onclick="downloadFile('情场秘籍.pdf', 'https://你的文件地址/情场秘籍.pdf')">下载</button>
-                    
+                    <button class="download-btn" onclick="downloadFile('统计插件.zip', 'https://你的文件地址/统计插件.zip')">下载</button>
                 </div>
             </div>
         </div>
-
         <!-- 卡片2 -->
         <div class="card">
             <img class="card-img" src="https://picsum.photos/id/24/150/120" alt="插件">
@@ -260,42 +240,36 @@ body {
                     <div class="card-desc">可以统计圆弧 直线 圆的的数量</div>
                 </div>
                 <div class="card-meta">
-                    <button class="download-btn" onclick="downloadFile('情场秘籍.pdf', 'https://你的文件地址/情场秘籍.pdf')">下载</button>
-                    
+                    <button class="download-btn" onclick="downloadFile('统计插件.zip', 'https://你的文件地址/统计插件.zip')">下载</button>
                 </div>
             </div>
         </div>
-
         <!-- 卡片3 -->
         <div class="card">
             <img class="card-img" src="https://picsum.photos/id/24/150/120" alt="插件">
             <div class="card-content">
                 <div>
-                    <a href="#" class="card-title">这是一个统计插件</a>
-                    <div class="card-desc">可以统计圆弧 直线 圆的的数量</div>
+                    <a href="#" class="card-title">圆弧统计工具</a>
+                    <div class="card-desc">快速统计CAD中的圆弧和圆数量</div>
                 </div>
                 <div class="card-meta">
-                    <button class="download-btn" onclick="downloadFile('情场秘籍.pdf', 'https://你的文件地址/情场秘籍.pdf')">下载</button>
-                    
+                    <button class="download-btn" onclick="downloadFile('圆弧统计工具.zip', 'https://你的文件地址/圆弧统计工具.zip')">下载</button>
                 </div>
             </div>
         </div>
-
         <!-- 卡片4 -->
         <div class="card">
             <img class="card-img" src="https://picsum.photos/id/24/150/120" alt="插件">
             <div class="card-content">
                 <div>
-                    <a href="#" class="card-title">这是一个统计插件</a>
-                    <div class="card-desc">可以统计圆弧 直线 圆的的数量</div>
+                    <a href="#" class="card-title">直线计数插件</a>
+                    <div class="card-desc">专门统计CAD中直线数量的小工具</div>
                 </div>
                 <div class="card-meta">
-                    <button class="download-btn" onclick="downloadFile('情场秘籍.pdf', 'https://你的文件地址/情场秘籍.pdf')">下载</button>
-                    
+                    <button class="download-btn" onclick="downloadFile('直线计数插件.zip', 'https://你的文件地址/直线计数插件.zip')">下载</button>
                 </div>
             </div>
         </div>
-
         <!-- 卡片5 -->
         <div class="card">
             <img class="card-img" src="https://picsum.photos/id/24/150/120" alt="插件">
@@ -305,28 +279,23 @@ body {
                     <div class="card-desc">可以统计圆弧 直线 圆的的数量</div>
                 </div>
                 <div class="card-meta">
-                    <button class="download-btn" onclick="downloadFile('情场秘籍.pdf', 'https://你的文件地址/情场秘籍.pdf')">下载</button>
-                    
+                    <button class="download-btn" onclick="downloadFile('统计插件.zip', 'https://你的文件地址/统计插件.zip')">下载</button>
                 </div>
             </div>
         </div>
-
         <!-- 卡片6 -->
-         <div class="card">
+        <div class="card">
             <img class="card-img" src="https://picsum.photos/id/24/150/120" alt="插件">
             <div class="card-content">
                 <div>
-                    <a href="#" class="card-title">这是一个统计插件</a>
-                    <div class="card-desc">可以统计圆弧 直线 圆的的数量</div>
+                    <a href="#" class="card-title">CAD全能统计器</a>
+                    <div class="card-desc">支持圆弧、直线、圆、多边形等全类型统计</div>
                 </div>
                 <div class="card-meta">
-                    <button class="download-btn" onclick="downloadFile('情场秘籍.pdf', 'https://你的文件地址/情场秘籍.pdf')">下载</button>
-                    
+                    <button class="download-btn" onclick="downloadFile('CAD全能统计器.zip', 'https://你的文件地址/CAD全能统计器.zip')">下载</button>
                 </div>
             </div>
         </div>
-
-
         <!-- 卡片7 -->
         <div class="card">
             <img class="card-img" src="https://picsum.photos/id/24/150/120" alt="插件">
@@ -336,30 +305,26 @@ body {
                     <div class="card-desc">可以统计圆弧 直线 圆的的数量</div>
                 </div>
                 <div class="card-meta">
-                    <button class="download-btn" onclick="downloadFile('情场秘籍.pdf', 'https://你的文件地址/情场秘籍.pdf')">下载</button>
-                    
+                    <button class="download-btn" onclick="downloadFile('统计插件.zip', 'https://你的文件地址/统计插件.zip')">下载</button>
                 </div>
             </div>
         </div>
-
         <!-- 卡片8 -->
-         <div class="card">
+        <div class="card">
             <img class="card-img" src="https://picsum.photos/id/24/150/120" alt="插件">
             <div class="card-content">
                 <div>
-                    <a href="#" class="card-title">这是一个统计插件</a>
-                    <div class="card-desc">可以统计圆弧 直线 圆的的数量</div>
+                    <a href="#" class="card-title">圆数量统计工具</a>
+                    <div class="card-desc">精准统计CAD图纸中的圆形对象数量</div>
                 </div>
                 <div class="card-meta">
-                    <button class="download-btn" onclick="downloadFile('情场秘籍.pdf', 'https://你的文件地址/情场秘籍.pdf')">下载</button>
-                    
+                    <button class="download-btn" onclick="downloadFile('圆数量统计工具.zip', 'https://你的文件地址/圆数量统计工具.zip')">下载</button>
                 </div>
             </div>
         </div>
-
     </div>
 
-    <!-- 分页控件 - 支持真实跳转 -->
+    <!-- 分页 -->
     <div class="pagination">
         <button class="prev" onclick="changePage('prev')">上一页</button>
         <button class="active" onclick="changePage(1)">1</button>
@@ -369,67 +334,84 @@ body {
     </div>
 </div>
 
-<!-- 核心功能JS - 下载/搜索/分页跳转 -->
+<!-- 核心JS - 修复提前触发+保证搜索有效 -->
 <script>
-// 1. 下载文件到本地电脑（兼容CAD/浏览器）
+// 1. 下载功能
 function downloadFile(fileName, fileUrl) {
-    // 校验文件地址（可替换为你的真实地址）
     if (fileUrl.includes('你的文件地址')) {
         alert('请先替换代码中的「你的文件地址」为真实的文件下载链接！');
         return;
     }
-    // 创建下载链接
     const link = document.createElement('a');
     link.href = fileUrl;
     link.download = fileName;
     link.target = '_blank';
-    // 触发下载
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     alert('✅ 开始下载：' + fileName + '\n文件将保存到你的电脑本地！');
 }
 
-// 2. 搜索功能 - 搜索卡片标题/简介内容
-document.querySelector('.search-btn').addEventListener('click', function() {
-    const searchText = document.querySelector('.search-input').value.trim().toLowerCase();
-    const cards = document.querySelectorAll('.card');
+// 2. 搜索功能 - 既不提前弹窗，又能正常搜索
+let searchInput = document.querySelector('.search-input');
+let searchBtn = document.querySelector('.search-btn');
+
+// 核心搜索逻辑（优化判断逻辑，保证搜索有效）
+function doSearch() {
+    // 1. 获取并清洗搜索关键词
+    const searchText = searchInput.value.trim().toLowerCase();
     
-    if (searchText === '') {
-        // 清空搜索时显示所有卡片
-        cards.forEach(card => card.style.display = 'flex');
+    // 2. 空输入：显示所有卡片，不弹窗
+    if (searchText.length === 0) {
+        document.querySelectorAll('.card').forEach(card => {
+            card.style.display = 'flex';
+        });
         return;
     }
     
-    // 筛选包含关键词的卡片
+    // 3. 有输入：执行筛选
     let hasResult = false;
-    cards.forEach(card => {
-        const title = card.querySelector('.card-title').innerText.toLowerCase();
-        const desc = card.querySelector('.card-desc').innerText.toLowerCase();
-        if (title.includes(searchText) || desc.includes(searchText)) {
-            card.style.display = 'flex';
+    const allCards = document.querySelectorAll('.card');
+    
+    allCards.forEach(card => {
+        // 获取卡片标题和描述的文本
+        const cardTitle = card.querySelector('.card-title').innerText.toLowerCase();
+        const cardDesc = card.querySelector('.card-desc').innerText.toLowerCase();
+        
+        // 判断是否包含关键词
+        if (cardTitle.includes(searchText) || cardDesc.includes(searchText)) {
+            card.style.display = 'flex'; // 显示匹配的卡片
             hasResult = true;
         } else {
-            card.style.display = 'none';
+            card.style.display = 'none'; // 隐藏不匹配的卡片
         }
     });
     
-    // 无结果提示
+    // 4. 有输入但无结果：弹窗提示
     if (!hasResult) {
         alert('❌ 未找到包含「' + searchText + '」的资源');
     }
-});
-// 支持回车搜索
-document.querySelector('.search-input').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') document.querySelector('.search-btn').click();
+}
+
+// 绑定搜索触发方式（点击按钮 + 回车）
+// 修复：确保DOM加载完成后再绑定事件，避免绑定失败
+document.addEventListener('DOMContentLoaded', function() {
+    // 点击搜索按钮触发
+    searchBtn.addEventListener('click', doSearch);
+    
+    // 回车触发搜索
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault(); // 阻止页面跳转
+            doSearch();
+        }
+    });
 });
 
-// 3. 分页跳转功能 - 真实页码切换
+// 3. 分页功能
 let currentPage = 1;
-const totalPages = 3; // 总页数，可根据实际数据调整
-
+const totalPages = 3;
 function changePage(target) {
-    // 计算目标页码
     let targetPage = currentPage;
     if (target === 'prev') {
         targetPage = currentPage > 1 ? currentPage - 1 : 1;
@@ -438,27 +420,17 @@ function changePage(target) {
     } else {
         targetPage = parseInt(target);
     }
-    
-    // 页码边界校验
     if (targetPage < 1) targetPage = 1;
     if (targetPage > totalPages) targetPage = totalPages;
     
-    // 更新页码样式
     document.querySelectorAll('.pagination button').forEach(btn => {
         btn.classList.remove('active');
         if (btn.innerText === targetPage.toString()) {
             btn.classList.add('active');
         }
     });
-    
-    // 更新当前页码
     currentPage = targetPage;
-    
-    // 模拟分页加载数据（可对接你的后台接口）
-    alert('📃 已跳转到第 ' + currentPage + ' 页\n可在此处添加加载对应页码数据的逻辑');
-    
-    // 真实项目中可在这里调用接口加载对应页码的资源列表
-    // loadCardData(currentPage);
+    alert('📃 已跳转到第 ' + currentPage + ' 页');
 }
 </script>
 </body>
