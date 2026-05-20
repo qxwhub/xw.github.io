@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>简法导航 | 清新主页</title>
+    <link rel="icon" type="image/png" href="img/tubiao.png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="index-page">
+
+    <canvas id="starCanvas"></canvas>
+
+    <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+    <div class="mask" id="mask"></div>
+    <div class="sidebar" id="sidebar">
+        <button class="sidebar-close" id="sidebarClose">✕</button>
+
+        <!-- 自定义网站区域（已移至最上方） -->
+        <div class="custom-link-group">
+            <div class="custom-title-bar">
+                <span class="custom-title-text">✨ 自定义·我的网站</span>
+                <button class="custom-toggle-btn" id="customToggleBtn">▶</button>
+            </div>
+            <div class="custom-add-form" id="customAddForm">
+                <div class="custom-import-export">
+                    <button class="custom-export-btn" id="customExportBtn">📤 导出链接</button>
+                    <button class="custom-import-btn" id="customImportBtn">📥 导入链接</button>
+                    <input type="file" id="import-file" accept=".json" style="display: none;">
+                </div>
+                <div class="import-mode">
+                    <label><input type="radio" name="import-mode" value="cover" checked> 覆盖原有</label>
+                    <label><input type="radio" name="import-mode" value="append"> 追加到原有</label>
+                </div>
+                <input type="text" id="custom-name" placeholder="网站名称 (例: 我的博客)">
+                <input type="text" id="custom-url" placeholder="网站链接 (以 http:// 或 https:// 开头)">
+                <button id="custom-add-btn">➕ 添加网站</button>
+            </div>
+            <div id="custom-links-container"></div>
+        </div>
+
+        <!-- 常用·工作 -->
+        <div class="link-group"><h3>常用·工作</h3><div class="link-grid"><a href="https://translate.google.cn/" class="link-item" target="_blank">Google翻译</a><a href="https://pan.baidu.com/" class="link-item" target="_blank">百度网盘</a><a href="https://mail.qq.com/" class="link-item" target="_blank">QQ邮箱</a><a href="https://wx.qq.com/" class="link-item" target="_blank">网页版微信</a><a href="https://www.evernote.com/" class="link-item" target="_blank">印象笔记</a><a href="https://cn.bing.com/" class="link-item" target="_blank">必应</a></div></div>
+        <!-- 常用·社交 -->
+        <div class="link-group"><h3>常用·社交</h3><div class="link-grid"><a href="https://weibo.com/" class="link-item" target="_blank">微博</a><a href="https://www.zhihu.com/" class="link-item" target="_blank">知乎</a><a href="https://www.douban.com/" class="link-item" target="_blank">豆瓣</a><a href="https://tieba.baidu.com/" class="link-item" target="_blank">百度贴吧</a><a href="https://www.v2ex.com/" class="link-item" target="_blank">V2EX</a><a href="https://www.hupu.com/" class="link-item" target="_blank">虎扑</a></div></div>
+        <!-- 常用·生活 -->
+        <div class="link-group"><h3>常用·生活</h3><div class="link-grid"><a href="https://www.ctrip.com/" class="link-item" target="_blank">携程</a><a href="https://www.58.com/" class="link-item" target="_blank">58同城</a><a href="https://www.ele.me/" class="link-item" target="_blank">饿了么</a><a href="https://www.dianping.com/" class="link-item" target="_blank">大众点评</a><a href="https://www.meituan.com/" class="link-item" target="_blank">美团</a></div></div>
+        <!-- 视频·音乐 -->
+        <div class="link-group"><h3>视频·音乐</h3><div class="link-grid"><a href="https://www.douyin.com/" class="link-item" target="_blank">抖音</a><a href="https://music.163.com/" class="link-item" target="_blank">网易云音乐</a><a href="https://y.qq.com/" class="link-item" target="_blank">QQ音乐</a><a href="https://www.bilibili.com/" class="link-item" target="_blank">哔哩哔哩</a><a href="https://v.qq.com/" class="link-item" target="_blank">腾讯视频</a><a href="https://www.iqiyi.com/" class="link-item" target="_blank">爱奇艺</a></div></div>
+        <!-- 消费·购物 -->
+        <div class="link-group"><h3>消费·购物</h3><div class="link-grid"><a href="https://www.taobao.com/" class="link-item" target="_blank">淘宝</a><a href="https://www.tmall.com/" class="link-item" target="_blank">天猫</a><a href="https://www.jd.com/" class="link-item" target="_blank">京东</a><a href="https://www.1688.com/" class="link-item" target="_blank">1688</a><a href="https://www.mi.com/" class="link-item" target="_blank">小米网</a><a href="https://www.vip.com/" class="link-item" target="_blank">唯品会</a></div></div>
+        <!-- 资讯·新闻 -->
+        <div class="link-group"><h3>资讯·新闻</h3><div class="link-grid"><a href="https://www.people.com.cn/" class="link-item" target="_blank">人民网</a><a href="https://www.sohu.com/" class="link-item" target="_blank">搜狐</a><a href="https://www.163.com/" class="link-item" target="_blank">网易</a><a href="https://www.qq.com/" class="link-item" target="_blank">腾讯</a><a href="https://www.sina.com.cn/" class="link-item" target="_blank">新浪</a></div></div>
+        <!-- 工作·求职 -->
+        <div class="link-group"><h3>工作·求职</h3><div class="link-grid"><a href="https://www.51job.com/" class="link-item" target="_blank">前程无忧</a><a href="https://www.zhaopin.com/" class="link-item" target="_blank">智联招聘</a><a href="https://www.liepin.com/" class="link-item" target="_blank">猎聘</a><a href="https://www.lagou.com/" class="link-item" target="_blank">拉勾</a></div></div>
+        <!-- 娱乐·游戏 -->
+        <div class="link-group"><h3>娱乐·游戏</h3><div class="link-grid"><a href="https://www.3dmgame.com/" class="link-item" target="_blank">3DM</a><a href="https://www.gamersky.com/" class="link-item" target="_blank">游民星空</a><a href="https://www.4399.com/" class="link-item" target="_blank">4399</a><a href="https://www.17173.com/" class="link-item" target="_blank">17173</a></div></div>
+        <!-- 金融·银行 -->
+        <div class="link-group"><h3>金融·银行</h3><div class="link-grid"><a href="https://www.boc.cn/" class="link-item" target="_blank">中国银行</a><a href="https://www.abchina.com/" class="link-item" target="_blank">农业银行</a><a href="https://www.ccb.com/" class="link-item" target="_blank">建设银行</a><a href="https://www.icbc.com.cn/" class="link-item" target="_blank">工商银行</a><a href="https://www.cmbchina.com/" class="link-item" target="_blank">招商银行</a></div></div>
+        <!-- AI·工具 -->
+        <div class="link-group"><h3>AI·工具</h3><div class="link-grid"><a href="https://chat.openai.com/" class="link-item" target="_blank">ChatGPT</a><a href="https://kimi.moonshot.cn/" class="link-item" target="_blank">Kimi</a><a href="https://doubao.com/" class="link-item" target="_blank">豆包</a><a href="https://deepseek.com/" class="link-item" target="_blank">DeepSeek</a><a href="https://copilot.microsoft.com/" class="link-item" target="_blank">Copilot</a></div></div>
+    </div>
+
+    <div class="clock-container" id="clockContainer">
+        <div class="clock-time" id="clockTime">00:00</div>
+        <div class="clock-date" id="clockDate">2025年1月1日 星期一</div>
+    </div>
+
+    <div class="search-container">
+        <div class="search-box" id="searchBox">
+            <input type="text" id="search-input" class="search-input" placeholder="搜索" autocomplete="off">
+            <button id="search-btn" class="search-btn-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </button>
+        </div>
+        <div class="engine-indicator" id="engineIndicator">
+            <span class="engine-dot"></span>
+            <span class="engine-name">必应</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-links">
+            <a href="https://qxwhub.github.io/xw.github.io/" class="footer-link" target="_blank">首页</a>
+            <a href="xz01.html" class="footer-link" target="_blank">资料推荐</a>
+            <a href="javascript:void(0)" class="footer-link" id="setHomepage">设为主页</a>
+            <a href="guanyu.html" class="footer-link" target="_blank">关于我们</a>
+            <a href="javascript:void(0)" class="footer-link" id="themeSwitchBtn">背景切换</a>
+        </div>
+        <div class="footer-copyright">
+            <p>© 2025 我的导航页 | 粤ICP备17112242号</p>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
