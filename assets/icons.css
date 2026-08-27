@@ -1,0 +1,10 @@
+.icon {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: -0.125em;
+  flex-shrink: 0;
+}
+.icon-lg { width: 1.35em; height: 1.35em; }
+.icon-xl { width: 1.6em; height: 1.6em; }
+.icon-sm { width: 0.85em; height: 0.85em; }

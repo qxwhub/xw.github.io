@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>播放中心 · 酸柠檬</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 2 24 20'%3E%3Cpath d='M12 3c-4.6 0-8 3.2-8 7.2 0 3.8 3.2 8.3 8 8.3s8-4.5 8-8.3C20 6.2 16.6 3 12 3z' fill='%23facc15' stroke='%23eab308' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12 3c-1-1.8-3.5-2.5-5.5-1.8 1 1.5 3.5 2 5.5 1.8z' fill='%2378350f'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/icons.css">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { height:100%; overflow:hidden; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei","Segoe UI",sans-serif; background:#f5f5f7; color:#1d1d1f; display:flex; flex-direction:column; }
+  .topbar { background:rgba(255,255,255,.82); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-bottom:1px solid rgba(29,29,31,.06); box-shadow:0 2px 12px rgba(29,29,31,.04); display:flex; align-items:center; gap:12px; padding:8px 20px; min-height:52px; position:sticky; top:0; z-index:100; flex-shrink:0; }
+  .topbar .logo { font-size:1.2rem; font-weight:700; color:#0ea5e9; flex-shrink:0; }
+  @supports (-webkit-background-clip: text) or (background-clip: text) { .topbar .logo { background:linear-gradient(135deg,#0ea5e9,#6366f1); background-clip:text; -webkit-background-clip:text; color:transparent; } }
+  .topbar a.home { color:#4b5563; text-decoration:none; font-size:13px; padding:5px 12px; border-radius:8px; border:1px solid #d1d5db; flex-shrink:0; white-space:nowrap; }
+  .topbar a.home:hover { color:#1f2937; border-color:#10b981; }
+  .wrap { width:100%; margin:0 auto; padding:14px 14px 14px; flex:1; min-height:0; display:flex; flex-direction:column; }
+  .main { display:flex; gap:14px; align-items:stretch; flex:1; min-height:0; }
+  .side { flex:0 0 260px; background:#fff; border:1px solid rgba(29,29,31,.06); border-radius:18px; box-shadow:0 4px 20px rgba(29,29,31,.05); overflow:hidden; display:flex; flex-direction:column; min-height:0; }
+  /* 左侧 Tab：电视 / 本地 */
+  .side-tabs { display:flex; border-bottom:1px solid rgba(29,29,31,.06); }
+  .side-tabs button { flex:1; padding:10px 0; font-size:13px; font-weight:600; color:#6b7280; background:#f9fafb; border:0; border-bottom:2px solid transparent; cursor:pointer; transition:all .15s; }
+  .side-tabs button.active { color:#059669; background:#fff; border-bottom-color:#10b981; }
+  .side-tabs button svg { width:14px; height:14px; vertical-align:-2px; margin-right:4px; }
+  .side-tabs button.active svg { color:#10b981; }
+  #paneTv, #paneLocal { display:flex; flex-direction:column; flex:1; min-height:0; }
+  .ch-list { flex:1; min-height:0; overflow-y:auto; padding:6px 0 10px; }
+  .grp { font-size:12px; font-weight:700; color:#9ca3af; padding:10px 14px 4px; }
+  .ch-item { display:flex; align-items:center; gap:8px; padding:8px 14px; font-size:13px; color:#374151; cursor:pointer; transition:background .12s; }
+  .ch-item:hover { background:#f3f4f6; }
+  .ch-item.active { background:#ecfdf5; color:#059669; font-weight:600; }
+  .ch-item svg { width:14px; height:14px; flex-shrink:0; color:#9ca3af; }
+  .ch-item.active svg { color:#10b981; }
+  .ch-item .nm { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+  .ch-item .st { font-size:10px; color:#9ca3af; flex-shrink:0; }
+  /* 本地文件移除按钮 */
+  .ch-item .rm { width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; border-radius:6px; color:#9ca3af; cursor:pointer; flex-shrink:0; transition:background .12s,color .12s; }
+  .ch-item .rm:hover { background:#fee2e2; color:#ef4444; }
+  .ch-item .rm svg { width:13px; height:13px; }
+  /* 本地文件 */
+  .local-add { display:flex; align-items:center; justify-content:center; gap:6px; margin:12px 14px 6px; padding:9px 0; border:1px dashed #d1d5db; border-radius:10px; background:#f9fafb; color:#059669; font-size:13px; font-weight:600; cursor:pointer; transition:all .15s; }
+  .local-add:hover { border-color:#10b981; background:#ecfdf5; }
+  .local-add svg { width:15px; height:15px; }
+  .local-list { flex:1; min-height:0; overflow-y:auto; padding:4px 0 10px; }
+  .player-col { flex:1; min-width:0; min-height:0; display:flex; flex-direction:column; }
+  .card { background:#fff; border:1px solid rgba(29,29,31,.06); border-radius:18px; box-shadow:0 4px 20px rgba(29,29,31,.05); padding:16px; display:flex; flex-direction:column; flex:1; min-height:0; }
+  .card-title { flex-shrink:0; font-size:15px; font-weight:700; color:#1f2937; display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .card-title use[href="#icon-signal"]{color:#0ea5e9}
+  .card-title .now { font-size:12px; font-weight:400; color:#6b7280; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  /* 在线 URL 输入条 */
+  .url-row { display:flex; gap:10px; margin-bottom:10px; flex-shrink:0; }
+  .url-row input { flex:1; min-width:0; border:1px solid #d1d5db; border-radius:10px; padding:10px 14px; font-size:14px; outline:none; }
+  .url-row input:focus { border-color:#10b981; }
+  .url-row button { flex-shrink:0; display:inline-flex; align-items:center; gap:5px; padding:10px 18px; border:0; border-radius:10px; background:#10b981; color:#fff; font-size:14px; font-weight:600; cursor:pointer; }
+  .url-row button:hover { background:#059669; }
+  .url-row button svg { width:14px; height:14px; }
+  .player-box { position:relative; width:100%; flex:1; min-height:0; background:#000; border-radius:12px; overflow:hidden; }
+  .player-box video { display:block; width:100%; height:100%; min-height:0; background:#000; object-fit:contain; }
+  .ph { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; color:#9ca3af; pointer-events:none; }
+  .ph svg { width:52px; height:52px; opacity:.4; }
+  .ph .ph-txt { font-size:13px; }
+  /* 纯音乐播放可视化（旋转唱片 + 声波，正在播放时可见） */
+  .music-vis { position:absolute; inset:0; z-index:2; display:none; flex-direction:column; align-items:center; justify-content:center; gap:16px; pointer-events:none; background:radial-gradient(circle at 50% 42%, rgba(16,185,129,.08), transparent 62%); }
+  .music-vis.show { display:flex; }
+  .mv-disc { width:96px; height:96px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:conic-gradient(from 0deg,#0b0f14,#1f2937,#0b0f14,#25303d,#0b0f14,#1f2937); box-shadow:0 0 34px rgba(16,185,129,.35), inset 0 0 0 1px rgba(255,255,255,.08); animation:mv-spin 8s linear infinite; }
+  .mv-disc svg { width:40px; height:40px; color:#34d399; }
+  .mv-bars { display:flex; align-items:flex-end; gap:5px; height:26px; }
+  .mv-bars i { width:4px; height:26px; border-radius:2px; background:linear-gradient(180deg,#34d399,#10b981); transform-origin:bottom; animation:mv-bounce 1s ease-in-out infinite; }
+  .mv-bars i:nth-child(1){ animation-delay:0s; }
+  .mv-bars i:nth-child(2){ animation-delay:.15s; }
+  .mv-bars i:nth-child(3){ animation-delay:.3s; }
+  .mv-bars i:nth-child(4){ animation-delay:.45s; }
+  .mv-bars i:nth-child(5){ animation-delay:.6s; }
+  .mv-name { max-width:78%; color:rgba(255,255,255,.85); font-size:13px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .music-vis.paused .mv-disc { animation-play-state:paused; }
+  .music-vis.paused .mv-bars i { animation-play-state:paused; }
+  @keyframes mv-spin { to { transform:rotate(360deg); } }
+  @keyframes mv-bounce { 0%,100% { transform:scaleY(.28); } 50% { transform:scaleY(1); } }
+  /* 自定义控制条（播放/进度/音量/全屏） */
+  .pctrl { position:absolute; left:0; right:0; bottom:0; z-index:5; display:flex; align-items:center; gap:6px; padding:10px 12px; background:transparent; opacity:0; transition:opacity .25s; }
+  .pctrl.show { opacity:1; }
+  .pb { width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; background:transparent; border:0; color:#fff; cursor:pointer; border-radius:50%; flex-shrink:0; transition:background .12s; }
+  .pb:hover { background:rgba(255,255,255,.16); }
+  .pb svg { width:19px; height:19px; }
+  .pbar-wrap { flex:1; min-width:0; display:flex; align-items:center; }
+  .pbar { -webkit-appearance:none; appearance:none; width:100%; height:4px; border-radius:2px; background:linear-gradient(to right,rgba(255,255,255,.85) 0%,rgba(255,255,255,.85) var(--pct,0%),rgba(255,255,255,.12) var(--pct,0%),rgba(255,255,255,.12) 100%); outline:none; cursor:pointer; }
+  .pbar:disabled { cursor:default; opacity:.55; }
+  .pbar::-webkit-slider-thumb { -webkit-appearance:none; width:12px; height:12px; border-radius:50%; background:#10b981; border:2px solid #fff; box-shadow:0 1px 3px rgba(0,0,0,.4); }
+  .pbar::-moz-range-thumb { width:12px; height:12px; border-radius:50%; background:#10b981; border:2px solid #fff; }
+  .ptime { font-size:12px; color:rgba(255,255,255,.9); white-space:nowrap; font-variant-numeric:tabular-nums; flex-shrink:0; }
+  .vbox { position:relative; flex-shrink:0; }
+  .vtrack { position:absolute; bottom:38px; left:50%; transform:translateX(-50%); width:34px; height:104px; background:rgba(15,15,19,.94); border:1px solid rgba(255,255,255,.14); border-radius:14px; display:none; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 8px 24px rgba(0,0,0,.4); }
+  .vbox.open .vtrack { display:flex; }
+  .vbar { -webkit-appearance:none; appearance:none; width:78px; height:4px; border-radius:2px; background:linear-gradient(to right,#10b981 0%,#10b981 var(--vpct,100%),rgba(255,255,255,.28) var(--vpct,100%),rgba(255,255,255,.28) 100%); transform:rotate(-90deg); outline:none; cursor:pointer; }
+  .vbar::-webkit-slider-thumb { -webkit-appearance:none; width:12px; height:12px; border-radius:50%; background:#10b981; border:2px solid #fff; }
+  .vbar::-moz-range-thumb { width:12px; height:12px; border-radius:50%; background:#10b981; border:2px solid #fff; }
+  .status { font-size:12px; color:#f59e0b; margin-top:8px; display:none; align-items:center; gap:6px; }
+  .status.show { display:flex; }
+  .status.err { color:#ef4444; }
+  .status svg { width:14px; height:14px; flex-shrink:0; }
+  .tip { font-size:12px; color:#9ca3af; margin-top:8px; line-height:1.7; flex-shrink:0; }
+  .tip b { color:#6b7280; }
+  /* 种子文件选择弹窗：种子含多个文件（多个视频/音频/图片等）时，让用户选择播放哪个 / 下载哪个 */
+  .tp-overlay { position:fixed; inset:0; background:rgba(15,23,42,.5); z-index:999; display:none; align-items:center; justify-content:center; padding:16px; }
+  .tp-overlay.show { display:flex; }
+  .tp-box { width:min(580px,94vw); max-height:76vh; background:#fff; border-radius:12px; box-shadow:0 16px 50px rgba(0,0,0,.28); display:flex; flex-direction:column; overflow:hidden; }
+  .tp-head { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 16px; font-size:13.5px; font-weight:600; color:#111827; border-bottom:1px solid #f3f4f6; flex-shrink:0; }
+  .tp-head span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tp-close { background:none; border:none; cursor:pointer; color:#9ca3af; padding:4px; display:flex; flex-shrink:0; }
+  .tp-close:hover { color:#111827; }
+  .tp-close svg { width:18px; height:18px; }
+  .tp-list { overflow-y:auto; padding:8px; flex:1; }
+  .tp-row { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; }
+  .tp-row:hover { background:#f9fafb; }
+  .tp-row svg { width:19px; height:19px; flex-shrink:0; color:#6366f1; }
+  .tp-name { flex:1; min-width:0; font-size:13px; color:#111827; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .tp-size { font-size:12px; color:#9ca3af; flex-shrink:0; }
+  .tp-btn { border:none; border-radius:6px; padding:5px 14px; font-size:12.5px; cursor:pointer; color:#fff; background:#6366f1; flex-shrink:0; }
+  .tp-btn.dl { background:#ef4444; }
+  .tp-btn:hover { opacity:.88; }
+  @media (max-width:820px) {
+    html, body { height:auto; overflow:auto; }
+    .main { flex-direction:column; }
+    .side { flex:1 1 auto; width:100%; }
+    .ch-list { max-height:240px; min-height:0; }
+    .local-list { max-height:240px; }
+    .player-box video { max-height:52vh; }
+  }
+</style>
+</head>
+<body>
+<script src="../assets/icons.js" defer></script>
+<div class="topbar">
+  <span class="logo">播放中心</span>
+  <a class="home" href="../index.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-home"></use></svg> 首页</a>
+</div>
+<div class="wrap">
+  <div class="main">
+    <div class="side">
+      <div class="side-tabs">
+        <button id="tabTv" class="active" onclick="switchPane('tv')"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-signal"></use></svg>电视</button>
+        <button id="tabLocal" onclick="switchPane('local')"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-folder"></use></svg>本地</button>
+      </div>
+      <div id="paneTv">
+        <div class="ch-list" id="chList"></div>
+      </div>
+      <div id="paneLocal" style="display:none">
+        <input type="file" id="localInput" accept="video/*,audio/*,.mkv,.avi,.flv,.wmv,.ts,.mov,.mp4,.webm,.mp3,.wav,.flac,.aac,.m4a,.ogg,.opus,.ncm,.kgm,.vpr,.qmc0,.qmc2,.qmc3,.qmc4,.qmc6,.qmc8,.qmcflac,.qmcflac0,.qmcflac1,.mflac,.mflac0,.mgg,.mgg0,.mgg1,.kgma,.kwm,.uc,.uc0,.tm0,.tm3,.tkm,.xm,.torrent" multiple style="display:none">
+        <div class="local-add" onclick="document.getElementById('localInput').click()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-plus"></use></svg> 添加本地文件（可多选）</div>
+        <div class="local-list" id="localList"></div>
+      </div>
+    </div>
+    <div class="player-col">
+      <div class="card">
+        <div class="card-title"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-signal"></use></svg> <span id="nowName" class="now">选择左侧频道或本地文件开始播放</span></div>
+        <div class="url-row">
+          <input id="urlInput" placeholder="粘贴在线视频 / 音频网址（mp4 · mp3 · m3u8 直播 · flv · dash），回车即播" autocomplete="off" autocorrect="off" spellcheck="false">
+          <button onclick="playUrl()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-search"></use></svg> 解析</button>
+        </div>
+        <div class="player-box" id="playerBox">
+          <video id="video" playsinline preload="auto"></video>
+          <iframe id="biliFrame" style="display:none;width:100%;height:100%;border:none;border-radius:14px" allowfullscreen></iframe>
+          <div class="ph">
+            <svg class="icon" viewBox="0 0 24 24"><use href="#icon-signal"></use></svg>
+            <span class="ph-txt">选择频道 / 本地文件开始播放</span>
+          </div>
+          <!-- 纯音乐播放时的动态可视化层（旋转唱片 + 声波，避免黑屏） -->
+          <div class="music-vis" id="musicVis">
+            <div class="mv-disc"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-music"></use></svg></div>
+            <div class="mv-bars"><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="mv-name" id="mvName"></div>
+          </div>
+          <div class="pctrl" id="pctrl">
+            <button class="pb" id="btnPlay" onclick="togglePlay()" title="播放 / 暂停"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-play"></use></svg></button>
+            <div class="pbar-wrap">
+              <input type="range" class="pbar" id="pbar" min="0" max="1000" value="0" step="1">
+            </div>
+            <span class="ptime" id="ptime">0:00</span>
+            <div class="vbox" id="vbox">
+              <button class="pb" id="btnVol" onclick="toggleVol()" title="音量"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-volume"></use></svg></button>
+              <div class="vtrack" id="vtrack">
+                <input type="range" class="vbar" id="vbar" min="0" max="100" value="100" step="1">
+              </div>
+            </div>
+            <button class="pb" id="btnFs" onclick="toggleFs()" title="全屏"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-fullscreen"></use></svg></button>
+            <button class="pb" id="btnDl" onclick="downloadCur()" title="下载当前内容"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-download"></use></svg></button>
+          </div>
+        </div>
+        <div class="status" id="status"></div>
+        <div class="tip"><b>提示：</b>直播源来自公开 IPTV 列表，可能随时失效；本地视频 / 音频完全在浏览器内播放，不上传；磁力 / 种子通过 P2P 下载，完成后自动播放，内容仅保存在当前浏览器中。种子含多个文件（多个视频 / 音频 / 图片等）时，会弹出选择面板，可挑要播放或下载的文件。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/vendor/hls.min.js"></script>
+<script src="../assets/vendor/flv.min.js"></script>
+<script src="../assets/vendor/dash.all.min.js"></script>
+<script src="../assets/vendor/webtorrent.min.js?v=20260816"></script>
+<script src="../assets/music-decrypt.js?v=1983cd84"></script>
+<script>
+(function(){
+  /* ---------- 内置默认频道（公开 IPTV 源，https 为主） ---------- */
+  var DEFAULT=[
+    {g:'央视', c:[
+      {n:'CCTV-9 纪录', u:'https://xykt-fix.github.io/Y77.m3u8'}
+    ]},
+    {g:'卫视', c:[
+      {n:'河北卫视', u:'https://event.pull.hebtv.com/live/live101.m3u8'}
+    ]},
+    {g:'地方', c:[
+      {n:'哈尔滨新闻综合', u:'https://stream.hrbtv.net/xwzh/playlist.m3u8'},
+      {n:'哈尔滨影视', u:'https://stream.hrbtv.net/yspd/playlist.m3u8'},
+      {n:'兰州新闻综合', u:'https://liveplus.lzr.com.cn/xwzh/HD/live.m3u8'},
+      {n:'兰州文旅', u:'https://liveplus.lzr.com.cn/wlpd/HD/live.m3u8'},
+      {n:'白城新闻综合', u:'https://stream2.jlntv.cn/baicheng1/sd/live.m3u8'},
+      {n:'浙江国际', u:'https://ali-m-l.cztv.com/channels/lantian/channel10/1080p.m3u8'}
+    ]}
+  ];
+  var LS_KEY='iptv_channels';
+  var video=document.getElementById('video'), statusEl=document.getElementById('status');
+  var hls=null, flvP=null, dashP=null, cur=null, curLocal=null;
+  var localFiles=[];
+  var ph=document.querySelector('.ph');
+  // 磁力 / 种子（WebTorrent P2P）
+  var wtClient=null, wtTorrent=null, wtStream=null, wtProgTimer=null;
+  var curDownload=null; // {name, kind:'direct'|'torrent', url} 当前可下载内容
+
+  function getChannels(){
+    try{ var d=JSON.parse(localStorage.getItem(LS_KEY)); if(d&&d.length) return d; }catch(e){}
+    return DEFAULT;
+  }
+  function setStatus(msg,isErr){
+    statusEl.innerHTML='<svg class="icon" viewBox="0 0 24 24"><use href="#'+(isErr?'icon-alert':'icon-zap')+'"></use></svg> '+msg;
+    statusEl.className='status show'+(isErr?' err':'');
+  }
+  function clearStatus(){ statusEl.className='status'; statusEl.innerHTML=''; }
+  function hidePh(){ if(ph) ph.style.display='none'; }
+
+  // 停止所有引擎，准备新播放
+  function stopEngines(){
+    if(hls){ try{hls.destroy();}catch(e){} hls=null; }
+    if(flvP){ try{flvP.destroy();}catch(e){} flvP=null; }
+    if(dashP){ try{dashP.reset();}catch(e){} dashP=null; }
+    stopTorrent();
+    video.removeAttribute('src'); video.load();
+    var bf=document.getElementById('biliFrame'); if(bf){ bf.style.display='none'; bf.src='about:blank'; }
+    video.style.display='';
+  }
+  // 停止磁力下载 / 边下边播
+  function stopTorrent(){
+    if(wtStream){ try{ wtStream.destroy(); }catch(e){} wtStream=null; }
+    if(wtTorrent){ try{ wtTorrent.destroy(); }catch(e){} wtTorrent=null; }
+    wtTorrent=null;
+    if(wtProgTimer){ clearInterval(wtProgTimer); wtProgTimer=null; }
+    curDownload=null;
+    if(window.closeTorrentPicker) window.closeTorrentPicker();
+  }
+  // 隐藏音乐可视化层（切台/换源/停止时调用）
+  function hideVisGlobal(){ var el=document.getElementById('musicVis'); if(el) el.classList.remove('show'); }
+
+  // 左侧 Tab 切换：电视 / 本地
+  window.switchPane=function(t){
+    document.getElementById('tabTv').classList.toggle('active', t==='tv');
+    document.getElementById('tabLocal').classList.toggle('active', t==='local');
+    document.getElementById('paneTv').style.display = t==='tv' ? '' : 'none';
+    document.getElementById('paneLocal').style.display = t==='local' ? '' : 'none';
+  };
+
+  // ---------- 电视 ----------
+  function play(grp,ch){
+    cur=ch; curLocal=null;
+    document.getElementById('nowName').textContent=ch.n+'　·　'+grp;
+    clearStatus();
+    hideVisGlobal();
+    stopEngines();
+    setStatus('正在连接 '+ch.n+'…');
+    if(/^https?:/i.test(ch.u)===false){ setStatus('地址无效',true); return; }
+    if(window.Hls && Hls.isSupported()){
+      hls=new Hls({maxBufferLength:30});
+      hls.on(Hls.Events.ERROR,function(ev,data){
+        if(data.fatal){ setStatus('直播加载失败，可能源已失效',true); }
+      });
+      hls.loadSource(ch.u); hls.attachMedia(video);
+      hls.on(Hls.Events.MANIFEST_PARSED,function(){ video.play().catch(function(){}); });
+    }else if(video.canPlayType('application/vnd.apple.mpegurl')){
+      video.src=ch.u; video.play().catch(function(){});
+    }else{
+      setStatus('当前浏览器不支持直播流播放',true);
+    }
+    renderTv();
+  }
+  window.playCh=function(g,i){ play(g, getChannels().filter(function(x){return x.g===g;})[0].c[i]); };
+
+  function renderTv(){
+    var list=getChannels(), el=document.getElementById('chList'), h='', total=0;
+    list.forEach(function(grp){
+      total+=grp.c.length;
+      h+='<div class="grp">'+grp.g+'</div>';
+      grp.c.forEach(function(c){
+        var idx=grp.c.indexOf(c);
+        h+='<div class="ch-item'+(cur===c?' active':'')+'" onclick="playCh(\''+grp.g.replace(/'/g,"\\'")+'\','+idx+')"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-play"></use></svg><span class="nm">'+c.n+'</span></div>';
+      });
+    });
+    el.innerHTML=h||'<div class="grp">暂无频道</div>';
+  }
+
+  // ---------- 本地文件 ----------
+  var localInput=document.getElementById('localInput');
+  localInput.addEventListener('change',function(){
+    var fs=Array.prototype.slice.call(localInput.files||[]);
+    fs.forEach(function(f){
+      // 去重（同路径文件）
+      if(!localFiles.some(function(x){return x.name===f.name && x.size===f.size;})) localFiles.push(f);
+    });
+    localInput.value='';
+    renderLocal();
+  });
+  function fmtSize(n){
+    if(n>=1048576) return (n/1048576).toFixed(1)+' MB';
+    if(n>=1024) return (n/1024).toFixed(0)+' KB';
+    return n+' B';
+  }
+  function renderLocal(){
+    var el=document.getElementById('localList');
+    if(!localFiles.length){ el.innerHTML='<div class="grp">还没有添加文件，点击上方按钮选择</div>'; return; }
+    var h='';
+    localFiles.forEach(function(f,i){
+      h+='<div class="ch-item'+(curLocal===i?' active':'')+'" onclick="playLocal('+i+')"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-play"></use></svg><span class="nm">'+f.name+'</span><span class="st">'+fmtSize(f.size)+'</span><span class="rm" title="移除" onclick="delLocal('+i+',event)"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-x"></use></svg></span></div>';
+    });
+    el.innerHTML=h;
+  }
+  // 移除本地文件（阻止冒泡，避免触发播放）
+  window.delLocal=function(i,ev){
+    if(ev&&ev.stopPropagation) ev.stopPropagation();
+    if(!localFiles[i]) return;
+    localFiles.splice(i,1);
+    if(curLocal!==null){
+      if(curLocal===i){ // 正在播放的文件被移除 → 停止播放
+        curLocal=null; cur=null;
+        clearStatus(); stopEngines();
+        hideVisGlobal();
+        if(ph) ph.style.display='';
+        document.getElementById('nowName').textContent='选择左侧频道或本地文件开始播放';
+      }else if(i<curLocal){ curLocal--; }
+    }
+    renderLocal();
+  };
+  window.playLocal=function(i){
+    var f=localFiles[i]; if(!f) return;
+    cur=f; curLocal=i;
+    document.getElementById('nowName').textContent=f.name;
+    clearStatus(); stopEngines();
+    setStatus('正在加载本地文件…');
+    // 加密音频（酷狗 kgm / vpr、网易云 ncm）先本地解密再播放
+    var rawExt=(f.name.match(/\.([^.]+)$/)||[, 'mp4'])[1].toLowerCase();
+    // .torrent 种子文件：本地种子自带完整文件列表，用 WebTorrent 直接解析，立即弹出选择列表
+    if(rawExt==='torrent'){
+      playLocalTorrent(f);
+      return;
+    }
+    // 纯音频扩展名（普通 + 加密），用于显示声波/旋转唱片可视化
+    var audioExt=/^(mp3|wav|flac|aac|m4a|ogg|oga|opus|ncm|kgm|vpr|qmc0|qmc2|qmc3|qmc4|qmc6|qmc8|qmcflac|mflac|mflac0|mgg|mgg0|mgg1|kgma|kwm|uc|uc0|tm0|tm3|tkm|xm)$/.test(rawExt);
+    var mv=document.getElementById('musicVis'), mvName=document.getElementById('mvName');
+    function showVis(){ if(mv){ mv.classList.add('show'); mv.classList.remove('paused'); } if(mvName) mvName.textContent=f.name; }
+    function hideVis(){ if(mv) mv.classList.remove('show'); }
+    if(audioExt) showVis(); else hideVis();
+    if(rawExt==='ncm'||rawExt==='kgm'||rawExt==='vpr'){
+      setStatus('正在解密 ' + rawExt.toUpperCase() + ' 文件（纯本地处理，不上传）…');
+      f.arrayBuffer().then(function(buf){
+        var dec = rawExt==='ncm'
+          ? MusicDecrypt.decryptNcm(buf)
+          : Promise.resolve(MusicDecrypt.decryptKgm(buf, rawExt==='vpr'));
+        return dec;
+      }).then(function(r){
+        if(!r || !r.ok) throw new Error('解密失败');
+        var blob=new Blob([r.data], {type:r.mime||'audio/mpeg'});
+        video.src=URL.createObjectURL(blob);
+        video.play().catch(function(){});
+        setStatus('已解密为 ' + (r.format||'mp3').toUpperCase() + '，开始播放（本地处理，不上传）');
+        renderTv(); renderLocal();
+      }).catch(function(e){
+        video.removeAttribute('src');
+        hideVis();
+        setStatus('解密失败：' + ((e&&e.message)||'文件可能已损坏或不是有效的加密音频'), true);
+      });
+      return;
+    }
+    var url=URL.createObjectURL(f);
+    curDownload={name:f.name, kind:'local', file:f};
+    video.src=url;
+    video.play().catch(function(){});
+    renderTv(); renderLocal();
+  };
+
+  // ---------- 磁力链接 / BT 种子：WebTorrent P2P 边下边播 ----------
+  // 本地 .torrent 文件：文件自带完整文件列表，读入后交给 WebTorrent 解析（不依赖网络即可列出文件）
+  function playLocalTorrent(file){
+    cur=null; curLocal=null;
+    document.getElementById('nowName').textContent='种子文件：'+(file.name||'').slice(0,40);
+    clearStatus(); hideVisGlobal();
+    stopEngines(); // 内部会 stopTorrent()
+    if(!window.WebTorrent){ setStatus('磁力组件加载失败，请刷新页面重试',true); return; }
+    setStatus('正在读取种子文件…');
+    try{
+      if(!wtClient) wtClient=new WebTorrent();
+      // 直接传入 File 对象（浏览器里是 Blob 子类），WebTorrent 内部会用 FileReader 正确解析，立即拿到完整文件列表
+      wtTorrent=wtClient.add(file, { announce: ['wss://tracker.openwebtorrent.com','wss://tracker.btorrent.xyz','wss://tracker.webtorrent.io','wss://tracker.files.fm:7073'] }, function(torrent){
+        onTorrentReady(torrent);
+      });
+    }catch(e){
+      setStatus('种子文件读取失败：'+(e&&e.message||e), true);
+    }
+    renderTv(); renderLocal();
+  }
+
+  function playMagnet(url){
+    cur=null; curLocal=null;
+    document.getElementById('nowName').textContent='磁力链接 / BT 种子';
+    clearStatus(); hideVisGlobal();
+    stopEngines(); // 内部会 stopTorrent()
+    if(!window.WebTorrent){ setStatus('磁力组件加载失败，请刷新页面重试',true); return; }
+    setStatus('正在连接节点，获取种子信息…');
+    try{
+      if(!wtClient) wtClient=new WebTorrent();
+      wtTorrent=wtClient.add(url, { announce: ['wss://tracker.openwebtorrent.com','wss://tracker.btorrent.xyz','wss://tracker.webtorrent.io','wss://tracker.files.fm:7073'] }, function(torrent){
+        onTorrentReady(torrent);
+      });
+      // metadata 获取较慢时提示：磁力必须先从在线节点拿到文件列表，节点少/国外节点慢会等待较久；
+      // 改用 .torrent 文件（本地种子自带列表）可立即列出文件选择
+      setTimeout(function(){
+        if(wtTorrent && !wtTorrent.ready){
+          setStatus('种子信息获取较慢（在线节点少或网络慢）。可改用本地 .torrent 文件解析，文件列表立即显示', true);
+        }
+      }, 20000);
+    }catch(e){
+      setStatus('磁力加载出错：'+(e.message||e), true); return;
+    }
+    renderTv(); renderLocal();
+  }
+
+  function fileKind(name){
+    var ext=(name.split('.').pop()||'').toLowerCase();
+    if(/^(mp4|mkv|avi|mov|webm|ts|m4v|flv|wmv|rmvb)$/.test(ext)) return 'video';
+    if(/^(mp3|wav|flac|aac|m4a|ogg|oga|opus)$/.test(ext)) return 'audio';
+    if(/^(jpg|jpeg|png|gif|webp|bmp|svg|ico|avif|heic)$/.test(ext)) return 'image';
+    return 'other';
+  }
+  function fmtSize(b){
+    if(b>1073741824) return (b/1073741824).toFixed(2)+' GB';
+    if(b>1048576) return (b/1048576).toFixed(1)+' MB';
+    if(b>1024) return (b/1024).toFixed(1)+' KB';
+    return b+' B';
+  }
+  function onTorrentReady(torrent){
+    if(!torrent || torrent!==wtTorrent) return; // 已切换到其他播放
+    var nm=(torrent.name||'BT 种子').slice(0,40);
+    document.getElementById('nowName').textContent='磁力种子：'+nm;
+    var files=torrent.files||[];
+    if(!files.length){ setStatus('种子内没有文件',true); return; }
+    // 按类型分类：视频 / 音频 / 图片 / 其他
+    var vids=[], auds=[], imgs=[], others=[];
+    files.forEach(function(f){
+      var k=fileKind(f.name);
+      if(k==='video') vids.push(f);
+      else if(k==='audio') auds.push(f);
+      else if(k==='image') imgs.push(f);
+      else others.push(f);
+    });
+    // 解析成功一律弹出文件列表，让用户明确选择播放哪个 / 下载哪个（不自动播放、不打扰）
+    curDownload=null;
+    showTorrentPicker(files, vids, auds, imgs, others);
+  }
+
+  // P2P 下载完成后播放（浏览器端 getBlob 拉取整个文件；streamTo 需 Service Worker，不作为默认路径）
+  function playTorrentFile(pick){
+    curDownload={name:pick.name, kind:'torrent'};
+    var fname=pick.name.slice(0,40);
+    document.getElementById('nowName').textContent='磁力种子：'+fname;
+    var mv=document.getElementById('musicVis');
+    if(/\.(mp3|wav|flac|aac|m4a|ogg|oga|opus)$/i.test(pick.name)){
+      if(mv){ mv.classList.add('show'); mv.classList.remove('paused'); }
+      var mvName=document.getElementById('mvName'); if(mvName) mvName.textContent=pick.name;
+    }else if(mv) mv.classList.remove('show');
+    setStatus('正在下载：'+fname+'（完成后自动播放）');
+    var played=false;
+    function startPlay(blob){
+      if(played) return; played=true;
+      video.src=URL.createObjectURL(blob);
+      var p=video.play();
+      if(p&&p.then){
+        p.then(function(){ setStatus('下载完成，开始播放：'+fname); })
+         .catch(function(){ setStatus('下载完成，点击播放按钮开始播放：'+fname); });
+      }else{
+        setStatus('下载完成，开始播放：'+fname);
+      }
+    }
+    pick.getBlob(function(err, blob){
+      if(err || !blob){ setStatus('获取磁力文件失败',true); return; }
+      if(!wtTorrent || pick._torrent!==wtTorrent) return; // 已切换到其他播放
+      startPlay(blob);
+    });
+    // 进度轮询：实时显示下载进度/连接数
+    if(wtProgTimer) clearInterval(wtProgTimer);
+    wtProgTimer=setInterval(function(){
+      if(!wtTorrent) return;
+      var pct=Math.round((wtTorrent.progress||0)*100);
+      var peers=wtTorrent.numPeers||0;
+      setStatus('磁力下载 '+pct+'% · 节点 '+peers+' · '+fname);
+      if(wtTorrent.done){
+        clearInterval(wtProgTimer); wtProgTimer=null;
+      }
+    }, 1200);
+  }
+
+  // 种子文件选择弹窗：视频/音频 → 播放，图片/其他 → 下载
+  function showTorrentPicker(files, vids, auds, imgs, others){
+    var ov=document.getElementById('tpOverlay');
+    if(!ov){
+      ov=document.createElement('div');
+      ov.id='tpOverlay';
+      ov.className='tp-overlay';
+      ov.innerHTML='<div class="tp-box"><div class="tp-head"><span></span><button class="tp-close" onclick="closeTorrentPicker()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-x"></use></svg></button></div><div class="tp-list"></div></div>';
+      document.body.appendChild(ov);
+    }
+    var nPlay=vids.length+auds.length, nImg=imgs.length, nOther=others.length;
+    var sum='种子共 '+files.length+' 个文件';
+    if(nPlay) sum+=' · '+nPlay+' 个可播放';
+    if(nImg) sum+=' · '+nImg+' 张图片';
+    if(nOther) sum+=' · '+nOther+' 个其他文件';
+    ov.querySelector('.tp-head span').textContent='选择要播放 / 下载的文件（'+sum+'）';
+    var list=ov.querySelector('.tp-list');
+    list.innerHTML='';
+    // 组排序：视频 → 音频 → 图片 → 其他
+    vids.concat(auds, imgs, others).forEach(function(f){
+      var k=fileKind(f.name);
+      var icn = k==='video' ? 'icon-film' : k==='audio' ? 'icon-music' : k==='image' ? 'icon-image' : 'icon-file';
+      var row=document.createElement('div');
+      row.className='tp-row';
+      row.innerHTML='<svg class="icon" viewBox="0 0 24 24"><use href="#'+icn+'"></use></svg><span class="tp-name"></span><span class="tp-size"></span><button class="tp-btn'+(k==='video'||k==='audio'?'':' dl')+'">'+(k==='video'||k==='audio'?'播放':'下载')+'</button>';
+      row.querySelector('.tp-name').textContent=f.name;
+      row.querySelector('.tp-size').textContent=fmtSize(f.length);
+      row.querySelector('.tp-btn').onclick=function(){
+        if(!wtTorrent || f._torrent!==wtTorrent) return; // 已切换到其他播放
+        closeTorrentPicker();
+        if(k==='video'||k==='audio') playTorrentFile(f);
+        else downloadTorrentFile(f);
+      };
+      list.appendChild(row);
+    });
+    ov.classList.add('show');
+    setStatus('种子解析成功，请选择要播放 / 下载的文件');
+  }
+  window.closeTorrentPicker=function(){
+    var ov=document.getElementById('tpOverlay');
+    if(ov) ov.classList.remove('show');
+  };
+
+  // 直接下载种子中的某个文件（图片 / 其他类型）
+  function downloadTorrentFile(f){
+    curDownload={name:f.name, kind:'torrent'};
+    var fname=f.name.slice(0,40);
+    document.getElementById('nowName').textContent='磁力种子：'+fname;
+    setStatus('正在生成文件：'+fname+'（P2P 下载中）');
+    if(wtProgTimer) clearInterval(wtProgTimer);
+    wtProgTimer=setInterval(function(){
+      if(!wtTorrent) return;
+      var pct=Math.round((wtTorrent.progress||0)*100);
+      setStatus('磁力下载 '+pct+'% · 节点 '+(wtTorrent.numPeers||0)+' · '+fname);
+      if(wtTorrent.done){ clearInterval(wtProgTimer); wtProgTimer=null; }
+    }, 1200);
+    f.getBlob(function(err, blob){
+      if(wtProgTimer){ clearInterval(wtProgTimer); wtProgTimer=null; }
+      if(err || !blob){ setStatus('生成文件失败',true); return; }
+      if(!wtTorrent || f._torrent!==wtTorrent) return; // 已切换到其他播放
+      saveBlob(blob, f.name);
+      setStatus('已开始下载：'+f.name);
+    });
+  }
+
+  // ---------- 下载 ----------
+  function saveBlob(blob, name){
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=name||'download';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 3000);
+  }
+  window.downloadCur=function(){
+    if(!curDownload){ setStatus('当前内容无法下载（电视直播 / 在线直播流不支持保存）',true); return; }
+    // 本地文件 / 解密音频：直接保存
+    if(curDownload.kind==='local'){
+      saveBlob(curDownload.file, curDownload.name);
+      setStatus('已开始下载：'+curDownload.name);
+      return;
+    }
+    if(curDownload.kind==='blob'){
+      saveBlob(curDownload.blob, curDownload.name);
+      setStatus('已开始下载：'+curDownload.name);
+      return;
+    }
+    if(curDownload.kind==='torrent'){
+      if(!wtTorrent || !wtTorrent.done){ setStatus('磁力文件还在下载中，请等下载完成后保存',true); return; }
+      var tgt=null;
+      (wtTorrent.files||[]).forEach(function(f){ if(f.name===curDownload.name) tgt=f; });
+      if(!tgt){ setStatus('未找到对应文件',true); return; }
+      setStatus('正在生成文件…');
+      tgt.getBlob(function(err, blob){
+        if(err || !blob){ setStatus('生成文件失败',true); return; }
+        saveBlob(blob, tgt.name);
+        setStatus('已开始下载：'+tgt.name);
+      });
+      return;
+    }
+    // 直链视频/音频
+    setStatus('正在下载：'+curDownload.name+'…');
+    fetch(curDownload.url, { mode:'cors' }).then(function(r){
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.blob();
+    }).then(function(blob){
+      saveBlob(blob, curDownload.name);
+      setStatus('已开始下载：'+curDownload.name);
+    }).catch(function(e){
+      setStatus('直链下载失败（跨域或网络原因），可尝试在浏览器中右键视频另存为', true);
+    });
+  };
+
+  // ---------- 在线 URL ----------
+  function detect(url){
+    var p=(url||'').split('?')[0].split('#')[0].toLowerCase();
+    if(/^magnet:/i.test(url)) return 'magnet';
+    if(/\.torrent($|\?)/.test(p)) return 'magnet';
+    if(/\.m3u8($|\/)/.test(p)) return 'hls';
+    if(/\.flv($|\/)/.test(p)) return 'flv';
+    if(/\.mpd($|\/)/.test(p)) return 'dash';
+    if(/\.(mp3|wav|flac|aac|m4a|ogg|oga|opus)($|\/)/.test(p)) return 'audio';
+    return 'video';
+  }
+  window.playUrl=function(){
+    var inp=document.getElementById('urlInput');
+    var url=(inp.value||'').trim();
+    if(!url){ setStatus('请先粘贴在线网址 / 磁力链接 / 种子',true); return; }
+    // 磁力链接 / 种子文件：交给 WebTorrent 处理
+    if(/^magnet:/i.test(url) || /\.torrent($|\?)/i.test(url.toLowerCase())){
+      playMagnet(url);
+      return;
+    }
+    if(!/^https?:\/\//i.test(url)){
+      if(/^[\w-]+(\.[\w-]+)+(\/|$)/i.test(url)) url='http://'+url;
+      else{ setStatus('链接格式不正确，需以 http:// 或 https:// 开头',true); return; }
+    }
+    // B 站视频：解析出真实播放地址再播
+    var bvM=url.match(/bilibili\.com\/video\/(BV[0-9A-Za-z]{10})/);
+    if(bvM){ playBili(bvM[1]); return; }
+    if(/b23\.tv\//i.test(url)){ setStatus('暂不支持 b23.tv 短链，请复制网页版完整链接（bilibili.com/video/BV…）',true); return; }
+    var shortName=url.replace(/^https?:\/\//,'').replace(/^www\./,'').slice(0,42);
+    cur=null; curLocal=null;
+    document.getElementById('nowName').textContent='在线：'+shortName;
+    clearStatus(); stopEngines();
+    setStatus('正在加载…');
+    var t=detect(url);
+    var mv=document.getElementById('musicVis'), mvName=document.getElementById('mvName');
+    if(t==='audio'){ if(mv){ mv.classList.add('show'); mv.classList.remove('paused'); } if(mvName) mvName.textContent=shortName; }
+    else if(mv) mv.classList.remove('show');
+    try{
+      if(t==='hls'){
+        if(window.Hls && Hls.isSupported()){
+          hls=new Hls();
+          hls.on(Hls.Events.ERROR,function(ev,data){ if(data&&data.fatal) setStatus('直播源加载失败',true); });
+          hls.loadSource(url); hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED,function(){ video.play().catch(function(){}); });
+        }else if(video.canPlayType('application/vnd.apple.mpegurl')){
+          video.src=url;
+        }else{ setStatus('当前浏览器不支持 M3U8 直播流',true); return; }
+      }else if(t==='flv'){
+        if(window.flvjs && flvjs.isSupported()){
+          flvP=flvjs.createPlayer({type:'flv',url:url,isLive:true});
+          flvP.on(flvjs.Events.ERROR,function(){ setStatus('FLV 流加载失败',true); });
+          flvP.attachMediaElement(video); flvP.load(); flvP.play();
+        }else{ setStatus('当前浏览器不支持 FLV 播放',true); return; }
+      }else if(t==='dash'){
+        if(window.dashjs){
+          dashP=dashjs.MediaPlayer().create();
+          dashP.on(dashP.events.ERROR,function(){ setStatus('DASH 流加载失败',true); });
+          dashP.initialize(video,url,true);
+        }else{ setStatus('当前浏览器不支持 DASH 播放',true); return; }
+      }else{
+        // 直链视频 / 音频：记录下载信息（直播流不支持下载）
+        curDownload={name:shortName, kind:'direct', url:url};
+        video.src=url;
+        video.play().catch(function(){});
+      }
+    }catch(e){
+      setStatus('播放出错：'+(e.message||e),true); return;
+    }
+    renderTv(); renderLocal();
+  };
+
+  // B 站视频：用官方嵌入播放器（无需服务器反代）
+  function playBili(bv){
+    cur=null; curLocal=null;
+    document.getElementById('nowName').textContent='B站视频：'+bv;
+    clearStatus(); hidePh();
+    hideVisGlobal();
+    stopEngines();
+    video.style.display='none';
+    var bf=document.getElementById('biliFrame');
+    bf.style.display='block';
+    bf.src='https://player.bilibili.com/player.html?bvid='+bv+'&high_quality=1&autoplay=1&danmaku=1';
+    renderTv(); renderLocal();
+  }
+
+  // 输入框回车即播
+  document.getElementById('urlInput').addEventListener('keydown',function(e){ if(e.key==='Enter') playUrl(); });
+
+  video.addEventListener('playing',function(){ clearStatus(); hidePh(); });
+  video.addEventListener('waiting',function(){ setStatus('缓冲中…'); });
+  video.addEventListener('error',function(){ if(cur) setStatus('播放失败，该直播源可能已失效',true); });
+
+  /* ---------- 自定义控制条：播放 / 进度 / 音量（上下）/ 全屏 ---------- */
+  var playerBox=document.getElementById('playerBox'), pctrl=document.getElementById('pctrl');
+  var btnPlay=document.getElementById('btnPlay'), btnVol=document.getElementById('btnVol'), btnFs=document.getElementById('btnFs');
+  var pbar=document.getElementById('pbar'), ptime=document.getElementById('ptime');
+  var vbar=document.getElementById('vbar'), vbox=document.getElementById('vbox'), vtrack=document.getElementById('vtrack');
+  var volLast=1, ctrlTimer=null;
+
+  function isLive(){ return !isFinite(video.duration)||isNaN(video.duration); }
+  function fmtT(s){ if(!isFinite(s)||isNaN(s)||s<0) return '--:--'; s=Math.floor(s); var m=Math.floor(s/60),ss=s%60; return m+':'+(ss<10?'0':'')+ss; }
+  function showCtrl(hold){
+    pctrl.classList.add('show');
+    clearTimeout(ctrlTimer);
+    if(hold) return;
+    ctrlTimer=setTimeout(function(){ if(!video.paused && !vbox.classList.contains('open')) pctrl.classList.remove('show'); },2600);
+  }
+  function setVolUI(){
+    var v=video.muted?0:Math.round((video.volume||0)*100);
+    vbar.value=v;
+    vbar.style.setProperty('--vpct', v+'%');
+    btnVol.querySelector('use').setAttribute('href','#icon-'+(v===0?'volume-mute':'volume'));
+  }
+  window.togglePlay=function(){ if(video.paused) video.play().catch(function(){}); else video.pause(); };
+  window.toggleVol=function(){ vbox.classList.toggle('open'); if(vbox.classList.contains('open')) showCtrl(true); };
+  window.toggleFs=function(){
+    if(!document.fullscreenElement){ if(playerBox.requestFullscreen) playerBox.requestFullscreen().catch(function(){}); }
+    else{ if(document.exitFullscreen) document.exitFullscreen(); }
+  };
+  pbar.addEventListener('input',function(){
+    if(isLive()||!video.duration) return;
+    var r=pbar.value/1000;
+    video.currentTime=r*video.duration;
+    // 拖动瞬间同步填充进度，避免"点先走、填充后追"的滞后
+    pbar.style.setProperty('--pct',(r*100)+'%');
+    ptime.textContent=fmtT(video.currentTime)+' / '+fmtT(video.duration);
+  });
+  vbar.addEventListener('input',function(){
+    var v=vbar.value/100;
+    video.muted=false; video.volume=v; if(v>0) volLast=v;
+    setVolUI();
+  });
+  video.addEventListener('play',function(){ btnPlay.querySelector('use').setAttribute('href','#icon-pause'); showCtrl(); var el=document.getElementById('musicVis'); if(el) el.classList.remove('paused'); });
+  video.addEventListener('pause',function(){ btnPlay.querySelector('use').setAttribute('href','#icon-play'); showCtrl(true); var el=document.getElementById('musicVis'); if(el) el.classList.add('paused'); });
+  video.addEventListener('timeupdate',function(){
+    if(!isLive()&&video.duration){
+      pbar.disabled=false;
+      pbar.value=Math.round(video.currentTime/video.duration*1000);
+      pbar.style.setProperty('--pct',(video.currentTime/video.duration*100)+'%');
+      ptime.textContent=fmtT(video.currentTime)+' / '+fmtT(video.duration);
+    }else{
+      pbar.disabled=true; pbar.value=0;
+      ptime.textContent='直播 · '+fmtT(video.currentTime);
+    }
+  });
+  video.addEventListener('click',function(){ showCtrl(true); window.togglePlay(); });
+  video.addEventListener('ended',function(){ if(ph) ph.style.display=''; hideVisGlobal(); });
+  document.addEventListener('fullscreenchange',function(){
+    btnFs.querySelector('use').setAttribute('href','#icon-'+(document.fullscreenElement?'fullscreen-exit':'fullscreen'));
+  });
+  playerBox.addEventListener('mousemove',function(){ if(video.currentTime||!video.paused) showCtrl(); });
+  pctrl.addEventListener('mousemove',function(e){ e.stopPropagation(); showCtrl(true); });
+  document.addEventListener('click',function(e){
+    if(vbox.contains(e.target)) return;
+    if(vbox.classList.contains('open')){ vbox.classList.remove('open'); showCtrl(); }
+  });
+  setVolUI();
+
+  renderTv();
+  renderLocal();
+
+  // 嵌入模式（?embed=1）：用于工具箱内嵌展示，恢复左右分栏大屏布局（控制条保持透明样式）
+  if (/[?&]embed=1/.test(location.search)) {
+    var tb = document.querySelector('.topbar');
+    if (tb) tb.style.display = 'none';
+    var st = document.createElement('style');
+    st.textContent =
+      'html,body{height:100%;overflow:hidden;}' +
+      '.wrap{max-width:none;height:100%;display:flex;align-items:stretch;}' +
+      '.main{width:100%;height:100%;gap:14px;align-items:stretch;flex-direction:row !important;}' +
+      '.side{flex:0 0 250px !important;display:flex;flex-direction:column;border-radius:20px;}' +
+      '.ch-list,.local-list{flex:1;max-height:none !important;min-height:0 !important;height:auto;padding:6px 0 10px;}' +
+      '.player-col{flex:1;min-width:0;display:flex;flex-direction:column;height:100%;}' +
+      '.card{flex:1;display:flex;flex-direction:column;min-height:0;padding:16px;border-radius:20px;}' +
+      '.card-title{flex-shrink:0;font-size:15px;margin-bottom:10px;}' +
+      '.url-row{flex-shrink:0;margin-bottom:10px;gap:10px;}' +
+      '.player-box{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;border-radius:14px;}' +
+      '.player-box video{width:100%;height:100%;max-height:none !important;aspect-ratio:auto;object-fit:contain;border-radius:10px;}' +
+      '.status{flex-shrink:0;}' +
+      '.tip{flex-shrink:0;margin-top:10px;display:none;}' +
+      '@media (max-width:820px){' +
+      'html,body{height:auto;overflow:auto;}' +
+      '.wrap{height:auto;display:block;padding:10px 10px 14px;}' +
+      '.main{flex-direction:column !important;gap:10px;height:auto;}' +
+      '.side{flex:0 0 auto;width:100%;max-height:220px;}' +
+      '.ch-list,.local-list{max-height:150px !important;}' +
+      '.player-col{height:auto;}' +
+      '.card{flex:none;min-height:0;padding:12px;}' +
+      '.card-title{margin-bottom:8px;}' +
+      '.url-row{margin-bottom:8px;}' +
+      '.player-box{min-height:0;aspect-ratio:16/9;}' +
+      '.player-box video{max-height:none;}' +
+      '.tip{display:none;}' +
+      '}';
+    document.head.appendChild(st);
+  }
+})();
+</script>
+</body>
+</html>

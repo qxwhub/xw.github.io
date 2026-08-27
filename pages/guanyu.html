@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>关于</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 2 24 20'%3E%3Cpath d='M12 3c-4.6 0-8 3.2-8 7.2 0 3.8 3.2 8.3 8 8.3s8-4.5 8-8.3C20 6.2 16.6 3 12 3z' fill='%23facc15' stroke='%23eab308' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12 3c-1-1.8-3.5-2.5-5.5-1.8 1 1.5 3.5 2 5.5 1.8z' fill='%2378350f'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="../assets/icons.css">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei","Segoe UI",sans-serif; background:#f5f5f7; color:#1d1d1f; min-height:100vh; overflow-y:scroll; }
+    .topbar { background:rgba(255,255,255,.82); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-bottom:1px solid rgba(29,29,31,.06); box-shadow:0 2px 12px rgba(29,29,31,.04); display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:8px 20px; min-height:52px; position:sticky; top:0; z-index:100; }
+    .topbar .logo { font-size:1.2rem; font-weight:700; color:#0ea5e9; flex-shrink:0; }
+    @supports (-webkit-background-clip: text) or (background-clip: text) { .topbar .logo { background:linear-gradient(135deg,#0ea5e9,#6366f1); background-clip:text; -webkit-background-clip:text; color:transparent; } }
+    .topbar a.home { color:#4b5563; text-decoration:none; font-size:13px; padding:5px 12px; border-radius:8px; border:1px solid #d1d5db; flex-shrink:0; white-space:nowrap; }
+    .topbar a.home:hover { color:#1f2937; border-color:#10b981; }
+    .doc-wrap { max-width:960px; margin:0 auto; padding:12px 8px; }
+    .doc-box { background:#ffffff; border:1px solid rgba(29,29,31,.06); border-radius:18px; padding:22px 24px; margin-bottom:16px; box-shadow:0 4px 20px rgba(29,29,31,.05); }
+    /* 彩色图标（苹果风） */
+    use[href="#icon-home"]{color:#3b82f6}
+    use[href="#icon-book"]{color:#f59e0b}
+    use[href="#icon-balance"]{color:#0ea5e9}
+    use[href="#icon-mail"]{color:#3b82f6}
+    .doc-box h2 { font-size:17px; margin-bottom:12px; color:#059669; display:flex; align-items:center; gap:8px; }
+    .doc-box p { font-size:13px; color:#4b5563; line-height:1.9; margin-bottom:8px; }
+    .doc-box b { color:#1f2937; }
+    .doc-box code { background:#f9fafb; border:1px solid #e5e7eb; padding:1px 6px; border-radius:5px; font-size:12px; color:#0ea5e9; font-family:Consolas,monospace; }
+    .about-footer { text-align:center; margin-top:24px; font-size:12px; color:#9ca3af; }
+  </style>
+</head>
+<body>
+<script src="../assets/icons.js?v=30" defer></script>
+
+<div class="topbar">
+  <span class="logo">关于</span>
+  <a class="home" href="../index.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-home"></use></svg> 首页</a>
+</div>
+
+<div class="doc-wrap">
+  <div class="doc-box">
+    <h2><svg class="icon" viewBox="0 0 24 24"><use href="#icon-book"></use></svg> 关于本站</h2>
+    <p>感谢你喜欢酸柠檬！</p>
+    <p>酸柠檬是一个轻量级浏览器起始页，提供清爽干净的上网入口。壁纸背景、多引擎搜索、快捷方式网格，希望每次打开都能给你一个好心情。我们一直在努力把酸柠檬做得更好，让更多人喜欢它！如果你有任何疑问和建议，欢迎反馈给我们。</p>
+    <p>酸柠檬的特点有：可切换壁纸背景、百度/谷歌/必应多引擎一键切换、自定义快捷网址、清新毛玻璃界面…</p>
+    <p>欢迎将酸柠檬设为浏览器主页或者 <code>Ctrl+D</code> 添加到收藏夹，方便日后快速打开。</p>
+    <p>网站持续更新中… 酸柠檬想和你在一起，昼夜朝夕…</p>
+  </div>
+
+  <div class="doc-box">
+    <h2><svg class="icon" viewBox="0 0 24 24"><use href="#icon-balance"></use></svg> 其他声明</h2>
+    <p>我们重视用户上网隐私，酸柠檬不会主动收集记录用户的个人隐私用于任何违法目的；</p>
+    <p>搜索引擎搜索内容由各搜索服务商计算机算法生成，所生成内容本站不保证真实性，搜索结果不代表本站立场，本站不对搜索结果负责；</p>
+    <p>酸柠檬为用户免费提供网址导航功能，所链接网站均与本站无利益相关，外链网站内容或立场与本站无关，本站不能保证外链网站内容真实性，如果外链网站有不当信息，欢迎用户反馈；</p>
+    <p>本站部分内容来源于互联网，由于互联网信息繁杂，无法保证所有文章的真实性，一些情况下也无法获知文章的知识产权所有人，我们尊重合法知识产权，如果本站内容无意触犯了您的合法权益，请联系本站删除；</p>
+    <p>感谢您阅读并同意以上服务条款！请您关注本站法律声明更新，如有变动，恕不另行通知，在法律许可范围内，本站拥有以上条款解释权。</p>
+  </div>
+
+  <div class="doc-box">
+    <h2><svg class="icon" viewBox="0 0 24 24"><use href="#icon-mail"></use></svg> 联系方式</h2>
+    <p>如果你有功能建议、bug反馈或合作意向，可通过以下方式联系我们：</p>
+    <p>邮箱：guowaizhuceyx@sina.com</p>
+  </div>
+
+  <div class="about-footer">&copy; 2026 酸柠檬 | 个人导航页</div>
+</div>
+
+</body>
+</html>

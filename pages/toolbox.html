@@ -1,0 +1,3784 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>工具箱</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 2 24 20'%3E%3Cpath d='M12 3c-4.6 0-8 3.2-8 7.2 0 3.8 3.2 8.3 8 8.3s8-4.5 8-8.3C20 6.2 16.6 3 12 3z' fill='%23facc15' stroke='%23eab308' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12 3c-1-1.8-3.5-2.5-5.5-1.8 1 1.5 3.5 2 5.5 1.8z' fill='%2378350f'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="../assets/icons.css?v=64309f72">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei","Segoe UI",sans-serif; background:#f5f5f7; color:#1d1d1f; min-height:100vh; }
+    .wrap { max-width:760px; margin:0 auto; padding:14px 12px 40px; }
+    .panel { background:#ffffff; border:1px solid rgba(29,29,31,.06); border-radius:18px; padding:18px 20px; margin-bottom:16px; position:relative; box-shadow:0 4px 20px rgba(29,29,31,.05); }
+    .panel p { font-size:12.5px; color:#4b5563; line-height:1.8; margin-bottom:6px; }
+    .sub-tabs { display:flex; justify-content:center; gap:8px; margin-bottom:14px; }
+    .sub-tab { padding:7px 16px; text-align:center; font-size:13px; font-weight:600; border-radius:99px; border:1px solid #e5e7eb; background:#f9fafb; color:#4b5563; cursor:pointer; transition:all .15s; }
+    .sub-tab.active { background:#10b981; border-color:#10b981; color:#fff; }
+    .sub-tab.active svg use { color:#fff !important; }
+    .sub-tab:hover:not(.active) { border-color:#10b981; color:#1f2937; }
+
+    /* 按钮 */
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:9px 18px; border-radius:12px; border:1px solid #d1d5db; background:#ffffff; color:#374151; font-size:13px; font-weight:600; cursor:pointer; transition:all .15s; }
+    /* 按钮内图标统一固定尺寸，避免不同字号按钮下图标大小不一致 */
+    .btn .icon { width:18px; height:18px; }
+    /* 转码/加载中的旋转动画 */
+    @keyframes lp-spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+    .btn .icon.spin, .icon.spin { animation: lp-spin 1.1s linear infinite; }
+    .btn:hover { border-color:#10b981; }
+    .btn.disabled { opacity:.45; pointer-events:none; }
+    .btn.primary { background:#10b981; border-color:#10b981; color:#fff; }
+    .btn.primary:hover { background:#059669; }
+    .btn.primary.blue { background:#2563eb; border-color:#2563eb; }
+    .btn.primary.blue:hover { background:#1d4ed8; }
+    .btn:disabled { opacity:.45; cursor:not-allowed; }
+    .btn.copied { border-color:#10b981 !important; color:#10b981 !important; }
+    .btn.active { border-color:#10b981; color:#10b981; background:#ecfdf5; }
+    .btn-row { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:10px; margin-bottom:14px; }
+    .btn-row .btn { flex:0 1 auto; min-width:132px; padding:10px 16px; font-size:13px; white-space:nowrap; }
+    /* 本地播放器小按钮（前进/后退/播放暂停均为纯图标圆形按钮） */
+    .btn-row .btn.icon-only { min-width:0; width:36px; height:36px; padding:0; border-radius:50%; }
+
+    /* 格式转换：目标格式选择行 */
+    .fmt-row { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:12px 0 14px; }
+    .fmt-label { font-size:13px; color:#6b7280; font-weight:600; margin-right:2px; }
+    .fc-fmt { padding:6px 14px; font-size:12.5px; }
+
+    /* 拖拽选择区：点击选择或拖入文件/文件夹，文件列表也显示在这里 */
+    .drop-zone { margin:-2px 0 14px; padding:28px 16px; text-align:center; font-size:13px; color:#9ca3af; border:2px dashed #d1d5db; border-radius:12px; background:#fafbfc; transition:all .2s; cursor:pointer; user-select:none; }
+    .drop-zone:hover { border-color:#10b981; color:#6b7280; background:#f0fdf4; }
+    .drop-zone.dragover { border-color:#10b981; background:#ecfdf5; color:#059669; box-shadow:inset 0 0 0 1px #10b981; }
+    .drop-zone .file-list { margin-top:16px; text-align:left; cursor:default; max-height:320px; overflow-y:auto; border:none; border-radius:8px; background:transparent; }
+    .drop-zone:has(.file-list[style*="block"]) { padding:16px 20px 12px; }
+    .drop-zone:has(.file-list[style*="block"]) #lanDropHint { display:block; margin-bottom:10px; font-size:12px; color:#9ca3af; text-align:center; }
+
+    .row { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:14px; }
+    .info-line { font-size:12.5px; color:#4b5563; margin-bottom:10px; line-height:1.9; }
+    .info-line b { color:#1f2937; }
+    .info-line .size-tip { display:block; margin-top:2px; color:#d97706; font-size:12px; }
+    .info-line .size-tip.err { color:#ef4444; }
+    /* 已选文件列表 */
+    .file-item { display:flex; align-items:center; gap:8px; padding:8px 10px; font-size:13px; color:#374151; border-bottom:1px solid #f3f4f6; border-radius:6px; transition:background .12s; }
+    .file-item:last-child { border-bottom:none; }
+    .file-item:hover { background:#f9fafb; }
+    .file-item svg.icon { width:16px; height:16px; flex-shrink:0; }
+    .file-item .fname { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .file-item .fsize { flex-shrink:0; color:#9ca3af; font-size:12px; }
+    .file-item.off { opacity:.45; }
+    .file-item.fgroup { background:#f0fdf4; border-radius:6px; }
+    .file-item.fgroup:hover { background:#dcfce7; }
+    /* 行末移除按钮（叉）：移出列表 */
+    .file-item .fremove { display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; flex-shrink:0; margin-left:2px; padding:0; border:none; background:transparent; border-radius:6px; color:#9ca3af; cursor:pointer; transition:all .15s; }
+    .file-item .fremove svg.icon { width:14px; height:14px; }
+    .file-item .fremove:hover { color:#ef4444; background:#fef2f2; }
+    .file-item .fdl { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; flex-shrink:0; margin-left:2px; padding:0; border:none; background:#10b981; border-radius:6px; color:#fff; cursor:pointer; transition:all .15s; }
+    .file-item .fdl svg.icon { width:14px; height:14px; }
+    .file-item .fdl:hover { background:#059669; }
+    /* 勾选框：打勾的文件参与传输，取消勾选则不传 */
+    .fcheck { display:inline-flex; align-items:center; flex-shrink:0; cursor:pointer; }
+    .fcheck input { position:absolute; opacity:0; width:0; height:0; }
+    .fcheck .fake { width:18px; height:18px; border:1.5px solid #d1d5db; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; box-sizing:border-box; transition:all .15s; }
+    .fcheck input:checked + .fake { background:#10b981; border-color:#10b981; }
+    .fcheck input:checked + .fake::after { content:''; width:9px; height:5px; border-left:2px solid #fff; border-bottom:2px solid #fff; transform:rotate(-45deg) translateY(-1px); }
+    /* 半选状态（文件夹内部分文件勾选） */
+    .fcheck input:indeterminate + .fake { background:#ecfdf5; border-color:#10b981; }
+    .fcheck input:indeterminate + .fake::after { content:''; width:9px; height:2px; background:#10b981; border-radius:1px; }
+    .state-line { font-size:13px; color:#059669; margin:8px 0 12px; min-height:18px; font-variant-numeric:tabular-nums; }
+    .hint { font-size:12px; color:#9ca3af; line-height:1.8; margin-top:6px; }
+
+    /* 进度条 */
+    .prog-wrap { margin-top:12px; }
+    .prog-bar { height:8px; background:#f3f4f6; border-radius:99px; overflow:hidden; border:1px solid #e5e7eb; }
+    .prog-fill { height:100%; width:0; background:linear-gradient(90deg,#34d399,#10b981); transition:width .15s; }
+    .prog-txt { font-size:12.5px; color:#4b5563; margin-top:7px; font-variant-numeric:tabular-nums; }
+    .done-box { margin-top:12px; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:12px 14px; font-size:13px; color:#059669; display:none; }
+    .done-box b { color:#1f2937; }
+
+    /* 二维码区 */
+    .pair-box { margin-bottom:12px; }
+    .pair-box label { display:block; font-size:12.5px; color:#4b5563; margin-bottom:8px; }
+    .qr-wrap { display:flex; flex-direction:column; align-items:center; gap:10px; }
+    .qr-wrap canvas { max-width:320px; width:100%; height:auto; background:#fff; border-radius:10px; border:1px solid #e5e7eb; }
+    .qr-wrap .btn { min-width:160px; }
+
+    /* 加入确认弹窗（手机扫码/链接打开时） */
+    .modal-mask { position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:200; padding:20px; }
+    .modal { background:#ffffff; border:1px solid #e5e7eb; border-radius:14px; padding:22px 24px; max-width:380px; width:100%; box-shadow:0 16px 48px rgba(0,0,0,.2); }
+    .modal h3 { font-size:16px; color:#1f2937; margin-bottom:14px; }
+    .modal-row { font-size:13px; color:#4b5563; margin-bottom:12px; line-height:1.7; }
+    .modal-row b { color:#1f2937; word-break:break-all; }
+    .modal-ask { font-size:14px; color:#1f2937; margin:16px 0 14px; }
+    .modal-actions { display:flex; gap:10px; justify-content:flex-end; }
+    .modal-actions .btn { min-width:96px; }
+    /* 选择文件/文件夹弹菜单 */
+    .modal-opts { display:flex; flex-direction:column; gap:10px; margin:4px 0 16px; }
+    .modal-opt-btn { width:100%; justify-content:center; padding:11px 16px; font-size:14px; }
+
+    /* 接收方：两个入口按钮（提取码 / 扫描接收）并排 */
+    .recv-actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+    .recv-actions .join-btn-big { padding:0 26px; }
+    /* 提取码入口：白色按钮，与发送方「线上存取」对称；扫描接收保持绿色 */
+    .join-btn-big.white { background:#ffffff; color:#1f2937; border:1px solid #d1d5db; box-shadow:0 4px 16px rgba(16,185,129,.12); }
+    .join-btn-big.white:hover { background:#f0fdf4; border-color:#10b981; color:#059669; transform:translateY(-2px); }
+    .join-btn-big.white:active { transform:translateY(0); }
+    .join-btn-big.white.active { background:#ecfdf5; border-color:#10b981; color:#059669; }
+
+    /* 接收方：提取码输入 */
+    .relay-extract-panel { display:flex; flex-direction:column; gap:10px; align-items:center; }
+    .relay-code-box { display:flex; gap:8px; width:100%; max-width:340px; }
+    .relay-code-box input { flex:1; min-width:0; padding:10px 12px; border:1px solid #d1d5db; border-radius:10px; font-size:14px; letter-spacing:2px; outline:none; text-align:center; }
+    .relay-code-box input:focus { border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,.12); }
+    .relay-code-box .btn { flex-shrink:0; }
+    .relay-extract-panel .done-box { margin-top:0; }
+    .or-divider { display:flex; align-items:center; gap:10px; width:100%; max-width:340px; color:#9ca3af; font-size:12px; }
+    .or-divider::before, .or-divider::after { content:''; flex:1; height:1px; background:#e5e7eb; }
+    /* 发送方：提取码结果 */
+    .relay-code-big { font-size:28px; font-weight:800; letter-spacing:5px; color:#059669; background:#f0fdf4; border:1px dashed #10b981; border-radius:12px; padding:10px 8px; text-align:center; margin:8px 0 2px; user-select:all; }
+    .relay-code-tip { font-size:11.5px; color:#6b7280; text-align:center; margin-bottom:10px; }
+    .relay-file-row { display:flex; align-items:center; gap:8px; padding:8px 2px; border-bottom:1px solid #f3f4f6; }
+    .relay-file-row:last-child { border-bottom:none; }
+    .relay-file-row .fname { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; color:#1f2937; }
+    .relay-file-row .code { font-weight:700; color:#059669; letter-spacing:1px; flex-shrink:0; font-size:13px; user-select:all; }
+    .relay-file-row .btn { padding:4px 10px; font-size:12px; flex-shrink:0; }
+    .relay-list { margin-top:8px; }
+
+    /* 接收方：扫描接收 */
+    .recv-join-area { display:flex; flex-direction:column; align-items:center; gap:12px; padding:36px 0 24px; }
+    .join-btn-big { display:inline-flex; flex-direction:row; align-items:center; justify-content:center; gap:8px; height:48px; padding:0 32px; border-radius:10px; background:#10b981; color:#fff; cursor:pointer; transition:all .2s; box-shadow:0 4px 16px rgba(16,185,129,.25); border:none; font-size:15px; font-weight:600; }
+    .join-btn-big:hover { background:#059669; transform:translateY(-2px); box-shadow:0 6px 20px rgba(16,185,129,.35); }
+    .join-btn-big:active { transform:translateY(0); }
+    .join-btn-big .scan-icon { width:20px; height:20px; flex-shrink:0; }
+
+    /* 窄屏：紧凑布局 */
+    @media (max-width:420px) {
+      .sub-tabs { gap:6px; }
+      .sub-tab { padding:6px 10px; font-size:12px; }
+      .btn-row { gap:8px; }
+      .btn-row .btn { font-size:12px; padding:9px 10px; min-width:118px; }
+    }
+
+    /* 微信/QQ内浏览器遮罩 */
+    .inapp-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; z-index:300; padding:24px; }
+    .inapp-popup { background:#ffffff; border-radius:16px; padding:28px 24px; max-width:340px; width:100%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.3); }
+    .inapp-icon { font-size:40px; margin-bottom:8px; }
+    .inapp-popup h3 { font-size:17px; color:#1f2937; margin-bottom:12px; }
+    .inapp-popup p { font-size:13px; color:#4b5563; line-height:1.8; margin-bottom:16px; }
+    .inapp-popup p b { color:#10b981; }
+    .inapp-hint { font-size:12px; color:#059669; margin-top:10px; }
+
+    /* ==================== 工具箱布局 ==================== */
+    /* 顶部：功能显示区 */
+    .tool-stage { }
+    .tool-view { display:none; }
+    .tool-view.active { display:block; }
+
+    /* 中间：工具网格（3 列） */
+    .tool-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
+    .tool-card { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:16px 8px; background:#ffffff; border:1px solid rgba(29,29,31,.06); border-radius:16px; cursor:pointer; transition:all .15s; color:#374151; box-shadow:0 1px 4px rgba(29,29,31,.04); }
+    .tool-card:hover { border-color:#10b981; background:#f0fdf4; transform:translateY(-1px); }
+    .tool-card.active { border-color:#10b981; background:#10b981; color:#fff; box-shadow:0 4px 16px rgba(16,185,129,.25); }
+    /* 彩色图标（苹果风）：工具箱工具卡片 */
+    .tool-card svg use[href="#icon-transfer"]{color:#3b82f6}
+    .tool-card svg use[href="#icon-image"]{color:#8b5cf6}
+    .tool-card svg use[href="#icon-video"]{color:#ef4444}
+    .tool-card svg use[href="#icon-pdf"]{color:#dc2626}
+    .tool-card.active svg use{color:#fff}
+    /* 彩色图标（苹果风）：工具箱各工具界面/按钮 */
+    svg use[href="#icon-send"]{color:#f97316}
+    svg use[href="#icon-receive"]{color:#60a5fa}
+    svg use[href="#icon-folder-open"]{color:#f59e0b}
+    svg use[href="#icon-folder"]{color:#f59e0b}
+    svg use[href="#icon-file"]{color:#3b82f6}
+    svg use[href="#icon-cloud"]{color:#10b981}
+    svg use[href="#icon-signal"]{color:#3b82f6}
+    svg use[href="#icon-download"]{color:#3b82f6}
+    svg use[href="#icon-upload"]{color:#10b981}
+    svg use[href="#icon-refresh"]{color:#10b981}
+    svg use[href="#icon-clipboard"]{color:#6366f1}
+    svg use[href="#icon-trash"]{color:#ef4444}
+    svg use[href="#icon-check-circle"]{color:#10b981}
+    svg use[href="#icon-x-circle"]{color:#ef4444}
+    svg use[href="#icon-alert"]{color:#f59e0b}
+    svg use[href="#icon-zap"]{color:#f59e0b}
+    svg use[href="#icon-lock"]{color:#64748b}
+    svg use[href="#icon-video"]{color:#ef4444}
+    svg use[href="#icon-info"]{color:#0ea5e9}
+    svg use[href="#icon-home"]{color:#3b82f6}
+    svg use[href="#icon-x"]{color:#ef4444}
+    /* 主按钮/成功态按钮内图标保持白色 */
+    .btn.primary svg use, .btn.copied svg use, .btn.saved svg use{color:#fff}
+    .tool-card .tc-ico { width:24px; height:24px; }
+    .tool-card .tc-name { font-size:12.5px; font-weight:600; white-space:nowrap; }
+
+    /* 通用工具视图内部样式 */
+    .view-head { display:flex; align-items:center; gap:8px; font-size:15px; font-weight:700; color:#1f2937; margin-bottom:14px; }
+    .view-head .icon { width:20px; height:20px; color:#10b981; }
+    /* 播放中心嵌入：panel 撑满可用高度，iframe 填满剩余空间（适配任意窗口高度） */
+    #view-media.c-mode .panel { display:flex; flex-direction:column; height:calc(100vh - 28px); margin-bottom:0; min-height:0; padding:12px 14px; border:1px solid rgba(29,29,31,.05); box-shadow:none; }
+    #view-media.c-mode .view-head { margin-bottom:8px; }
+    #view-media.c-mode .sub-tabs { margin-bottom:8px; }
+    #view-media.c-mode #mediaSub-c { flex:1; min-height:0; }
+    #view-media.c-mode #iptvFrame { height:100%; }
+    /* 移动端：面板与 iframe 高度跟随内容，页面整体滚动，避免套娃滚动条 */
+    @media (max-width:820px) {
+      #view-media.c-mode .panel { height:auto; }
+      #view-media.c-mode #mediaSub-c { flex:none; }
+      #view-media.c-mode #iptvFrame { height:auto; }
+    }
+    .wrap.tv-mode { padding:14px 12px; }
+    .tool-textarea { width:100%; min-height:120px; padding:12px; border:1px solid #d1d5db; border-radius:10px; font-size:13px; font-family:inherit; outline:none; resize:vertical; box-sizing:border-box; }
+    .tool-textarea:focus { border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,.12); }
+    .tool-input-row { display:flex; align-items:center; gap:10px; margin-bottom:14px; flex-wrap:wrap; }
+    .tool-input-row label { font-size:13px; color:#4b5563; white-space:nowrap; }
+    .tool-input { flex:1; min-width:120px; padding:10px 12px; border:1px solid #d1d5db; border-radius:10px; font-size:14px; outline:none; }
+    .tool-input:focus { border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,.12); }
+    .tool-output { width:100%; min-height:80px; padding:12px; border:1px solid #d1d5db; border-radius:10px; font-size:13px; background:#f9fafb; outline:none; box-sizing:border-box; margin-top:10px; resize:vertical; }
+    .tool-slider { flex:1; min-width:140px; accent-color:#10b981; }
+    /* 多媒体工具 */
+    .media-stage { width:100%; margin-top:12px; }
+    .media-stage video { width:100%; max-height:420px; border-radius:12px; background:#000; }
+    .media-stage audio { width:100%; margin-top:8px; }
+    .media-block + .media-block { margin-top:12px; border-top:1px dashed #e5e7eb; padding-top:12px; }
+    .block-title { font-size:14px; font-weight:600; color:#1f2937; display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+    .block-title .icon { width:16px; height:16px; }
+    #view-media .drop-zone { margin:0 0 8px; padding:18px 16px; }
+    #view-media .tool-input-row { margin-bottom:0; }
+    #view-media .state-line:empty { display:none; margin:0; }
+    #view-media .state-line { margin:6px 0 0; }
+
+    /* 图片/多媒体：文件列表统一风格，固定 180px 高度 */
+    #imgSub-c .file-list, #imgSub-m .file-list, #mediaSub-a .file-list { max-height:180px; }
+    #imgSub-m .file-item, #imgSub-c .file-item, #mediaSub-a .file-item { cursor:default; }
+    #imgSub-m .file-item { cursor:grab; }
+    #imgSub-m .file-item:active { cursor:grabbing; }
+    #imgSub-m .file-item.dragging { opacity:.45; }
+    #imgSub-m .file-item.drop-target { background:#ecfdf5; box-shadow:inset 0 0 0 1px #10b981; }
+    .file-item .fstatus { flex-shrink:0; font-size:12px; color:#6b7280; }
+    .file-item .fstatus .save { color:#10b981; font-weight:700; }
+
+    /* 本地播放器：复古电视 · 左侧屏幕 / 右侧可折叠播放列表 */
+    .lp-tv { position:relative; width:100%; border-radius:8px; padding:12px 10px 10px; background:linear-gradient(180deg, #d4b896, #b08d67); border:1px solid #8b6f4e; box-shadow:inset 0 1px 0 rgba(255,255,255,.2), 0 4px 14px rgba(0,0,0,.3); }
+    .lp-tv-top { display:flex; align-items:center; justify-content:space-between; padding:0 2px 8px; }
+    .lp-tv-brand { display:flex; align-items:center; gap:5px; font-size:11px; letter-spacing:2px; color:#5c4033; font-weight:600; text-shadow:0 1px 0 rgba(255,255,255,.3); }
+    .lp-tv-brand .icon { width:14px; height:14px; }
+    /* 旋钮呼吸灯：待机红色呼吸，播放绿色呼吸 */
+    @keyframes knobBreathe { 0%,100%{ box-shadow:inset 0 1px 2px rgba(255,255,255,.35), 0 0 6px rgba(255,82,82,.95); } 50%{ box-shadow:inset 0 1px 2px rgba(255,255,255,.35), 0 0 2px rgba(183,28,28,.35); } }
+    @keyframes knobGlow { 0%,100%{ box-shadow:inset 0 1px 2px rgba(255,255,255,.35), 0 0 10px rgba(0,230,118,1); } 50%{ box-shadow:inset 0 1px 2px rgba(255,255,255,.35), 0 0 3px rgba(46,125,50,.4); } }
+    .lp-tv-body { display:flex; align-items:flex-start; }
+    .lp-screen { position:relative; flex:1; min-width:0; aspect-ratio:16/9; background:transparent; border-radius:4px; overflow:hidden; }
+    .lp-screen video { display:block; width:100%; height:100%; object-fit:contain; }
+    .lp-screen audio { width:100%; }
+    .lp-ph { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; color:#64748b; background:linear-gradient(160deg,#0f172a,#1e293b); cursor:pointer; }
+    .lp-ph:hover .icon { color:#475569; }
+    .lp-ph .icon { width:52px; height:52px; color:#334155; transition:color .15s; }
+    .lp-ph span { font-size:13px; color:#64748b; }
+    .lp-ph small { font-size:11px; color:#475569; }
+    .lp-vis { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:linear-gradient(160deg,#0f172a,#1e293b); }
+    .lp-vis .lp-disc { width:84px; height:84px; color:#10b981; animation:lpSpin 6s linear infinite; }
+    @keyframes lpSpin { to { transform:rotate(360deg); } }
+    .lp-vis .lp-vis-title { font-size:13px; color:#94a3b8; max-width:80%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .lp-big { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:76px; height:76px; border-radius:50%; border:0; background:rgba(0,0,0,.5); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:1; pointer-events:auto; transition:background .15s, transform .1s; z-index:5; }
+    .lp-big:hover { background:rgba(0,0,0,.68); }
+    .lp-big:active { transform:translate(-50%,-50%) scale(.94); }
+    .lp-big .icon { width:32px; height:32px; }
+    .lp-bar { position:absolute; left:0; right:0; bottom:0; z-index:6; padding:8px 12px 6px; background:linear-gradient(transparent, rgba(0,0,0,.45)); opacity:1; transform:none; pointer-events:auto; transition:opacity .3s; }
+    .lp-bar.lp-hidden { opacity:0; pointer-events:none; }
+    .lp-track { display:flex; align-items:center; gap:10px; }
+    .lp-time { font-size:11.5px; color:#cbd5e1; font-variant-numeric:tabular-nums; min-width:34px; text-align:center; }
+    .lp-progress { flex:1; -webkit-appearance:none; appearance:none; height:4px; border-radius:2px; background:transparent; outline:none; cursor:pointer; }
+    .lp-progress::-webkit-slider-runnable-track { height:4px; border-radius:2px; background:linear-gradient(to right,rgba(255,255,255,.85) 0%,rgba(255,255,255,.85) var(--lp-pct,0%),rgba(255,255,255,.12) var(--lp-pct,0%),rgba(255,255,255,.12) 100%); }
+    .lp-progress::-moz-range-track { height:4px; border-radius:2px; background:linear-gradient(to right,rgba(255,255,255,.85) 0%,rgba(255,255,255,.85) var(--lp-pct,0%),rgba(255,255,255,.12) var(--lp-pct,0%),rgba(255,255,255,.12) 100%); }
+    .lp-progress::-webkit-slider-thumb { -webkit-appearance:none; width:13px; height:13px; border-radius:50%; background:#10b981; border:2px solid #fff; cursor:pointer; margin-top:-4.5px; }
+    .lp-progress::-moz-range-thumb { width:13px; height:13px; border-radius:50%; background:#10b981; border:2px solid #fff; cursor:pointer; }
+    .lp-btns { position:relative; display:flex; align-items:center; justify-content:center; margin-top:6px; }
+    .lp-btns-center { display:flex; align-items:center; gap:10px; }
+    .lp-btns-right { position:absolute; right:2px; top:50%; transform:translateY(-50%); display:flex; align-items:center; gap:6px; }
+    .lp-btn { width:30px; height:30px; border-radius:50%; border:0; background:transparent; color:#e2e8f0; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; transition:background .15s; }
+    .lp-btn:hover { background:rgba(255,255,255,.14); }
+    .lp-btn .icon { width:16px; height:16px; }
+    .lp-btn.lp-play { background:#10b981; color:#fff; width:38px; height:38px; }
+    .lp-btn.lp-play:hover { background:#059669; }
+    .lp-btn.lp-play .icon { width:20px; height:20px; }
+    .lp-vol { width:60px; -webkit-appearance:none; appearance:none; height:4px; border-radius:2px; background:rgba(255,255,255,.22); outline:none; cursor:pointer; }
+    .lp-vol::-webkit-slider-thumb { -webkit-appearance:none; width:12px; height:12px; border-radius:50%; background:#e2e8f0; cursor:pointer; }
+    .lp-vol::-moz-range-thumb { width:12px; height:12px; border-radius:50%; background:#e2e8f0; cursor:pointer; }
+    /* 电视底座 */
+    .lp-tv-foot { display:flex; align-items:center; gap:12px; padding:10px 10px 2px; }
+    .lp-foot-left { display:flex; align-items:center; gap:12px; flex:1; min-width:0; }
+    .lp-knob { width:15px; height:15px; flex-shrink:0; border-radius:50%; background:radial-gradient(circle at 35% 30%, #e8dcc8, #a08060 55%, #6b5344 100%); box-shadow:inset 0 1px 2px rgba(255,255,255,.35), 0 1px 2px rgba(0,0,0,.3); animation:knobBreathe 1.8s ease-in-out infinite; }
+    .lp-knob.on { animation:knobGlow 1.2s ease-in-out infinite; }
+    .lp-foot-left .lp-name { flex:1; min-width:0; font-size:12px; color:#5c4033; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .lp-tv-foot .lp-actions { display:flex; gap:8px; flex-shrink:0; }
+    .lp-tv-foot .lp-actions .btn { padding:5px 12px; font-size:12px; }
+    .lp-swap { display:inline-flex; align-items:center; gap:3px; padding:4px 9px; border:none; border-radius:10px; background:linear-gradient(180deg,#8d7a5e,#5a4a36); box-shadow:inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.4); color:#f0e6d3; font-size:11px; font-weight:600; cursor:pointer; transition:transform .1s; flex-shrink:0; }
+    .lp-swap:hover { transform:translateY(-1px); box-shadow:inset 0 1px 0 rgba(255,255,255,.25), 0 2px 4px rgba(0,0,0,.5); }
+    .lp-swap:active { transform:translateY(1px); }
+    .lp-swap .icon { width:13px; height:13px; }
+    /* 音箱格栅（居中，随声音颤动） */
+    .lp-speaker-mid { display:flex; align-items:flex-end; gap:3px; height:18px; flex-shrink:0; padding:0 2px; }
+    .lp-speaker-mid span { display:block; width:4px; height:6px; border-radius:2px; background:#5c4033; box-shadow:inset 0 1px 0 rgba(255,255,255,.35); transition:height .08s ease; }
+    /* 触屏设备：无 hover，控制条与中央按钮常显 */
+    @media (hover:none) {
+      .lp-bar, .lp-bar.lp-hidden { opacity:1; transform:none; pointer-events:auto; }
+      .lp-big { opacity:1; pointer-events:auto; }
+    }
+
+    /* 图片合并：预览 */
+    .merge-stage { text-align:center; margin-top:12px; }
+    .merge-stage canvas { max-width:100%; border-radius:10px; border:1px solid #e5e7eb; background:#f3f4f6; }
+
+    /* 底部：使用须知 */
+    .tips-box { background:#ffffff; border:1px solid rgba(29,29,31,.06); border-radius:18px; padding:16px 20px; box-shadow:0 4px 20px rgba(29,29,31,.05); }
+    .tips-box h3 { font-size:14px; color:#1f2937; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+    .tips-box h3 .icon { width:16px; height:16px; color:#10b981; }
+    /* 使用须知标题右侧：首页 */
+    .tips-box h3 .tips-home { margin-left:auto; display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; color:#059669; text-decoration:none; border:1px solid #e5e7eb; border-radius:8px; padding:5px 10px; transition:all .15s; }
+    .tips-box h3 .tips-home:hover { border-color:#10b981; background:#ecfdf5; }
+    .tips-box h3 .tips-home .icon { width:13px; height:13px; }
+    .tips-box p { font-size:12px; color:#6b7280; line-height:1.9; margin-bottom:4px; }
+    .tips-box p b { color:#059669; }
+
+    /* 窄屏：工具网格 3 列保持，卡片内边距缩小 */
+    @media (max-width:420px) {
+      .tool-card { padding:12px 4px; }
+      .tool-card .tc-ico { width:20px; height:20px; }
+      .tool-card .tc-name { font-size:11px; }
+      .lp-btn { width:26px; height:26px; }
+      .lp-btn.lp-play { width:32px; height:32px; }
+      .lp-vol { width:44px; }
+      .lp-big { width:62px; height:62px; }
+      .lp-big .icon { width:26px; height:26px; }
+      .lp-bar { padding:8px 8px 6px; }
+    }
+  </style>
+</head>
+<body>
+<script src="../assets/icons.js?v=125a0bb4" defer></script>
+
+<div class="wrap">
+
+  <!-- ==================== 顶部：功能显示区 ==================== -->
+  <div class="tool-stage">
+
+  <!-- ==================== 工具：文件传输（默认选中） ==================== -->
+  <div class="tool-view active" id="view-file">
+  <!-- ==================== 文件传输（即时传输 · P2P） ==================== -->
+  <div class="panel" id="lanPanel">
+    <div class="sub-tabs">
+      <div class="sub-tab active" id="lanTabSend" onclick="switchLanRole('sender')"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-send"></use></svg> 我是发送方</div>
+      <div class="sub-tab" id="lanTabRecv" onclick="switchLanRole('receiver')"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-receive"></use></svg> 我是接收方</div>
+    </div>
+    <div class="state-line" id="lanState">未连接</div>
+
+    <!-- 发送方视图 -->
+    <div id="lanSendView">
+      <input type="file" id="lanFileInput" multiple style="display:none">
+      <input type="file" id="lanDirInput" webkitdirectory style="display:none">
+      <!-- 拖拽区：点击选择或拖入文件/文件夹，文件列表也显示在这里 -->
+      <div class="drop-zone" id="lanDropZone">
+        <span id="lanDropHint"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-folder-open"></use></svg> 点击选择文件/文件夹，或拖到这里</span>
+        <div class="file-list" id="lanFileList" style="display:none"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary blue" id="lanOfferBtn" onclick="lanCreateOffer()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-signal"></use></svg> 即时传输</button>
+      </div>
+      <div class="prog-wrap" id="lanGenProg" style="display:none">
+        <div class="prog-bar"><div class="prog-fill" id="lanGenFill"></div></div>
+        <div class="prog-txt" id="lanGenTxt">正在连接信令服务器…</div>
+      </div>
+      <div class="pair-box" id="lanCodeBox" style="display:none">
+        <label>我的连接二维码（发给对方）</label>
+        <div class="qr-wrap">
+          <canvas id="lanQrCanvas"></canvas>
+          <button class="btn" id="lanCopyBtn" onclick="downloadLanQr()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-download"></use></svg> 下载二维码</button>
+        </div>
+        <div class="hint" id="lanQrHint">对方扫码即可接收文件，或点「下载二维码」保存图片发给对方；连接成功后选择文件会自动发送。</div>
+      </div>
+      <!-- 线上存取已移除（GitHub Pages 版无服务器存储） -->
+      <div class="prog-wrap" id="lanSendProg" style="display:none">
+        <div class="prog-bar"><div class="prog-fill" id="lanSendFill"></div></div>
+        <div class="prog-txt" id="lanSendTxt"></div>
+      </div>
+    </div>
+
+    <!-- 接收方视图 -->
+    <div id="lanRecvView" style="display:none">
+      <div class="recv-join-area">
+        <div class="recv-actions">
+          <label class="join-btn-big" id="lanJoinBtn" for="lanQrFileInput">
+            <svg class="scan-icon" viewBox="0 0 24 24"><use href="#icon-scan"></use></svg>
+            <span>扫描接收</span>
+          </label>
+        </div>
+        <input type="file" id="lanQrFileInput" accept="image/*" capture="environment" style="display:none">
+      </div>
+      <div class="prog-wrap" id="lanGenProg2" style="display:none">
+        <div class="prog-bar"><div class="prog-fill" id="lanGenFill2"></div></div>
+        <div class="prog-txt" id="lanGenTxt2">正在连接…</div>
+      </div>
+      <div class="prog-wrap" id="lanRecvProg" style="display:none">
+        <div class="prog-bar"><div class="prog-fill" id="lanRecvFill"></div></div>
+        <div class="prog-txt" id="lanRecvTxt"></div>
+      </div>
+      <div class="done-box" id="lanDoneBox"></div>
+    </div>
+  </div>
+
+  </div><!-- /view-file -->
+
+  <!-- ==================== 工具：多媒体工具（提取音频 / 网页录音录屏） ==================== -->
+  <div class="tool-view" id="view-media">
+    <div class="panel">
+      <div class="view-head"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-video"></use></svg> 多媒体工具</div>
+      <div class="sub-tabs">
+        <button class="sub-tab active" data-tab="a" onclick="mediaTab('a')">提取音频</button>
+        <button class="sub-tab" data-tab="b" onclick="mediaTab('b')">录音 / 录屏</button>
+        <button class="sub-tab" data-tab="d" onclick="mediaTab('d')">格式转换</button>
+        <button class="sub-tab" data-tab="c" onclick="mediaTab('c')">播放中心</button>
+      </div>
+
+      <!-- 子功能A：提取音频（本地文件） -->
+      <div id="mediaSub-a">
+      <div class="media-block">
+        <div class="block-title"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-zap"></use></svg> 提取音频（视频→音频）</div>
+        <input type="file" id="aeInput" accept="video/*" multiple style="display:none">
+        <div class="drop-zone" id="aeDrop" onclick="document.getElementById('aeInput').click()">
+          <span id="aeHint"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-video"></use></svg> 点击选择本地视频（可多选），或拖到这里（本地提取，不上传）</span>
+          <div class="file-list" id="aeList" style="display:none"></div>
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" onclick="aeStart()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-zap"></use></svg> 开始提取</button>
+        </div>
+        <div class="state-line" id="aeState" style="font-size:12px;color:#6b7280"></div>
+        <div class="btn-row" id="aeStopRow" style="display:none">
+          <button class="btn" onclick="aeStop()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-x"></use></svg> 停止提取</button>
+          <button class="btn" id="aeDownloadAllBtn" style="display:none" onclick="aeDownloadAll()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-download"></use></svg> 全部下载</button>
+        </div>
+        <div class="media-stage" id="aeResult" style="display:none">
+          <audio id="aeAudio" controls style="width:100%"></audio>
+          <div class="btn-row" style="justify-content:center; margin-top:10px">
+            <button class="btn primary" onclick="aeDownload()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-download"></use></svg> 下载音频</button>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <!-- 子功能B：网页录音 / 录屏 -->
+      <div id="mediaSub-b" style="display:none">
+      <div class="media-block">
+        <div class="block-title"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-video"></use></svg> 网页录音 / 录屏（任意网页正在播放的内容）</div>
+        <div class="btn-row" style="gap:10px;flex-wrap:wrap">
+          <button class="btn" onclick="wrStart('audio')"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-zap"></use></svg> 录制网页声音</button>
+          <button class="btn primary" onclick="wrStart('video')"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-video"></use></svg> 录制屏幕（含声音）</button>
+        </div>
+        <div style="font-size:12px;color:#dc2626;margin-top:6px;line-height:1.5">提示：录画面请选「整个屏幕」或「窗口」；选单个标签页，切换页面时画面会冻结（只剩声音）</div>
+        <div class="state-line" id="wrState" style="font-size:12px;color:#6b7280;margin-top:8px"></div>
+        <div class="btn-row" id="wrStopRow" style="display:none;margin-top:8px">
+          <button class="btn" onclick="wrStop()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-x"></use></svg> 停止录制</button>
+        </div>
+        <div class="media-stage" id="wrResult" style="display:none">
+          <audio id="wrAudio" controls style="width:100%;display:none"></audio>
+          <video id="wrVideo" controls style="width:100%;display:none;border-radius:6px;max-height:420px;background:#000"></video>
+          <div class="btn-row" style="justify-content:center; margin-top:10px">
+            <button class="btn primary" onclick="wrDownload()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-download"></use></svg> 下载</button>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <!-- 子功能D：格式转换（本地 ffmpeg.wasm，音视频互转） -->
+      <div id="mediaSub-d" style="display:none">
+      <div class="media-block">
+        <div class="block-title"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-refresh"></use></svg> 格式转换（音视频互转，本地处理）</div>
+        <input type="file" id="fcInput" accept="video/*,audio/*,.mkv,.avi,.flv,.wmv,.ts,.mov,.mp4,.webm,.mp3,.wav,.flac,.aac,.m4a,.ogg,.opus,.m4v,.3gp,.ncm,.kgm,.vpr,.qmc0,.qmc2,.qmc3,.qmc4,.qmc6,.qmc8,.qmcflac,.qmcflac0,.qmcflac1,.mflac,.mflac0,.mgg,.mgg0,.mgg1,.kgma,.kwm,.uc,.uc0,.tm0,.tm3,.tkm,.xm" multiple style="display:none">
+        <div class="drop-zone" id="fcDrop" onclick="document.getElementById('fcInput').click()">
+          <span id="fcHint"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-video"></use></svg> 点击选择音视频文件（可多选），或拖到这里（本地转换，不上传）</span>
+          <div class="file-list" id="fcList" style="display:none"></div>
+        </div>
+        <div class="fmt-row">
+          <span class="fmt-label">目标格式</span>
+          <button class="sub-tab fc-fmt active" data-fmt="mp4" onclick="fcSetFmt('mp4')">MP4</button>
+          <button class="sub-tab fc-fmt" data-fmt="mp3" onclick="fcSetFmt('mp3')">MP3</button>
+          <button class="sub-tab fc-fmt" data-fmt="wav" onclick="fcSetFmt('wav')">WAV</button>
+          <button class="sub-tab fc-fmt" data-fmt="m4a" onclick="fcSetFmt('m4a')">M4A</button>
+          <button class="sub-tab fc-fmt" data-fmt="flac" onclick="fcSetFmt('flac')">FLAC</button>
+          <button class="sub-tab fc-fmt" data-fmt="ogg" onclick="fcSetFmt('ogg')">OGG</button>
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" onclick="fcStart()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-refresh"></use></svg> 开始转换</button>
+        </div>
+        <div class="state-line" id="fcState" style="font-size:12px;color:#6b7280"></div>
+        <div class="btn-row" id="fcStopRow" style="display:none">
+          <button class="btn" onclick="fcStop()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-x"></use></svg> 停止转换</button>
+          <button class="btn" id="fcDownloadAllBtn" style="display:none" onclick="fcDownloadAll()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-download"></use></svg> 全部下载</button>
+        </div>
+      </div>
+      </div>
+
+      <!-- 子功能C：播放中心（嵌入：电视直播 / 本地视频 / 网址直链 / 磁力种子） -->
+      <div id="mediaSub-c" style="display:none">
+        <iframe id="iptvFrame" src="iptv.html?embed=1&v=20260817c" style="width:100%;height:100%;border:none;border-radius:14px;background:transparent;"></iframe>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== 工具：图片工具（压缩 / 合并） ==================== -->
+  <div class="tool-view" id="view-img">
+    <div class="panel">
+      <div class="view-head"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-image"></use></svg> 图片工具</div>
+      <div class="sub-tabs">
+        <button class="sub-tab active" data-tab="c" onclick="imgTab('c')">图片压缩</button>
+        <button class="sub-tab" data-tab="m" onclick="imgTab('m')">图片合并</button>
+      </div>
+
+      <!-- 子功能：图片压缩 -->
+      <div id="imgSub-c">
+        <input type="file" id="imgcInput" accept="image/*" multiple style="display:none">
+        <div class="drop-zone" id="imgcDrop" onclick="document.getElementById('imgcInput').click()">
+          <span id="imgcHint"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-image"></use></svg> 点击选择图片（可多选），或拖到这里</span>
+          <div class="file-list" id="imgcList" style="display:none"></div>
+        </div>
+        <div class="tool-input-row">
+          <label>质量</label>
+          <input type="range" class="tool-slider" id="imgcQ" min="30" max="100" value="70" oninput="imgcQSet()">
+          <label id="imgcQLbl">70%</label>
+          <span id="imgcEst" style="display:none; margin-left:8px; font-size:12px; color:#059669"></span>
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" id="imgcGoBtn" onclick="imgcGo()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-zap"></use></svg> 开始压缩</button>
+          <button class="btn" id="imgcDownloadAllBtn" style="display:none" onclick="imgcDownloadAll()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-download"></use></svg> 全部下载</button>
+          <button class="btn" id="imgcClearBtn" style="display:none" onclick="imgcClear()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-trash"></use></svg> 清空列表</button>
+        </div>
+      </div>
+
+      <!-- 子功能：图片合并（网格拼图） -->
+      <div id="imgSub-m" style="display:none">
+        <input type="file" id="imgmInput" accept="image/*" multiple style="display:none">
+        <div class="drop-zone" id="imgmDrop" onclick="document.getElementById('imgmInput').click()">
+          <span id="imgmHint"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-image"></use></svg> 点击选择图片（可多选），自动排成网格；拖拽可调整顺序</span>
+          <div class="file-list" id="imgmList" style="display:none"></div>
+        </div>
+        <div class="tool-input-row">
+          <label>列数</label>
+          <input type="number" class="tool-input" id="imgmCols" min="0" max="6" value="0" style="max-width:80px">
+          <label>行数</label>
+          <input type="number" class="tool-input" id="imgmRows" min="0" max="6" value="0" style="max-width:80px">
+          <label style="color:#9ca3af;font-size:12px">0 为自动；只填一个时另一个自动算</label>
+        </div>
+        <div class="state-line" id="imgmStatus" style="display:none; font-size:12px; color:#6b7280"></div>
+        <div class="btn-row">
+          <button class="btn primary" id="imgmGoBtn" onclick="imgmGo()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-zap"></use></svg> 合并</button>
+          <button class="btn" id="imgmClearBtn" style="display:none" onclick="imgmClear()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-trash"></use></svg> 清空列表</button>
+        </div>
+        <div class="merge-stage" id="imgmStage" style="display:none">
+          <canvas id="imgmCanvas"></canvas>
+          <div class="btn-row" style="justify-content:center; margin-top:10px">
+            <button class="btn primary" onclick="imgmDownload()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-download"></use></svg> 下载合并图片</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 工具：PDF 工具 ==================== -->
+  <div class="tool-view" id="view-pdf">
+    <div class="panel">
+      <div class="view-head"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-pdf"></use></svg> PDF 工具</div>
+      <div class="sub-tabs">
+        <button class="sub-tab active" data-tab="merge" onclick="pdfTab('merge')">合并</button>
+        <button class="sub-tab" data-tab="split" onclick="pdfTab('split')">拆分</button>
+      </div>
+
+      <!-- 子功能：合并 PDF -->
+      <div id="pdfSub-merge">
+        <input type="file" id="pdfmInput" accept="application/pdf,.pdf" multiple style="display:none">
+        <div class="drop-zone" id="pdfmDrop" onclick="document.getElementById('pdfmInput').click()">
+          <span id="pdfmHint"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-pdf"></use></svg> 点击选择 PDF（可多选，按选择顺序合并），或拖到这里（本地处理，不上传）</span>
+          <div class="file-list" id="pdfmList" style="display:none"></div>
+        </div>
+        <div class="state-line" id="pdfmState" style="display:none; font-size:12px; color:#6b7280"></div>
+        <div class="btn-row">
+          <button class="btn primary" onclick="pdfmGo()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-zap"></use></svg> 开始合并</button>
+          <button class="btn" id="pdfmClearBtn" style="display:none" onclick="pdfmClear()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-trash"></use></svg> 清空列表</button>
+        </div>
+      </div>
+
+      <!-- 子功能：拆分 PDF -->
+      <div id="pdfSub-split" style="display:none">
+        <input type="file" id="pdfsInput" accept="application/pdf,.pdf" style="display:none">
+        <div class="drop-zone" id="pdfsDrop" onclick="document.getElementById('pdfsInput').click()">
+          <span id="pdfsHint"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-pdf"></use></svg> 点击选择一个 PDF，或拖到这里（本地处理，不上传）</span>
+          <div class="file-list" id="pdfsList" style="display:none"></div>
+        </div>
+        <div class="tool-input-row">
+          <label style="font-size:12.5px">拆分方式</label>
+          <select class="tool-input" id="pdfsMode" style="flex:1; min-width:0" onchange="pdfsModeSet()">
+            <option value="all">拆成单页（打包 zip 下载）</option>
+            <option value="range">提取指定页码范围，合并成一个新 PDF</option>
+          </select>
+        </div>
+        <div class="tool-input-row" id="pdfsRangeRow" style="display:none">
+          <label>页码范围</label>
+          <input class="tool-input" id="pdfsRange" placeholder="例：1-3,5,8-10" style="flex:1; min-width:0">
+        </div>
+        <div class="state-line" id="pdfsState" style="display:none; font-size:12px; color:#6b7280"></div>
+        <div class="btn-row">
+          <button class="btn primary" onclick="pdfsGo()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-zap"></use></svg> 开始拆分</button>
+          <button class="btn" id="pdfsClearBtn" style="display:none" onclick="pdfsClear()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-trash"></use></svg> 移除文件</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /tool-stage -->
+
+  <!-- ==================== 中间：工具网格 ==================== -->
+  <div class="tool-grid">
+    <div class="tool-card active" onclick="switchTool('file')">
+      <svg class="tc-ico" viewBox="0 0 24 24"><use href="#icon-transfer"></use></svg>
+      <span class="tc-name">文件传输</span>
+    </div>
+    <div class="tool-card" onclick="switchTool('img')">
+      <svg class="tc-ico" viewBox="0 0 24 24"><use href="#icon-image"></use></svg>
+      <span class="tc-name">图片工具</span>
+    </div>
+    <div class="tool-card" onclick="switchTool('media')">
+      <svg class="tc-ico" viewBox="0 0 24 24"><use href="#icon-video"></use></svg>
+      <span class="tc-name">多媒体工具</span>
+    </div>
+    <div class="tool-card" onclick="switchTool('pdf')">
+      <svg class="tc-ico" viewBox="0 0 24 24"><use href="#icon-pdf"></use></svg>
+      <span class="tc-name">PDF 工具</span>
+    </div>
+  </div>
+
+  <!-- ==================== 底部：使用须知 ==================== -->
+  <div class="tips-box">
+    <h3><svg class="icon" viewBox="0 0 24 24"><use href="#icon-info"></use></svg> 使用须知
+      <a class="tips-home" href="../index.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-home"></use></svg> 首页</a>
+    </h3>
+    <p><b>文件传输</b>：无需安装，浏览器直连（P2P）。即时传输需双方同时在线。</p>
+    <p><b>多媒体工具</b>：本地视频/B站/直链提取音频；网页录音录屏（任意网页正在播放的声音/画面）。</p>
+    <p><b>图片工具</b>：压缩、背景更换、水印去除，均在本地处理，不会上传任何数据。</p>
+    <p><b>PDF 工具</b>：合并、拆分、加水印，全部在浏览器本地完成，不会上传文件。</p>
+  </div>
+
+</div>
+
+<!-- 接收确认弹窗（手机扫码 / 打开链接时） -->
+<div class="modal-mask" id="joinModal">
+  <div class="modal">
+    <h3><svg class="icon" viewBox="0 0 24 24"><use href="#icon-receive"></use></svg> 接收文件</h3>
+    <div class="modal-ask">是否接收对方发来的文件？</div>
+    <div class="modal-actions">
+      <button class="btn" onclick="modalCancel()">取消</button>
+      <button class="btn primary" onclick="modalJoin()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-check-circle"></use></svg> 接收</button>
+    </div>
+  </div>
+</div>
+
+<!-- 选择文件 / 选择文件夹 弹菜单 -->
+<div class="modal-mask" id="pickMenu" style="display:none">
+  <div class="modal" style="max-width:300px; text-align:center">
+    <h3><svg class="icon" viewBox="0 0 24 24"><use href="#icon-folder-open"></use></svg> 选择上传内容</h3>
+    <div class="modal-opts">
+      <button class="btn modal-opt-btn" onclick="pickMenuSelect('file')"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-file"></use></svg> 选择文件</button>
+      <button class="btn modal-opt-btn" onclick="pickMenuSelect('dir')"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-folder"></use></svg> 选择文件夹</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- 录制确认弹窗：点"录制屏幕"后提示，确认后再开始 -->
+<div class="modal-mask" id="wrConfirm" style="display:none">
+  <div class="modal">
+    <h3><svg class="icon" viewBox="0 0 24 24"><use href="#icon-video"></use></svg> 开始录制</h3>
+    <div class="modal-ask" style="color:#dc2626">即将开始录制画面与声音。弹出选择框时请选「整个屏幕」或「窗口」；若选单个标签页，切换页面时画面会冻结。</div>
+    <div class="modal-actions">
+      <button class="btn" onclick="wrCancel()">取消</button>
+      <button class="btn primary" onclick="wrBegin()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-check-circle"></use></svg> 开始</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- 微信/QQ内浏览器遮罩提示 -->
+<div class="inapp-overlay" id="inappOverlay" style="display:none">
+  <div class="inapp-popup">
+    <div class="inapp-icon"><svg class="icon icon-xl" viewBox="0 0 24 24"><use href="#icon-alert"></use></svg></div>
+    <h3>需在浏览器中打开</h3>
+    <p>微信/QQ 内置浏览器不支持文件下载，请点右上角「<b>···</b>」→「<b>在浏览器打开</b>」，用系统浏览器打开本页后即可接收文件。</p>
+    <button class="btn primary" onclick="copyCurrentUrl()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-clipboard"></use></svg> 复制链接</button>
+    <div class="inapp-hint" id="inappCopied" style="display:none"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-check-circle"></use></svg> 已复制，去浏览器粘贴打开</div>
+    <button class="btn" style="margin-top:8px;font-size:12px;color:#9ca3af" onclick="document.getElementById('inappOverlay').style.display='none'">先继续浏览页面</button>
+  </div>
+</div>
+
+<script src="../js/qrcode.min.js?v=170c5297"></script>
+<script src="../js/jsqr.min.js?v=eb173922"></script>
+<script src="../js/peerjs.min.js?v=c2c48b56" onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';document.head.appendChild(s)"></script>
+<script src="../assets/vendor/hls.min.js?v=b0e74c4a"></script>
+<script src="../assets/music-decrypt.js?v=1983cd84"></script>
+<script>
+(function(){
+  'use strict';
+
+  // ===================== 通用工具 =====================
+  function fmtSize(n) {
+    if (n < 1024) return n + ' B';
+    if (n < 1048576) return (n/1024).toFixed(1) + ' KB';
+    if (n < 1073741824) return (n/1048576).toFixed(2) + ' MB';
+    return (n/1073741824).toFixed(2) + ' GB';
+  }
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function bytesToB64(bytes) {
+    var bin = '', chunk = 0x8000;
+    for (var i = 0; i < bytes.length; i += chunk) {
+      bin += String.fromCharCode.apply(null, bytes.subarray(i, i+chunk));
+    }
+    return btoa(bin);
+  }
+  function sha256B64(buf) {
+    if (!window.crypto || !crypto.subtle) return Promise.resolve('n/a');
+    return crypto.subtle.digest('SHA-256', buf).then(function(d){ return bytesToB64(new Uint8Array(d)); })
+      .catch(function(){ return 'n/a'; });
+  }
+
+  // 根据文件扩展名推断 MIME 类型（避免鸿蒙/微信因缺 MIME 弹"暂无可用打开方式"）
+  function guessMime(name) {
+    var ext = (String(name).split('.').pop() || '').toLowerCase();
+    var map = {
+      xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      xls:  'application/vnd.ms-excel',
+      docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      doc:  'application/msword',
+      pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      ppt:  'application/vnd.ms-powerpoint',
+      pdf:  'application/pdf',
+      zip:  'application/zip',
+      rar:  'application/x-rar-compressed',
+      '7z': 'application/x-7z-compressed',
+      txt:  'text/plain;charset=utf-8',
+      csv:  'text/csv;charset=utf-8',
+      html: 'text/html;charset=utf-8',
+      json: 'application/json;charset=utf-8',
+      js:   'text/javascript;charset=utf-8',
+      css:  'text/css;charset=utf-8',
+      png:  'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', gif:'image/gif',
+      webp: 'image/webp', bmp:'image/bmp', svg:'image/svg+xml',
+      mp3:  'audio/mpeg', wav:'audio/wav', flac:'audio/flac', m4a:'audio/mp4',
+      mp4:  'video/mp4', mov:'video/quicktime', mkv:'video/x-matroska', webm:'video/webm', avi:'video/x-msvideo',
+      apk:  'application/vnd.android.package-archive',
+      exe:  'application/x-msdownload'
+    };
+    return map[ext] || 'application/octet-stream';
+  }
+
+  // SVG 图标辅助函数
+  function icon(name, cls) {
+    return '<svg class="icon ' + (cls || '') + '" viewBox="0 0 24 24"><use href="#icon-' + name + '"></use></svg>';
+  }
+
+  // 环境检测：手机、鸿蒙、微信/QQ 内置浏览器
+  var UA = navigator.userAgent || '';
+  var isMobileEnv = /iPhone|iPad|iPod|Android|HarmonyOS|Harmony|OpenHarmony|HuaweiBrowser|HMSCore|HUAWEI|Mobile/i.test(UA);
+  var isInAppBrowser = /MicroMessenger|QQ\/|WeChat|WXWork|DingTalk/i.test(UA);
+
+  // 后台中断提示：传输过程中切到后台会被系统挂起，回到前台时提醒
+  var pageWasHidden = false;
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) { pageWasHidden = true; }
+    else if (pageWasHidden) {
+      pageWasHidden = false;
+      if (peer || lanConnected) lanState(icon('alert') + ' 刚才切到了后台，连接可能已中断，请重新生成二维码/扫描接收。', '#d97706');
+    }
+  });
+
+  function downloadBlob(bytes, name, mime) {
+    var type = mime || guessMime(name);
+    var blob = new Blob([bytes], { type: type });
+    var a = document.createElement('a');
+    var url = URL.createObjectURL(blob);
+    a.href = url;
+    a.download = name;
+    a.rel = 'noopener';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    // 直接 click 在部分浏览器可能被拦截，用原生 click 而非 dispatchEvent
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 3000);
+  }
+
+  // ===================== 二维码绘制 =====================
+  function drawQr(text, canvas) {
+    var qr = qrcode(0, 'L');
+    qr.addData(text, 'Byte');
+    qr.make();
+    var n = qr.getModuleCount();
+    // 固定内部分辨率，避免隐藏时宽度为 0 导致二维码糊成一团
+    var target = Math.max(240, Math.min(420, (window.innerWidth || 420) - 80));
+    var px = Math.max(2, Math.floor(target / n));
+    canvas.width = n * px;
+    canvas.height = n * px;
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#000000';
+    for (var r = 0; r < n; r++) {
+      for (var c = 0; c < n; c++) {
+        if (qr.isDark(r, c)) ctx.fillRect(c*px, r*px, px, px);
+      }
+    }
+  }
+
+  // ===================== 文件传输（网络 · P2P） =====================
+  // 原理：PeerJS 免费云做信令（配对/应答自动完成），数据仍是 P2P 直连。
+  // 需要联网（像微信一样）；同一局域网/热点/跨网络都能用（只要双方能访问信令服务器）。
+  var LAN_CHUNK = 65536;              // 数据分块 64KB
+  var LARGE_FILE = 500 * 1024 * 1024; // 单个文件 ≥500MB 视为大文件，传输耗时较长需提醒
+  var lanRole = 'sender';
+  var MAX_LAN_RECEIVERS = 10; // 单个二维码最多同时接收设备数（避免连接过多导致浏览器卡顿）
+  var peer = null, conn = null, conns = [], lanConnected = false, lanSending = false;
+  // 接收完成回执（ACK）统计
+  var lanTargetCount = 0, lanAckOk = 0, lanAckFail = 0, lanAckTimer = null;
+  var lanSendCancelled = false;
+  var lanRecvMeta = null, lanRecvParts = [], lanRecvBytes = 0;
+  var lanFiles = [];       // 选中内容：[{ file, path, size }]，单文件或文件夹内所有文件
+  var lanTotalSize = 0;    // 选中内容总大小
+  var lanFileCount = 0;    // 选中文件数
+  var lanDirMode = false;  // 是否文件夹模式
+  var lanDirName = '';     // 文件夹名（文件夹模式）
+  var lanRecvFileTotal = 1;  // 当前接收批次文件总数
+  var lanRecvFileIndex = 0;  // 当前接收文件序号
+  var lanCode = '';
+  var pendingJoinCode = '';           // 通过链接/二维码进入时的配对码
+
+  // 选择文件/文件夹：共用一个入口按钮，弹菜单二选一（浏览器不允许同一对话框混选文件与文件夹）
+  window.showPickMenu = function() {
+    document.getElementById('pickMenu').style.display = 'flex';
+  };
+  window.pickMenuSelect = function(kind) {
+    document.getElementById('pickMenu').style.display = 'none';
+    if (kind === 'dir') document.getElementById('lanDirInput').click();
+    else document.getElementById('lanFileInput').click();
+  };
+  document.addEventListener('click', function(e) {
+    var m = document.getElementById('pickMenu');
+    if (m.style.display === 'none') return;
+    // 点击遮罩空白（e.target 即遮罩自身）或菜单外部：关闭菜单
+    // 但排除「选择文件/文件夹」按钮本身：由按钮 onclick 负责开关，这里不重复关闭
+    if (e.target && e.target.closest && e.target.closest('#lanDropZone')) return;
+    if (e.target === m || !m.contains(e.target)) m.style.display = 'none';
+  });
+
+  window.switchLanRole = function(r) {
+    if (r === lanRole) return;
+    lanRole = r;
+    document.getElementById('lanTabSend').classList.toggle('active', r === 'sender');
+    document.getElementById('lanTabRecv').classList.toggle('active', r === 'receiver');
+    document.getElementById('lanSendView').style.display = r === 'sender' ? '' : 'none';
+    document.getElementById('lanRecvView').style.display = r === 'receiver' ? '' : 'none';
+    lanClose();
+    lanState('未连接');
+  };
+
+  function lanState(msg, color) {
+    var el = document.getElementById('lanState');
+    el.innerHTML = msg;
+    el.style.color = color || '#059669';
+  }
+
+  function genCode() {
+    var alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    var s = '';
+    for (var i = 0; i < 6; i++) s += alphabet[Math.floor(Math.random() * alphabet.length)];
+    return s;
+  }
+
+  // PeerJS 配置：使用 PeerJS 公共免费信令服务器（无需自建服务器）
+  var LAN_SIGNAL_HOST = '0.peerjs.com';
+  var LAN_SIGNAL_PORT = 443;
+  var LAN_SIGNAL_PATH = '/';
+  var LAN_SIGNAL_SECURE = true;
+  function peerOptions() {
+    return {
+      host: LAN_SIGNAL_HOST,
+      port: LAN_SIGNAL_PORT,
+      path: LAN_SIGNAL_PATH,
+      secure: LAN_SIGNAL_SECURE,
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun.qq.com:3478' },
+          { urls: 'stun:stun.miwifi.com:3478' },
+          { urls: 'stun:stun.chat.bilibili.com:3478' }
+        ]
+      }
+    };
+  }
+
+  // 二维码/复制的链接内容 = 本站链接 + ?r=配对码，对方扫码/点链接自动打开接收页
+  function lanLink(code) {
+    return location.href.split('?')[0] + '?r=' + code;
+  }
+
+  // ---- 发送方：生成二维码 ----
+  window.lanCreateOffer = function() {
+    if (!lanFiles.length) { lanState('请先选择文件或文件夹，再点「即时传输」', '#d97706'); return; }
+    if (!lanCheckedCount()) { lanState('请先勾选要传输的文件（默认为全选，取消勾选的文件不会发送）', '#d97706'); return; }
+    if (peer) lanClose();
+    var genProg = document.getElementById('lanGenProg');
+    var genFill = document.getElementById('lanGenFill');
+    var genTxt = document.getElementById('lanGenTxt');
+    var btn = document.getElementById('lanOfferBtn');
+    var tries = 0;
+    genProg.style.display = '';
+    genFill.style.width = '0%';
+    var connTxt = '正在连接信令服务器…';
+    genTxt.textContent = connTxt;
+    lanState(connTxt);
+    btn.disabled = true;
+    try {
+      peer = new Peer('lime-' + genCode(), peerOptions());
+      peer.on('open', function(id) {
+        lanCode = String(id).replace(/^lime-/, '');
+        document.getElementById('lanCodeBox').style.display = '';
+        genFill.style.width = '100%';
+        genTxt.innerHTML = icon('check-circle') + ' 二维码已生成';
+        lanState(icon('check-circle') + ' 二维码已生成，等对方扫码/点链接连接…（请尽快连接，二维码约 5 分钟内有效）', '#059669');
+        btn.disabled = false;
+        setTimeout(function(){ genProg.style.display = 'none'; }, 1600);
+        drawLanQr(lanCode);
+        // 信令连接中途断开（境外免费信令服务器不稳定，常见）→ 自动重连，重连后二维码仍然有效；多次失败再提示重新生成
+        var reconnTimes = 0;
+        peer.on('disconnected', function() {
+          if (lanConnected || document.getElementById('lanCodeBox').style.display === 'none') return;
+          if (reconnTimes < 3) {
+            reconnTimes++;
+            lanState(icon('alert') + ' 信令连接中断，正在自动重连（' + reconnTimes + '/3）…', '#d97706');
+            try { peer.reconnect(); } catch(e) {}
+          } else {
+            lanState(icon('alert') + ' 信令连接多次断开，二维码可能已失效，请重新点「即时传输」生成', '#d97706');
+          }
+        });
+        peer.on('reconnected', function() {
+          if (lanConnected) return;
+          lanState(icon('check-circle') + ' 已自动重连，二维码仍然有效，等对方扫码/点链接连接…', '#059669');
+        });
+      });
+      peer.on('connection', function(c) {
+        setupConn(c);
+      });
+      // 统一 error 处理（只注册这一个监听器）：
+      // - 已建立 P2P 通道：信令报错不影响传输，忽略，避免误杀连接
+      // - 二维码已生成但未连接：信令抖动 → 自动重连，保留二维码，不销毁
+      // - 二维码未生成（配对阶段）：才是真正的生成失败
+      peer.on('error', function(e) {
+        if (lanConnected) return;
+        if (lanCode) {
+          lanState(icon('alert') + ' 信令连接异常（' + (e.message || e.type || '网络问题') + '），正在尝试恢复…', '#d97706');
+          if (peer && peer.disconnected) {
+            try { peer.reconnect(); } catch(e2) {}
+          }
+          return;
+        }
+        if (e.type === 'unavailable-id' && tries < 3) {
+          tries++;
+          lanState('配对码被占用，重新生成…', '#d97706');
+          lanClose();
+          setTimeout(lanCreateOffer, 300);
+          return;
+        }
+        lanState('生成失败：' + (e.message || e.type || '网络不可用，请检查联网'), '#ef4444');
+        lanClose();
+      });
+    } catch(e) {
+      genProg.style.display = 'none';
+      btn.disabled = false;
+      lanState('生成失败：' + e.message, '#ef4444');
+    }
+  };
+
+  function drawLanQr(code) {
+    var url = lanLink(code);
+    drawQr(url, document.getElementById('lanQrCanvas'));
+    var hint = document.getElementById('lanQrHint');
+    if (location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) {
+      hint.innerHTML = icon('alert') + ' 当前是<b>本地地址</b>，手机扫码打不开（localhost/file 地址指向本机自己）。<br>请把项目部署到 GitHub Pages 等线上服务后，再用手机打开页面扫码。';
+    } else {
+      hint.textContent = '对方扫码即可接收文件，或点「下载二维码」保存图片发给对方；连接成功后选择文件会自动发送。';
+    }
+  }
+
+  // ---- 下载二维码图片（发给对方） ----
+  window.downloadLanQr = function() {
+    var canvas = document.getElementById('lanQrCanvas');
+    if (!canvas || !canvas.width) {
+      lanState(icon('alert') + ' 二维码还未生成', '#d97706');
+      return;
+    }
+    canvas.toBlob(function(blob) {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = '连接二维码.png';
+      a.rel = 'noopener';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 3000);
+      var btn = document.getElementById('lanCopyBtn');
+      var t = btn.textContent;
+      btn.innerHTML = icon('check-circle') + ' 已下载';
+      btn.classList.add('copied');
+      setTimeout(function(){ btn.textContent = t; btn.classList.remove('copied'); }, 1400);
+    }, 'image/png');
+  };
+
+  // ---- 接收方：加入（不传码时打开图片选择，识别二维码） ----
+  window.lanJoin = function(code) {
+    if (!code) {
+      document.getElementById('lanQrFileInput').click();
+      return;
+    }
+    code = String(code).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (!code) { lanState('未识别到有效的连接信息，请重试', '#d97706'); return; }
+    if (peer) lanClose();
+    var genProg = document.getElementById('lanGenProg2');
+    var genFill = document.getElementById('lanGenFill2');
+    var genTxt = document.getElementById('lanGenTxt2');
+    genProg.style.display = '';
+    genFill.style.width = '0%';
+    genTxt.textContent = '正在连接…';
+    lanState('正在连接…');
+    var joined = false;
+    try {
+      peer = new Peer(null, peerOptions());
+      peer.on('open', function() {
+        joined = true;
+        genFill.style.width = '100%';
+        conn = peer.connect('lime-' + code, { reliable: true });
+        setupConn(conn);
+      });
+      peer.on('error', function(e) {
+        // 连接已建立：信令服务器报错不影响已建立的 P2P 通道，忽略，避免误报"连接失败"并销毁连接
+        if (lanConnected) return;
+        var msg = e.message || e.type || '网络不可用，请检查联网';
+        if (e.type === 'peer-unavailable') {
+          // 常见原因：发送方的信令连接已断开（境外免费信令服务器不稳定）、二维码过期，或发送方已重新生成了新码
+          lanState(icon('x-circle') + ' 找不到对方（' + msg + '）。请确认发送方页面仍打开着且二维码未过期；如发送方提示"信令连接已断开"，请让其重新点「即时传输」生成新二维码后重试', '#ef4444');
+        } else {
+          lanState('连接失败：' + msg, '#ef4444');
+        }
+        lanClose();
+      });
+      setTimeout(function() {
+        if (!joined) {
+          // 信令服务器一直没连上（如网络不通），也给出提示，避免卡在"正在连接…"
+          lanState(icon('x-circle') + ' 连接信令服务器超时，请检查网络后重试', '#ef4444');
+          lanClose();
+          return;
+        }
+        if (!conn || !conn.open) {
+          lanState(icon('x-circle') + ' 未找到对方，请确认对方已生成二维码且双方联网', '#ef4444');
+          lanClose();
+        }
+      }, 12000);
+    } catch(e) {
+      genProg.style.display = 'none';
+      lanState('连接失败：' + e.message, '#ef4444');
+    }
+  };
+
+  // 微信/QQ内浏览器：点「加入」时拦截，显示遮罩提示跳浏览器
+  document.getElementById('lanJoinBtn').addEventListener('click', function(e) {
+    if (isInAppBrowser) {
+      e.preventDefault();
+      showInappOverlay();
+      return;
+    }
+  });
+
+  // 识别二维码图片 → 提取 ?r= 配对码
+  document.getElementById('lanQrFileInput').addEventListener('change', function() {
+    var f = this.files && this.files[0];
+    this.value = '';
+    if (!f) return;
+    if (isInAppBrowser) {
+      // 微信/QQ 内置浏览器连上也无法下载，先引导跳系统浏览器
+      showInappOverlay();
+      return;
+    }
+    lanState('正在识别二维码图片…');
+    recognizeQrImage(f).then(function(text) {
+      var c = parseJoinCode(text);
+      if (!c) {
+        lanState(icon('x-circle') + ' 图片中未识别到连接二维码，请选择对方发来的二维码截图', '#ef4444');
+        return;
+      }
+      lanState(icon('check-circle') + ' 识别成功，正在连接…', '#059669');
+      lanJoin(c);
+    }).catch(function(e) {
+      lanState(icon('x-circle') + ' ' + e.message, '#ef4444');
+    });
+  });
+
+  function recognizeQrImage(file) {
+    return new Promise(function(resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function() {
+        try {
+          var maxDim = 1280;
+          var scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+          var w = Math.max(1, Math.round(img.width * scale));
+          var h = Math.max(1, Math.round(img.height * scale));
+          var cv = document.createElement('canvas');
+          cv.width = w; cv.height = h;
+          var ctx = cv.getContext('2d');
+          ctx.drawImage(img, 0, 0, w, h);
+          var id = ctx.getImageData(0, 0, w, h);
+          var res = jsQR(id.data, w, h);
+          URL.revokeObjectURL(url);
+          if (res && res.data) resolve(res.data);
+          else reject(new Error('未能识别出二维码，请确认图片清晰完整'));
+        } catch(e) {
+          URL.revokeObjectURL(url);
+          reject(new Error('图片解析失败：' + e.message));
+        }
+      };
+      img.onerror = function() { URL.revokeObjectURL(url); reject(new Error('图片读取失败')); };
+      img.src = url;
+    });
+  }
+
+  function parseJoinCode(text) {
+    var c = '';
+    try { c = new URL(text).searchParams.get('r') || ''; }
+    catch(e) { c = (String(text).match(/[?&]r=([^&]+)/) || [])[1] || ''; }
+    return c ? c.toUpperCase().replace(/[^A-Z0-9]/g, '') : '';
+  }
+
+  // ---- 加入确认弹窗（手机扫码 / 打开链接进入时） ----
+  window.modalJoin = function() {
+    document.getElementById('joinModal').style.display = 'none';
+    switchLanRole('receiver');
+    lanJoin(pendingJoinCode);
+  };
+  window.modalCancel = function() {
+    document.getElementById('joinModal').style.display = 'none';
+    switchLanRole('receiver');
+  };
+
+  function showJoinModal(code) {
+    pendingJoinCode = code;
+    document.getElementById('joinModal').style.display = 'flex';
+  }
+
+  // ---- 微信/QQ内浏览器：显示遮罩提示 ----
+  window.copyCurrentUrl = function() {
+    var url = location.href;
+    var ok = false;
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = url;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+    } catch(e) {}
+    if (!ok && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(function() {
+        document.getElementById('inappCopied').style.display = '';
+      }).catch(function() {});
+      return;
+    }
+    if (ok) document.getElementById('inappCopied').style.display = '';
+  };
+
+  function showInappOverlay() {
+    document.getElementById('inappOverlay').style.display = 'flex';
+  }
+
+  function setupConn(c) {
+    c.binaryType = 'arraybuffer';
+    c.on('open', function() {
+      if (lanRole === 'sender') {
+        // 发送方：收集所有接收方连接（一个二维码可同时发给多台设备）
+        if (conns.length >= MAX_LAN_RECEIVERS) {
+          try { c.send(JSON.stringify({ t: 'full' })); } catch(e) {}
+          try { c.close(); } catch(e) {}
+          lanState(icon('alert') + ' 已达最大连接数（' + MAX_LAN_RECEIVERS + ' 台），新设备被拒绝', '#d97706');
+          return;
+        }
+        if (conns.indexOf(c) < 0) conns.push(c);
+        updateConnState();
+        document.getElementById('lanSendProg').style.display = '';
+        // 已有已选文件且未在发送中 → 自动开始发送
+        tryStartSend();
+      } else {
+        onLanOpen();
+      }
+    });
+    c.on('close', function() {
+      var i = conns.indexOf(c);
+      if (i >= 0) conns.splice(i, 1);
+      if (lanRole === 'sender') {
+        updateConnState();
+        if (conns.length === 0) document.getElementById('lanSendProg').style.display = 'none';
+      } else {
+        onLanClose();
+      }
+    });
+    c.on('error', function(e) { lanState('通道错误：' + (e.message || e.type || ''), '#ef4444'); });
+    // 把连接对象传给 onLanMessage：ACK 统计需按连接去重（每台设备只计一次）
+    c.on('data', function(data) { onLanMessage(data, c); });
+  }
+
+  // 发送方：连接状态行（当前已连接 N 台设备）
+  function updateConnState() {
+    var n = conns.length;
+    if (n === 0) {
+      lanConnected = false;
+      lanState('未连接', '#059669');
+    } else {
+      lanConnected = true;
+      lanState(icon('check-circle') + ' 已连接 ' + n + ' 台设备（最多 ' + MAX_LAN_RECEIVERS + ' 台），选好文件即自动发送给全部设备', '#059669');
+    }
+  }
+
+  // 发送方：满足条件（已有未发送设备 + 已勾选文件 + 未在发送中）时自动开始发送
+  function tryStartSend() {
+    if (lanRole !== 'sender' || lanSending || !conns.length) return;
+    if (!lanCheckedCount()) {
+      document.getElementById('lanSendTxt').innerHTML = icon('folder') + ' 请点「选择文件/文件夹」，选好后会自动发送给全部设备';
+      return;
+    }
+    // 只补发"未发送完成"的设备（通常是新接入的），已发送完成的设备绝不重发
+    var hasPending = false;
+    for (var i = 0; i < conns.length; i++) {
+      if (conns[i].open && !conns[i]._sentDone && !conns[i]._sending) { hasPending = true; break; }
+    }
+    if (!hasPending) return;
+    document.getElementById('lanSendProg').style.display = '';
+    sendLanFiles();
+  }
+
+  function onLanOpen() {
+    // 接收方专用：已连接发送方
+    lanConnected = true;
+    document.getElementById('lanGenProg2').style.display = 'none';
+    lanState(icon('check-circle') + ' 已连接，可以开始传输了！', '#059669');
+    document.getElementById('lanRecvProg').style.display = '';
+    lanRecvMeta = null; lanRecvParts = []; lanRecvBytes = 0;
+    document.getElementById('lanRecvFill').style.width = '0%';
+    document.getElementById('lanRecvTxt').textContent = '等待接收…';
+    document.getElementById('lanDoneBox').style.display = 'none';
+  }
+
+  function onLanClose() {
+    if (lanConnected) {
+      lanState('连接已断开', '#ef4444');
+    }
+    lanConnected = false;
+    document.getElementById('lanSendProg').style.display = 'none';
+    document.getElementById('lanRecvProg').style.display = 'none';
+  }
+
+  function lanClose() {
+    clearTimeout(lanAckTimer);
+    conns.forEach(function(c) { try { c.close(); } catch(e) {} });
+    conns = [];
+    if (conn) { try { conn.close(); } catch(e) {} conn = null; }
+    if (peer) { try { peer.destroy(); } catch(e) {} peer = null; }
+    lanConnected = false;
+    lanSending = false;
+    document.getElementById('lanSendProg').style.display = 'none';
+    document.getElementById('lanRecvProg').style.display = 'none';
+    // 失败/取消时也隐藏"正在连接…"进度条，避免卡住
+    document.getElementById('lanGenProg').style.display = 'none';
+    document.getElementById('lanGenProg2').style.display = 'none';
+  }
+
+  // ---- 选择文件/文件夹（为即时传输准备） ----
+  // files: FileList | File[]（按钮选择）或 [{file, path}] 预构建数组（拖拽，绕过 webkitRelativePath 只读限制）
+  // 追加模式：可多次选择/拖拽，内容会累积到已选列表，不会清空上次的选择；
+  // 重复文件（同名 + 同大小 + 同修改时间）自动忽略
+  // prebuilt=true 表示 files 是 [{file, path}]；mixInfo 可选：{dirNames, topFileCount} 混合拖入时的显示信息
+  function applyPickedFiles(files, dirMode, rootName, prebuilt, mixInfo) {
+    if (!files || !files.length) return;
+    var added = 0, dup = 0;
+    for (var i = 0; i < files.length; i++) {
+      var f, rel;
+      if (prebuilt) { f = files[i].file; rel = files[i].path; }
+      else { f = files[i]; rel = dirMode ? (f.webkitRelativePath || f.name) : f.name; }
+      // 去重：同名 + 同大小 + 同修改时间视为重复，自动忽略
+      var isDup = false;
+      for (var j = 0; j < lanFiles.length; j++) {
+        var old = lanFiles[j];
+        if (old.file.name === f.name && old.file.size === f.size && old.file.lastModified === f.lastModified) { isDup = true; break; }
+      }
+      if (isDup) { dup++; continue; }
+      lanFiles.push({ file: f, path: rel, size: f.size, checked: true });
+      lanTotalSize += f.size;
+      added++;
+    }
+    if (!added && dup) {
+      document.getElementById('lanSendTxt').textContent = '选中的内容都已在列表里（' + dup + ' 个重复项已忽略），可继续选择其他内容。';
+      return;
+    }
+    // 只要选择内容中出现过文件夹 → 视为含文件夹，文件夹名记住第一个
+    if (dirMode) {
+      if (!lanDirName) {
+        if (prebuilt) lanDirName = rootName || (mixInfo && mixInfo.dirNames && mixInfo.dirNames[0]) || '文件夹';
+        else lanDirName = rootName || (files[0].webkitRelativePath || '').split('/')[0] || '文件夹';
+      }
+      lanDirMode = true;
+    }
+    lanFileCount = lanFiles.length;
+    renderLanFileList();
+    // 选内容本身不启动即时传输；只有连接成功后才会自动发送
+    if (lanRole === 'sender' && conns.length) {
+      tryStartSend();
+    } else {
+      document.getElementById('lanSendTxt').textContent = '已选择 ' + lanFileCount + ' 个文件（共 ' + fmtSize(lanTotalSize) + '），点「即时传输」生成二维码，对方连接后自动发送。';
+    }
+  }
+
+  // 勾选状态辅助：返回参与传输（已勾选）的文件列表 / 数量 / 总大小
+  function lanCheckedFiles() {
+    var arr = [];
+    for (var i = 0; i < lanFiles.length; i++) if (lanFiles[i].checked !== false) arr.push(lanFiles[i]);
+    return arr;
+  }
+  function lanCheckedCount() {
+    return lanCheckedFiles().length;
+  }
+  function lanCheckedTotalSize() {
+    var arr = lanCheckedFiles(), s = 0;
+    for (var i = 0; i < arr.length; i++) s += arr[i].size;
+    return s;
+  }
+
+  // 已选文件列表：文件夹显示成一行（不展开），单独文件各自一行；
+  // 每行带勾选框（默认全勾选）和移除叉按钮；超出自动滚动
+
+
+  function renderLanFileList() {
+    var el = document.getElementById('lanFileList');
+    if (!el) return;
+    if (!lanFiles.length) { el.style.display = 'none'; el.innerHTML = ''; return; }
+    el.innerHTML = '';
+    // 顶层分组：路径含斜杠的文件按第一段目录名归组，单独文件按原顺序
+    var order = [], dirs = {};   // order: {kind:'dir'|'file', ...}
+    for (var i = 0; i < lanFiles.length; i++) {
+      var it = lanFiles[i];
+      it._idx = i;
+      var seg = it.path.split('/');
+      if (seg.length > 1) {
+        var top = seg[0];
+        if (!dirs[top]) { dirs[top] = { name: top, items: [] }; order.push({ kind: 'dir', dir: dirs[top] }); }
+        dirs[top].items.push(it);
+      } else {
+        order.push({ kind: 'file', item: it });
+      }
+    }
+    for (var k = 0; k < order.length; k++) {
+      var g = order[k];
+      if (g.kind === 'file') {
+        el.appendChild(buildFileRow(g.item, g.item.file.name));
+      } else {
+        el.appendChild(buildDirRow(g.dir.name, g.dir.items));
+      }
+    }
+    el.style.display = 'block';
+  }
+
+  // 单个文件行；displayName 为该文件显示的短名
+  function buildFileRow(item, displayName) {
+    var row = document.createElement('div');
+    row.className = 'file-item' + (item.checked === false ? ' off' : '');
+    row.innerHTML = '<label class="fcheck"><input type="checkbox" ' + (item.checked !== false ? 'checked' : '') + '><span class="fake"></span></label>' +
+      icon('file') +
+      '<span class="fname" title="' + esc(displayName) + '">' + esc(displayName) + '</span>' +
+      '<span class="fsize">' + fmtSize(item.size) + '</span>' +
+      '<button type="button" class="fremove" title="移除">' + icon('x') + '</button>';
+    var cb = row.querySelector('input');
+    cb.addEventListener('change', function() {
+      item.checked = cb.checked;
+      row.classList.toggle('off', !cb.checked);
+      syncAllDirChecks();   // 同步文件夹行的勾选/半选状态
+    });
+    row.querySelector('.fremove').addEventListener('click', function() {
+      lanDoRemove([item]);
+    });
+    return row;
+  }
+
+  // 文件夹行：📁 名字（N 个文件，共 X）+ 整体勾选（含半选）+ 移除；不展开，内部文件合并统计
+  function buildDirRow(name, items) {
+    var row = document.createElement('div');
+    row.className = 'file-item fgroup';
+    var totalSize = 0, checked = 0;
+    for (var i = 0; i < items.length; i++) {
+      totalSize += items[i].size;
+      if (items[i].checked !== false) checked++;
+    }
+    row.innerHTML =
+      '<label class="fcheck"><input type="checkbox" ' + (checked === items.length ? 'checked' : '') + '><span class="fake"></span></label>' +
+      icon('folder') +
+      '<span class="fname" title="' + esc(name) + '">' + esc(name) + '</span>' +
+      '<span class="fsize">' + items.length + ' 个文件，共 ' + fmtSize(totalSize) + '</span>' +
+      '<button type="button" class="fremove" title="移除文件夹">' + icon('x') + '</button>';
+    row._gitems = items;
+    var cb = row.querySelector('input');
+    if (checked > 0 && checked < items.length) cb.indeterminate = true;
+    cb.addEventListener('change', function() {
+      var on = cb.checked;
+      cb.indeterminate = false;
+      for (var j = 0; j < items.length; j++) items[j].checked = on;
+      renderLanFileList();   // 重绘列表（勾选状态保留在数据里）
+    });
+    row.querySelector('.fremove').addEventListener('click', function() {
+      lanDoRemove(items.slice());
+    });
+    return row;
+  }
+
+  // 文件勾选变化后，同步所有文件夹行的勾选/半选状态
+  function syncAllDirChecks() {
+    var listEl = document.getElementById('lanFileList');
+    if (!listEl) return;
+    var rows = listEl.querySelectorAll('.fgroup');
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i], list = row._gitems;
+      if (!list) continue;
+      var gcb = row.querySelector('.fcheck input');
+      var n = 0;
+      for (var j = 0; j < list.length; j++) if (list[j].checked !== false) n++;
+      gcb.checked = n === list.length;
+      gcb.indeterminate = n > 0 && n < list.length;
+    }
+  }
+
+  // ---- 移除已选文件（行末叉按钮） ----
+  function lanDoRemove(removeItems) {
+    if (!removeItems || !removeItems.length) return;
+    var kept = [];
+    lanTotalSize = 0;
+    for (var j = 0; j < lanFiles.length; j++) {
+      var it = lanFiles[j];
+      var shouldRemove = false;
+      for (var i = 0; i < removeItems.length; i++) {
+        if (removeItems[i] === it) { shouldRemove = true; break; }
+      }
+      if (shouldRemove) continue;
+      kept.push(it);
+      lanTotalSize += it.size;
+    }
+    lanFiles = kept;
+    // 重算文件夹标记：列表里还有没有路径含斜杠的项
+    lanDirMode = false; lanDirName = '';
+    for (var k = 0; k < lanFiles.length; k++) {
+      if (lanFiles[k].path.indexOf('/') >= 0) { lanDirMode = true; lanDirName = lanFiles[k].path.split('/')[0]; break; }
+    }
+    lanFileCount = lanFiles.length;
+    document.getElementById('lanSendTxt').textContent = lanFiles.length ? '已移除所选内容，可继续选择或直接传输。' : '已清空已选内容，可重新选择。';
+    renderLanFileList();
+  }
+
+  document.getElementById('lanFileInput').addEventListener('change', function() {
+    applyPickedFiles(this.files, false);
+    this.value = '';
+  });
+  document.getElementById('lanDirInput').addEventListener('change', function() {
+    applyPickedFiles(this.files, true);
+    this.value = '';
+  });
+
+  // ---- 拖拽选择：文件 / 文件夹 / 混合 一次性收下（与轻松传一致） ----
+  // 通过 dataTransfer.items + webkitGetAsEntry() 递归遍历，文件夹保留目录结构
+  var lanDropZone = document.getElementById('lanDropZone');
+  var lanDragDepth = 0;
+  ['dragenter', 'dragover'].forEach(function(ev) {
+    lanDropZone.addEventListener(ev, function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (ev === 'dragenter') lanDragDepth++;
+      lanDropZone.classList.add('dragover');
+    });
+  });
+  ['dragleave', 'drop'].forEach(function(ev) {
+    lanDropZone.addEventListener(ev, function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (ev === 'dragleave' && --lanDragDepth <= 0) { lanDragDepth = 0; lanDropZone.classList.remove('dragover'); }
+      if (ev === 'drop') { lanDragDepth = 0; lanDropZone.classList.remove('dragover'); handleLanDrop(e); }
+    });
+  });
+  // 点击拖拽区空白处 → 弹出选择文件/文件夹菜单（点文件列表内不触发）
+  lanDropZone.addEventListener('click', function(e) {
+    if (e.target.closest && e.target.closest('#lanFileList')) return;
+    showPickMenu();
+  });
+
+  function handleLanDrop(e) {
+    var dt = e.dataTransfer;
+    if (!dt) return;
+    // 超大目录遍历可能较慢，先显示读取提示
+    lanState('正在读取拖入的文件列表…', '#2563eb');
+    collectDropped(dt, function(items, hasDir, rootName, mixInfo) {
+      if (!items || !items.length) { lanState('拖入的内容中没有可发送的文件', '#d97706'); return; }
+      applyPickedFiles(items, hasDir, rootName, true, mixInfo);
+    });
+  }
+
+  // 递归遍历拖入内容；优先用 entry 接口（支持文件夹），否则回退到纯文件
+  // 返回预构建的 [{file, path}] 数组（path 已含目录结构，不依赖 webkitRelativePath）
+  function collectDropped(dt, done) {
+    var items = dt.items;
+    var out = [];
+    var hasDir = false;
+    var dirNames = [];
+    var topFileCount = 0;
+    if (!items || !items.length || !items[0].webkitGetAsEntry) {
+      var fs = dt.files || [];
+      for (var k = 0; k < fs.length; k++) out.push({ file: fs[k], path: fs[k].name });
+      done(out, false, '', null);
+      return;
+    }
+    var pending = 0;
+    function oneDone() { if (--pending === 0) done(out, hasDir, dirNames[0] || '', { dirNames: dirNames, topFileCount: topFileCount }); }
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i];
+      if (it.kind !== 'file') continue;
+      var entry = it.webkitGetAsEntry();
+      if (!entry) continue;
+      pending++;
+      if (entry.isDirectory) {
+        hasDir = true;
+        dirNames.push(entry.name);
+        walkDirEntry(entry, entry.name, out, oneDone);
+      } else {
+        topFileCount++;
+        (function(en) {
+          en.file(function(f) { out.push({ file: f, path: f.name }); oneDone(); }, function() { oneDone(); });
+        })(entry);
+      }
+    }
+    if (pending === 0) done([], false, '', null);
+  }
+
+  function walkDirEntry(entry, base, out, done) {
+    var reader = entry.createReader();
+    (function readBatch() {
+      reader.readEntries(function(entries) {
+        if (!entries.length) { done(); return; }
+        var remaining = entries.length;
+        entries.forEach(function(e) {
+          var p = base ? base + '/' + e.name : e.name;
+          if (e.isDirectory) {
+            walkDirEntry(e, p, out, function() { if (--remaining === 0) readBatch(); });
+          } else {
+            e.file(function(f) {
+              out.push({ file: f, path: p });
+              if (--remaining === 0) readBatch();
+            }, function() { if (--remaining === 0) readBatch(); });
+          }
+        });
+      }, function() { done(); });
+    })();
+  }
+
+  // 阻止拖到页面其它区域时浏览器直接打开文件（仅当拖入内容含文件时阻止，避免影响文本输入框拖入文本）
+  ['dragover', 'drop'].forEach(function(ev) {
+    window.addEventListener(ev, function(e) {
+      if (e.target === lanDropZone || lanDropZone.contains(e.target)) return;
+      var types = e.dataTransfer && e.dataTransfer.types;
+      if (types && (Array.prototype.indexOf.call(types, 'Files') >= 0 || Array.prototype.indexOf.call(types, 'application/x-moz-file') >= 0)) {
+        e.preventDefault();
+      }
+    });
+  });
+
+  // ===================== 发送：只处理"未发送完成"的设备 =====================
+  // 关键：新设备接入时只补发给新设备，已发送完成的设备绝不重发（否则重复接收 + ACK 计数错乱）
+  async function sendLanFiles() {
+    var files = lanCheckedFiles();
+    if (!files.length) { lanState(icon('alert') + ' 请先勾选要传输的文件（默认全部勾选）', '#d97706'); return; }
+    var targets = [];
+    for (var t = 0; t < conns.length; t++) {
+      var c0 = conns[t];
+      if (c0 && c0.open && !c0._sentDone && !c0._sending) targets.push(c0);
+    }
+    if (!targets.length) { lanSending = false; tryStartSend(); return; }
+    lanSending = true;
+    lanSendCancelled = false;
+    var fill = document.getElementById('lanSendFill'), txt = document.getElementById('lanSendTxt');
+    fill.style.width = '0%';
+    var okCount = 0, failCount = 0;
+    for (var d = 0; d < targets.length; d++) {
+      var c = targets[d];
+      if (!c || !c.open) { failCount++; continue; }
+      c._sending = true;
+      try {
+        for (var i = 0; i < files.length; i++) {
+          if (lanSendCancelled) return;
+          var item = files[i];
+          c.send(JSON.stringify({ t: 'meta', index: i, total: files.length, name: item.file.name, path: item.path, size: item.size, hash: 'n/a' }));
+          await sendOneFile(item.file, c, d, targets.length);
+          c.send(JSON.stringify({ t: 'done' }));
+        }
+        c._sentDone = true;
+        okCount++;
+      } catch(e) {
+        failCount++;
+        txt.textContent = '设备 ' + (d + 1) + ' 发送失败：' + e.message + '（跳过，继续发送其他设备）';
+      } finally {
+        c._sending = false;
+      }
+    }
+    lanSending = false;
+    // 累计本次新增已发送完成的设备数；lanAckOk/lanAckFail 只增不减（每台设备只确认一次）
+    lanTargetCount += okCount;
+    clearTimeout(lanAckTimer);
+    if (okCount > 0) {
+      txt.innerHTML = icon('signal') + ' 已发送完毕，等待设备确认接收… ' + lanAckOk + '/' + lanTargetCount;
+      if (failCount > 0) txt.innerHTML += '<br>' + icon('alert') + ' ' + failCount + ' 台设备发送中断（未参与本次传输）';
+      // 兜底：若部分设备一直不回执（异常/已关闭页面），超时后如实提示
+      lanAckTimer = setTimeout(function() {
+        if (lanAckOk + lanAckFail < lanTargetCount) {
+          document.getElementById('lanSendTxt').innerHTML = icon('alert') + ' 发送完毕：' + lanAckOk + '/' + lanTargetCount + ' 台设备确认接收完成，其余未确认（可能已断开或关闭页面）';
+        }
+      }, 30000);
+    } else {
+      txt.innerHTML = icon('alert') + ' 全部设备发送中断，未完成';
+    }
+    // 发送期间可能又有新设备接入：自动续发给它们（已完成的设备会被跳过）
+    tryStartSend();
+  }
+
+  // 流式发送单个文件给指定设备：边读边发，大文件不整体读入内存（否则 5GB+ 文件会卡死崩溃）
+  async function sendOneFile(file, c, devIdx, devCount) {
+    var reader = file.stream().getReader();
+    var pending = null;      // 已读入但尚未发完的剩余数据
+    var sent = 0;
+    var fill = document.getElementById('lanSendFill'), txt = document.getElementById('lanSendTxt');
+    while (true) {
+      if (lanSendCancelled) return;
+      if (!pending || pending.length === 0) {
+        var r = await reader.read();
+        if (r.done) break;
+        pending = new Uint8Array(r.value);
+      }
+      var part = pending.slice(0, LAN_CHUNK);
+      pending = pending.subarray(LAN_CHUNK);
+      await lanSendWait(c);
+      if (!c.open) throw new Error('通道已断开');
+      c.send(part.buffer.slice(part.byteOffset, part.byteOffset + part.byteLength));
+      sent += part.byteLength;
+      var pct = Math.round(sent / file.size * 100);
+      fill.style.width = pct + '%';
+      txt.textContent = '发送给设备 ' + (devIdx + 1) + '/' + devCount + '：' + file.name + ' ' + fmtSize(sent) + ' / ' + fmtSize(file.size) + '（' + pct + '%）';
+    }
+  }
+
+  function lanSendWait(c) {
+    // PeerJS 的 DataConnection 不直接暴露 bufferedAmount，走底层 RTCDataChannel（dataChannel）
+    var dc = (c && c.dataChannel) ? c.dataChannel : c;
+    if (!dc || !dc.bufferedAmount || dc.bufferedAmount < 4*1024*1024) return Promise.resolve();
+    return new Promise(function(resolve) {
+      dc.bufferedAmountLowThreshold = 1024*1024;
+      var handler = function() { dc.removeEventListener('bufferedamountlow', handler); resolve(); };
+      dc.addEventListener('bufferedamountlow', handler);
+    });
+  }
+
+  // ---- 接收文件 ----
+  function onLanMessage(data, c) {
+    if (typeof data === 'string') {
+      var m;
+      try { m = JSON.parse(data); } catch(e) { return; }
+      if (m.t === 'meta') {
+        lanRecvMeta = m;
+        lanRecvParts = [];
+        lanRecvBytes = 0;
+        lanRecvFileTotal = m.total || 1;
+        lanRecvFileIndex = m.index || 0;
+        document.getElementById('lanRecvFill').style.width = '0%';
+        // 收到新文件时隐藏上一个文件的"接收完成"框
+        document.getElementById('lanDoneBox').style.display = 'none';
+        var fname = (m.path || m.name).replace(/\//g, '_');
+        if (lanRecvFileTotal > 1) {
+          document.getElementById('lanRecvTxt').textContent = '接收中 ' + (lanRecvFileIndex + 1) + '/' + lanRecvFileTotal + '：' + fname + '（' + fmtSize(m.size) + '）' + (m.size > 512*1024*1024 ? '　' + icon('alert') + ' 大文件接收中，请确保设备内存充足、不要关闭页面' : '');
+        } else {
+          document.getElementById('lanRecvTxt').textContent = '开始接收：' + m.name + '（' + fmtSize(m.size) + '）' + (m.size > 512*1024*1024 ? '　' + icon('alert') + ' 大文件接收中，请确保设备内存充足、不要关闭页面' : '');
+        }
+      } else if (m.t === 'done') {
+        lanAssemble();
+      } else if (m.t === 'ack') {
+        // 发送方：某台设备已完整接收，统计回执（按连接去重，每台只计一次）
+        if (lanRole === 'sender') lanOnAck(m.ok, c);
+      } else if (m.t === 'full') {
+        // 接收方：发送方已达最大连接数
+        lanState(icon('alert') + ' 发送方已达最大连接数，本次无法接收', '#ef4444');
+        document.getElementById('lanRecvTxt').innerHTML = icon('alert') + ' 发送方已达最大连接数（' + MAX_LAN_RECEIVERS + ' 台），暂时无法接收，请稍后再试';
+      }
+      return;
+    }
+    if (!lanRecvMeta) return;
+    lanRecvParts.push(new Uint8Array(data));
+    lanRecvBytes += data.byteLength;
+    var pct = Math.round(lanRecvBytes / lanRecvMeta.size * 100);
+    if (pct > 100) pct = 100;
+    document.getElementById('lanRecvFill').style.width = pct + '%';
+    if (lanRecvFileTotal > 1) {
+      var fname2 = (lanRecvMeta.path || lanRecvMeta.name).replace(/\//g, '_');
+      document.getElementById('lanRecvTxt').textContent = '接收中 ' + (lanRecvFileIndex + 1) + '/' + lanRecvFileTotal + '：' + fname2 + ' ' + fmtSize(lanRecvBytes) + ' / ' + fmtSize(lanRecvMeta.size) + '（' + pct + '%）';
+    } else {
+      document.getElementById('lanRecvTxt').textContent = '接收中 ' + fmtSize(lanRecvBytes) + ' / ' + fmtSize(lanRecvMeta.size) + '（' + pct + '%）';
+    }
+  }
+
+  // ---- 接收完成回执（ACK）----
+  // 接收方：数据完整到达（组装成功/已保存）后回发 ack，让发送方知道"确实收完了"
+  function sendAck(ok) {
+    try {
+      if (conn && conn.open) conn.send(JSON.stringify({ t: 'ack', ok: ok }));
+    } catch(e) {}
+  }
+
+  // 发送方：收到 ack 后更新确认统计（同一连接只计一次）
+  function lanOnAck(ok, c) {
+    if (c && c._ackDone) return;
+    if (c) c._ackDone = true;
+    if (ok) lanAckOk++; else lanAckFail++;
+    updateSendAckStatus();
+  }
+
+  function updateSendAckStatus() {
+    var txt = document.getElementById('lanSendTxt');
+    if (!lanTargetCount) return;
+    if (lanAckOk + lanAckFail >= lanTargetCount) {
+      clearTimeout(lanAckTimer);
+      txt.innerHTML = lanAckFail > 0
+        ? icon('alert') + ' ' + lanAckOk + '/' + lanTargetCount + ' 台设备确认接收完成，' + lanAckFail + ' 台设备接收异常'
+        : icon('check-circle') + ' 全部 ' + lanTargetCount + ' 台设备已确认接收完成！';
+    } else {
+      txt.innerHTML = icon('signal') + ' 已发送完毕，等待设备确认接收… ' + lanAckOk + '/' + lanTargetCount;
+    }
+  }
+
+  // 最近一次接收到的文件，供「保存文件」按钮再次保存/换位置保存
+  var lanLastRecv = null;
+
+  async function lanAssemble() {
+    var doneBox = document.getElementById('lanDoneBox');
+    doneBox.style.display = 'block';
+    doneBox.textContent = '正在重组文件…';
+    try {
+      var len = 0, i;
+      for (i = 0; i < lanRecvParts.length; i++) len += lanRecvParts[i].length;
+      var merged = new Uint8Array(len);
+      var off = 0;
+      for (i = 0; i < lanRecvParts.length; i++) { merged.set(lanRecvParts[i], off); off += lanRecvParts[i].length; }
+      var ok = true;
+      if (lanRecvMeta.hash && lanRecvMeta.hash !== 'n/a' && window.crypto && crypto.subtle) {
+        var h = await sha256B64(merged);
+        ok = h === lanRecvMeta.hash;
+      }
+      var name = lanRecvMeta.name, size = fmtSize(merged.length);
+      if (!ok) {
+        lanLastRecv = { name: name, bytes: merged };
+        sendAck(false); // 告知发送方：该校验失败，未完整接收
+        doneBox.innerHTML = icon('alert') + ' <b>校验失败</b>：文件可能不完整，请点下方按钮重新保存。' +
+          '<br><button class="btn" style="margin-top:8px" onclick="saveRecvFileAgain()">' + icon('receive') + ' 保存文件</button>';
+        return;
+      }
+      // 多文件（文件夹传输）：逐个保存——桌面自动逐个下载，手机/内置浏览器逐个提示保存
+      if ((lanRecvMeta.total || 1) > 1) {
+        var fname = (lanRecvMeta.path || lanRecvMeta.name).replace(/\//g, '_');
+        var cur = (lanRecvMeta.index || 0) + 1, tot = lanRecvMeta.total;
+        if (isMobileEnv || isInAppBrowser) {
+          finishRecv(fname, merged, false);
+          document.getElementById('lanRecvTxt').innerHTML = icon('folder-open') + ' 第 ' + cur + '/' + tot + ' 个文件已就绪：' + fname + '，请点上方「保存文件」下载';
+          if (cur >= tot) sendAck(true); // 全部文件已接收完整
+        } else {
+          try { downloadBlob(merged, fname); } catch(e) {}
+          var rt = document.getElementById('lanRecvTxt');
+          if (cur >= tot) {
+            rt.innerHTML = icon('check-circle') + ' 文件夹接收完成：共 ' + tot + ' 个文件，已全部自动下载';
+            lanState(icon('check-circle') + ' 文件夹接收完成：共 ' + tot + ' 个文件', '#059669');
+            sendAck(true); // 全部文件已接收完整
+          } else {
+            rt.innerHTML = icon('folder-open') + ' 已接收 ' + cur + '/' + tot + '：' + fname + '（自动下载中…）';
+          }
+        }
+        return;
+      }
+      // 1) 手机/鸿蒙/微信/QQ 内置浏览器：不自动下载（iOS/鸿蒙/微信会拦截非手势触发的下载、或弹"暂无可用打开方式"）
+      if (isMobileEnv || isInAppBrowser) {
+        finishRecv(name, merged, false);
+        sendAck(true);
+        return;
+      }
+      // 3) 桌面：自动下载到默认目录，同时提供「保存文件」按钮可选位置
+      try { downloadBlob(merged, name); } catch(e) {}
+      finishRecv(name, merged, true);
+      sendAck(true);
+    } catch(e) {
+      sendAck(false); // 重组失败，告知发送方未完整接收
+      doneBox.innerHTML = icon('x-circle') + ' 重组失败：' + esc(e.message);
+    }
+  }
+
+  function finishRecv(name, bytes, downloaded) {
+    setRecvDone(document.getElementById('lanDoneBox'), name, bytes, downloaded);
+  }
+
+  // 当前活跃的「接收完成」结果框
+  var currentDoneBox = null;
+
+  // 共用保存流程：显示完成框 + 「保存文件」按钮（保存逻辑见 saveRecvFileAgain）
+  function setRecvDone(doneBox, name, bytes, downloaded) {
+    doneBox.style.display = 'block';
+    lanLastRecv = { name: name, bytes: bytes };
+    currentDoneBox = doneBox;
+    var tip;
+    if (isInAppBrowser) {
+      // 微信/QQ/钉钉内置浏览器：无法直接下载，必须引导到系统浏览器
+      tip = '' + icon('alert') + ' 当前是在' + (/MicroMessenger/.test(UA) ? '微信' : /QQ\//.test(UA) ? 'QQ' : /DingTalk/.test(UA) ? '钉钉' : '应用') + '内置浏览器中打开，' +
+            '内置浏览器无法保存文件。<br>' + icon('arrow-right') + ' 请点击右上角「<b>···</b>」菜单，选择「<b>在浏览器打开</b>」（或「用其他应用打开」→「浏览器」），' +
+            '在系统浏览器里打开后再点下方「保存文件」即可正常保存。';
+    } else if (isMobileEnv) {
+      tip = '点下方「' + icon('receive') + ' 保存文件」即可下载到手机，保存位置由浏览器决定。';
+    } else if (downloaded) {
+      tip = '已自动下载到浏览器默认下载目录。';
+    } else {
+      tip = '点下方「' + icon('receive') + ' 保存文件」选择保存位置。';
+    }
+    // 桌面端接收完成已自动下载，无需再点按钮；手机/微信需用户手势才能保存，保留按钮
+    var showBtn = !downloaded || isMobileEnv || isInAppBrowser;
+    doneBox.innerHTML = icon('check-circle') + ' <b>接收完成</b>：' + esc(name) + '（' + fmtSize(bytes.length) + '）<br>' + tip +
+      (showBtn ? '<br><button class="btn" style="margin-top:8px" onclick="saveRecvFileAgain()">' + icon('receive') + ' 保存文件</button>' : '');
+  }
+
+  // 「保存文件」按钮：直接触发下载（用户手势点击，浏览器不会拦截）
+  window.saveRecvFileAgain = function() {
+    if (!lanLastRecv) return;
+    var name = lanLastRecv.name, bytes = lanLastRecv.bytes;
+    var doneBox = currentDoneBox || document.getElementById('lanDoneBox');
+
+    // 微信/QQ 内置浏览器再次提示用系统浏览器打开
+    if (isInAppBrowser) {
+      doneBox.innerHTML = doneBox.innerHTML.replace(/^[^<]+/, function() {
+        return icon('arrow-right') + ' 请先点击右上角<b>···</b> → <b>在浏览器打开</b>，用系统浏览器打开后再点此按钮保存。';
+      });
+      return;
+    }
+
+    // 直接下载：用户手势点击不会被拦截，保存位置由系统/浏览器决定
+    try {
+      downloadBlob(bytes, name);
+      doneBox.innerHTML = icon('check-circle') + ' <b>已开始下载</b>：' + esc(name) + '（' + fmtSize(bytes.length) + '），' +
+        (isMobileEnv ? '请到通知栏或浏览器下载列表查看。' : '请在浏览器下载列表查看。');
+    } catch(e) {
+      doneBox.innerHTML = icon('x-circle') + ' 保存失败：' + esc(e.message) + '。请长按/右键页面后在浏览器中重新打开。';
+    }
+  };
+
+  // 通用复制：带按钮视觉反馈
+  function copyText(text, btn, okTxt) {
+    var ok = false;
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+    } catch(e) {}
+    function flash() {
+      if (!btn) return;
+      var t = btn.textContent;
+      btn.textContent = okTxt;
+      btn.classList.add('copied');
+      setTimeout(function(){ btn.textContent = t; btn.classList.remove('copied'); }, 1400);
+    }
+    if (!ok && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(flash).catch(function(){});
+      return;
+    }
+    if (ok) flash();
+  }
+
+  // ===================== 扫码/链接自动进入 =====================
+  // ?r= 即时传输配对码
+  (function() {
+    var r = '';
+    try {
+      var sp = new URLSearchParams(location.search);
+      r = (sp.get('r') || '').trim();
+    } catch(e) {
+      r = (location.search.match(/[?&]r=([^&]+)/) || [])[1] || '';
+    }
+    if (!r) return;
+    // 微信/QQ内浏览器：显示遮罩提示跳转浏览器
+    if (isInAppBrowser) {
+      showInappOverlay();
+      return;
+    }
+    pendingJoinCode = r.toUpperCase();
+    switchLanRole('receiver');
+    lanState(icon('phone') + ' 已通过扫码/链接打开，点「扫描接收」接收文件', '#059669');
+    showJoinModal(pendingJoinCode);
+  })();
+
+  // ?f= 中转提取码：扫码/点链接打开时自动切到接收方并执行提取
+  (function() {
+    var f = '';
+    try { f = new URLSearchParams(location.search).get('f') || ''; } catch(e) { f = (location.search.match(/[?&]f=([^&]+)/) || [])[1] || ''; }
+    if (!f) return;
+    if (isInAppBrowser) {
+      showInappOverlay();
+      return;
+    }
+    switchLanRole('receiver');
+    // 展开提取码面板并自动填入执行提取
+    var panel = document.getElementById('relayExtractPanel');
+    panel.style.display = 'flex';
+    document.getElementById('relayTabBtn').classList.add('active');
+    document.getElementById('relayCodeInput').value = f;
+    relayExtract();
+  })();
+
+  // ===================== 工具箱：工具切换 =====================
+  window.switchTool = function(name) {
+    var views = { file:'view-file', img:'view-img', media:'view-media', pdf:'view-pdf' };
+    var viewId = views[name];
+    if (!viewId) return;
+    // 切换视图
+    document.querySelectorAll('.tool-view').forEach(function(v) { v.classList.remove('active'); });
+    var el = document.getElementById(viewId);
+    if (el) el.classList.add('active');
+    // 高亮工具卡片
+    document.querySelectorAll('.tool-card').forEach(function(c) { c.classList.remove('active'); });
+    var cards = document.querySelectorAll('.tool-card');
+    for (var i = 0; i < cards.length; i++) {
+      if (cards[i].getAttribute('onclick').indexOf("'" + name + "'") >= 0) { cards[i].classList.add('active'); break; }
+    }
+    // 离开文件传输工具时断开 P2P 连接，避免后台耗资源
+    if (name !== 'file') lanClose();
+  };
+
+  // 图片工具：子功能切换（压缩 / 背景更换 / 水印去除）
+  window.imgTab = function(name) {
+    document.querySelectorAll('#view-img .sub-tab').forEach(function(t) {
+      t.classList.toggle('active', t.getAttribute('data-tab') === name);
+    });
+    ['c', 'm'].forEach(function(k) {
+      var el = document.getElementById('imgSub-' + k);
+      if (el) el.style.display = k === name ? '' : 'none';
+    });
+  };
+
+  // 多媒体工具：子功能切换（提取音频 / 录音录屏 / 播放中心 / 格式转换）
+  window.mediaTab = function(name) {
+    document.querySelectorAll('#view-media .sub-tab').forEach(function(t) {
+      t.classList.toggle('active', t.getAttribute('data-tab') === name);
+    });
+    ['a', 'b', 'c', 'd'].forEach(function(k) {
+      var el = document.getElementById('mediaSub-' + k);
+      if (el) el.style.display = k === name ? '' : 'none';
+    });
+    // 播放中心时：隐藏其他工具和使用须知，iframe 全宽
+    var wrap = document.querySelector('.wrap');
+    if (wrap) wrap.style.maxWidth = name === 'c' ? 'none' : '';
+    var vm = document.getElementById('view-media');
+    if (vm) vm.classList.toggle('c-mode', name === 'c');
+    if (wrap) wrap.classList.toggle('tv-mode', name === 'c');
+    ['view-file', 'view-img', 'view-pdf'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.style.display = name === 'c' ? 'none' : '';
+    });
+    var usage = document.querySelector('.tips-box');
+    if (usage) usage.style.display = name === 'c' ? 'none' : '';
+    var toolCards = document.querySelectorAll('.tool-grid,.tool-card');
+    toolCards.forEach(function(c) { c.style.display = name === 'c' ? 'none' : ''; });
+    if (name === 'c') { setTimeout(syncIptvFrame, 50); }
+  };
+
+  // ===================== 播放中心 iframe 高度同步 =====================
+  // 移动端：iframe 高度跟随内部内容，外层页面统一滚动，避免“套娃滚动条”
+  // 桌面端：保持 100% 撑满面板（c-mode 布局）
+  function syncIptvFrame() {
+    var f = document.getElementById('iptvFrame');
+    if (!f) return;
+    var mobile = window.innerWidth < 821;
+    f.style.height = 'auto';
+    if (mobile && f.contentDocument && f.contentDocument.documentElement) {
+      var h = f.contentDocument.documentElement.scrollHeight;
+      if (h > 0) f.style.height = h + 'px';
+    } else {
+      f.style.height = '100%';
+    }
+  }
+  var iptvFrame = document.getElementById('iptvFrame');
+  if (iptvFrame) {
+    iptvFrame.addEventListener('load', function() { setTimeout(syncIptvFrame, 100); });
+  }
+  window.addEventListener('resize', syncIptvFrame);
+
+  // ===================== PDF 工具（合并 / 拆分，纯本地 pdf-lib） =====================
+  // 子功能切换
+  window.pdfTab = function(name) {
+    document.querySelectorAll('#view-pdf .sub-tab').forEach(function(t) {
+      t.classList.toggle('active', t.getAttribute('data-tab') === name);
+    });
+    ['merge', 'split'].forEach(function(k) {
+      var el = document.getElementById('pdfSub-' + k);
+      if (el) el.style.display = k === name ? '' : 'none';
+    });
+  };
+
+  // 按需加载 CDN 脚本（pdf-lib / jszip）
+  function pdfLoadScript(src) {
+    return new Promise(function(resolve, reject) {
+      var s = document.createElement('script');
+      s.src = src;
+      s.onload = resolve;
+      s.onerror = function() { reject(new Error('加载 ' + src + ' 失败，请检查网络后重试')); };
+      document.head.appendChild(s);
+    });
+  }
+  var pdfLibPromise = null;
+  function pdfLibReady() {
+    if (window.PDFLib) return Promise.resolve();
+    if (!pdfLibPromise) {
+      pdfLibPromise = pdfLoadScript('../assets/vendor/pdf-lib.min.js').catch(function(e) { pdfLibPromise = null; throw e; });
+    }
+    return pdfLibPromise;
+  }
+  var jszipPromise = null;
+  function jszipReady() {
+    if (window.JSZip) return Promise.resolve();
+    if (!jszipPromise) {
+      jszipPromise = pdfLoadScript('../assets/vendor/jszip.min.js').catch(function(e) { jszipPromise = null; throw e; });
+    }
+    return jszipPromise;
+  }
+
+  function pdfState(elId, msg) {
+    var el = document.getElementById(elId);
+    if (el) { el.style.display = ''; el.innerHTML = msg; }
+  }
+
+  // ---------- 合并 PDF ----------
+  var pdfmFiles = [];
+  var pdfmDragFrom = null;
+  document.getElementById('pdfmInput').addEventListener('change', function() {
+    var files = this.files ? Array.prototype.slice.call(this.files) : [];
+    this.value = '';
+    pdfmAdd(files);
+  });
+  var pdfmDrop = document.getElementById('pdfmDrop');
+  ['dragenter', 'dragover'].forEach(function(ev) {
+    pdfmDrop.addEventListener(ev, function(e) { e.preventDefault(); e.stopPropagation(); pdfmDrop.classList.add('dragover'); });
+  });
+  ['dragleave', 'drop'].forEach(function(ev) {
+    pdfmDrop.addEventListener(ev, function(e) {
+      e.preventDefault(); e.stopPropagation();
+      pdfmDrop.classList.remove('dragover');
+      if (ev === 'drop' && e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) pdfmAdd(Array.prototype.slice.call(e.dataTransfer.files));
+    });
+  });
+  document.getElementById('pdfmList').addEventListener('click', function(e) { e.stopPropagation(); });
+
+  function pdfIsPdf(f) {
+    return /\.pdf$/i.test(f.name) || /^application\/pdf$/i.test(f.type);
+  }
+  function pdfmAdd(files) {
+    var added = 0, dup = 0, bad = 0;
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      if (!pdfIsPdf(f)) { bad++; continue; }
+      var isDup = false;
+      for (var j = 0; j < pdfmFiles.length; j++) {
+        var o = pdfmFiles[j].file;
+        if (o.name === f.name && o.size === f.size && o.lastModified === f.lastModified) { isDup = true; break; }
+      }
+      if (isDup) { dup++; continue; }
+      pdfmFiles.push({ file: f, checked: true });
+      added++;
+    }
+    var msg = '';
+    if (added) msg = '已添加 ' + added + ' 个 PDF（共 ' + pdfmFiles.length + ' 个），顺序即合并顺序，可拖拽调整。';
+    else if (dup) msg = '重复的 PDF 已忽略。';
+    if (bad && !added) msg = (msg ? msg + ' ' : '') + '非 PDF 文件已忽略。';
+    pdfmRender(msg);
+  }
+
+  function pdfmRender(msg) {
+    var list = document.getElementById('pdfmList');
+    var hint = document.getElementById('pdfmHint');
+    var clrBtn = document.getElementById('pdfmClearBtn');
+    if (!pdfmFiles.length) { list.innerHTML = ''; list.style.display = 'none'; hint.style.display = ''; if (clrBtn) clrBtn.style.display = 'none'; return; }
+    hint.style.display = 'none';
+    if (clrBtn) clrBtn.style.display = '';
+    list.innerHTML = '';
+    for (var i = 0; i < pdfmFiles.length; i++) {
+      (function(idx) {
+        var it = pdfmFiles[idx];
+        var f = it.file;
+        var row = document.createElement('div');
+        row.className = 'file-item' + (it.checked === false ? ' off' : '');
+        row.draggable = true;
+        row.innerHTML =
+          '<span class="fcheck"><input type="checkbox" ' + (it.checked !== false ? 'checked' : '') + '><span class="fake"></span></span>' +
+          '<span class="fseq" style="min-width:20px;text-align:center;font-size:12px;color:#9ca3af">' + (idx + 1) + '</span>' +
+          '<svg class="icon" viewBox="0 0 24 24"><use href="#icon-pdf"></use></svg>' +
+          '<span class="fname" title="' + esc(f.name) + '">' + esc(f.name) + '</span>' +
+          '<span class="fsize">' + fmtSize(f.size) + '</span>' +
+          '<button type="button" class="fremove" title="移除">' + icon('x') + '</button>';
+        var cb = row.querySelector('input');
+        cb.addEventListener('change', function() {
+          it.checked = cb.checked;
+          row.classList.toggle('off', !cb.checked);
+        });
+        row.querySelector('.fremove').addEventListener('click', function(e) { e.stopPropagation(); pdfmRemove(idx); });
+        row.addEventListener('dragstart', function(e) {
+          pdfmDragFrom = idx;
+          row.classList.add('dragging');
+          try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(idx)); } catch(err) {}
+        });
+        row.addEventListener('dragend', function() { row.classList.remove('dragging'); });
+        row.addEventListener('dragover', function(e) {
+          if (pdfmDragFrom === null || pdfmDragFrom === idx) return;
+          e.preventDefault();
+          row.classList.add('drop-target');
+        });
+        row.addEventListener('dragleave', function() { row.classList.remove('drop-target'); });
+        row.addEventListener('drop', function(e) {
+          e.preventDefault();
+          row.classList.remove('drop-target');
+          if (pdfmDragFrom !== null) pdfmMove(pdfmDragFrom, idx);
+          pdfmDragFrom = null;
+        });
+        list.appendChild(row);
+      })(i);
+    }
+    if (msg) {
+      var tip = document.createElement('div');
+      tip.style.cssText = 'font-size:12px;color:#059669;margin-top:4px;padding:0 4px';
+      tip.textContent = msg;
+      list.insertBefore(tip, list.firstChild);
+    }
+    list.style.display = 'block';
+  }
+
+  window.pdfmRemove = function(idx) {
+    if (idx < 0 || idx >= pdfmFiles.length) return;
+    pdfmFiles.splice(idx, 1);
+    pdfmRender();
+  };
+  function pdfmMove(from, to) {
+    if (from === to || from < 0 || to < 0 || from >= pdfmFiles.length || to >= pdfmFiles.length) return;
+    var f = pdfmFiles.splice(from, 1)[0];
+    pdfmFiles.splice(to, 0, f);
+    pdfmRender();
+  }
+  window.pdfmClear = function() {
+    pdfmFiles = [];
+    pdfmRender();
+    document.getElementById('pdfmState').style.display = 'none';
+  };
+
+  window.pdfmGo = function() {
+    var todo = pdfmFiles.filter(function(it) { return it.checked !== false; });
+    if (!todo.length) { pdfState('pdfmState', icon('alert') + ' 请先选择 PDF 文件'); return; }
+    pdfState('pdfmState', icon('refresh', 'spin') + ' 正在加载处理引擎…');
+    pdfLibReady().then(function() {
+      var PDFDocument = window.PDFLib.PDFDocument;
+      return PDFDocument.create().then(function(mergedDoc) {
+        var chain = Promise.resolve();
+        todo.forEach(function(it, n) {
+          chain = chain.then(function() {
+            pdfState('pdfmState', icon('refresh', 'spin') + ' 合并中（' + (n + 1) + '/' + todo.length + '）：' + esc(it.file.name));
+            return it.file.arrayBuffer();
+          }).then(function(buf) {
+            return PDFDocument.load(buf, { ignoreEncryption: true }).catch(function() {
+              return PDFDocument.load(buf);
+            });
+          }).then(function(src) {
+            return mergedDoc.copyPages(src, src.getPageIndices()).then(function(ps) {
+              ps.forEach(function(p) { mergedDoc.addPage(p); });
+            });
+          });
+        });
+        return chain.then(function() { return mergedDoc; });
+      });
+    }).then(function(mergedDoc) {
+      pdfmMergedDoc = mergedDoc;
+      pdfState('pdfmState', icon('refresh', 'spin') + ' 正在生成文件…');
+      return pdfmFinalSave();
+    }).catch(function(e) {
+      pdfState('pdfmState', icon('alert') + ' 合并失败：' + (e && e.message ? e.message : '未知错误'));
+    });
+  };
+  var pdfmMergedDoc = null;
+  function pdfmFinalSave() {
+    return pdfmMergedDoc.save().then(function(bytes) {
+      var blob = new Blob([bytes], { type: 'application/pdf' });
+      var d = new Date();
+      var name = '合并_' + d.getFullYear() + (d.getMonth() + 1) + d.getDate() + '.pdf';
+      if (isInAppBrowser) { showInappOverlay(); return; }
+      downloadBlob(blob, name);
+      pdfState('pdfmState', icon('check-circle') + ' 合并完成，已下载：' + name + '（' + fmtSize(blob.size) + '）');
+    });
+  }
+
+  // ---------- 拆分 PDF ----------
+  var pdfsFiles = [];
+  document.getElementById('pdfsInput').addEventListener('change', function() {
+    var files = this.files ? Array.prototype.slice.call(this.files) : [];
+    this.value = '';
+    pdfsAdd(files);
+  });
+  var pdfsDrop = document.getElementById('pdfsDrop');
+  ['dragenter', 'dragover'].forEach(function(ev) {
+    pdfsDrop.addEventListener(ev, function(e) { e.preventDefault(); e.stopPropagation(); pdfsDrop.classList.add('dragover'); });
+  });
+  ['dragleave', 'drop'].forEach(function(ev) {
+    pdfsDrop.addEventListener(ev, function(e) {
+      e.preventDefault(); e.stopPropagation();
+      pdfsDrop.classList.remove('dragover');
+      if (ev === 'drop' && e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) pdfsAdd(Array.prototype.slice.call(e.dataTransfer.files));
+    });
+  });
+  document.getElementById('pdfsList').addEventListener('click', function(e) { e.stopPropagation(); });
+
+  window.pdfsModeSet = function() {
+    var row = document.getElementById('pdfsRangeRow');
+    row.style.display = document.getElementById('pdfsMode').value === 'range' ? '' : 'none';
+  };
+
+  function pdfsAdd(files) {
+    var bad = 0;
+    for (var i = 0; i < files.length; i++) {
+      if (!pdfIsPdf(files[i])) { bad++; continue; }
+      pdfsFiles = [files[i]];
+      break;
+    }
+    pdfsRender(bad ? '非 PDF 文件已忽略，请选择 PDF 文件。' : '');
+  }
+
+  function pdfsRender(msg) {
+    var list = document.getElementById('pdfsList');
+    var hint = document.getElementById('pdfsHint');
+    var clrBtn = document.getElementById('pdfsClearBtn');
+    if (!pdfsFiles.length) { list.innerHTML = ''; list.style.display = 'none'; hint.style.display = ''; if (clrBtn) clrBtn.style.display = 'none'; return; }
+    hint.style.display = 'none';
+    if (clrBtn) clrBtn.style.display = '';
+    var f = pdfsFiles[0];
+    list.innerHTML = '';
+    var row = document.createElement('div');
+    row.className = 'file-item';
+    row.innerHTML =
+      '<svg class="icon" viewBox="0 0 24 24"><use href="#icon-pdf"></use></svg>' +
+      '<span class="fname" title="' + esc(f.name) + '">' + esc(f.name) + '</span>' +
+      '<span class="fsize">' + fmtSize(f.size) + '</span>' +
+      '<button type="button" class="fremove" title="移除">' + icon('x') + '</button>';
+    row.querySelector('.fremove').addEventListener('click', function(e) { e.stopPropagation(); pdfsClear(); });
+    list.appendChild(row);
+    if (msg) {
+      var tip = document.createElement('div');
+      tip.style.cssText = 'font-size:12px;color:#059669;margin-top:4px;padding:0 4px';
+      tip.textContent = msg;
+      list.insertBefore(tip, list.firstChild);
+    }
+    list.style.display = 'block';
+  }
+
+  window.pdfsClear = function() {
+    pdfsFiles = [];
+    pdfsRender();
+    document.getElementById('pdfsState').style.display = 'none';
+  };
+
+  // 解析页码范围："1-3,5,8-10" → 页索引数组（0 起）
+  function pdfParseRange(str, max) {
+    var pages = [], seen = {};
+    var parts = str.split(',');
+    for (var i = 0; i < parts.length; i++) {
+      var p = parts[i].trim();
+      var m = p.match(/^(\d+)\s*-\s*(\d+)$/);
+      var start, end;
+      if (m) { start = parseInt(m[1], 10); end = parseInt(m[2], 10); }
+      else if (/^\d+$/.test(p)) { start = end = parseInt(p, 10); }
+      else return null;
+      if (!start || !end) return null;
+      if (start > end) { var t = start; start = end; end = t; }
+      for (var j = start; j <= end; j++) {
+        if (j > max) break;
+        if (!seen[j]) { seen[j] = true; pages.push(j - 1); }
+      }
+    }
+    pages.sort(function(a, b) { return a - b; });
+    return pages;
+  }
+
+  window.pdfsGo = function() {
+    if (!pdfsFiles.length) { pdfState('pdfsState', icon('alert') + ' 请先选择一个 PDF 文件'); return; }
+    var f = pdfsFiles[0];
+    var base = f.name.replace(/\.pdf$/i, '');
+    var mode = document.getElementById('pdfsMode').value;
+    var rangeStr = document.getElementById('pdfsRange').value.trim();
+    pdfState('pdfsState', icon('refresh', 'spin') + ' 正在加载处理引擎…');
+    pdfLibReady().then(function() {
+      var PDFDocument = window.PDFLib.PDFDocument;
+      return f.arrayBuffer().then(function(buf) {
+        return PDFDocument.load(buf, { ignoreEncryption: true }).catch(function() {
+          return PDFDocument.load(buf);
+        });
+      });
+    }).then(function(doc) {
+      var PDFDocument = window.PDFLib.PDFDocument;
+      var total = doc.getPageCount();
+      if (mode === 'all') {
+        pdfState('pdfsState', icon('refresh', 'spin') + ' 正在拆分（共 ' + total + ' 页）…');
+        return jszipReady().then(function() {
+          var zip = new JSZip();
+          var chain = Promise.resolve();
+          var docIdx = 0;
+          for (var i = 0; i < total; i++) {
+            (function(idx) {
+              chain = chain.then(function() {
+                return PDFDocument.create().then(function(nd) {
+                  return nd.copyPages(doc, [idx]).then(function(ps) {
+                    nd.addPage(ps[0]);
+                    return nd.save();
+                  }).then(function(bytes) {
+                    zip.file(base + '_第' + (idx + 1) + '页.pdf', bytes);
+                  });
+                });
+              });
+            })(i);
+          }
+          return chain.then(function() {
+            return zip.generateAsync({ type: 'blob' });
+          }).then(function(blob) {
+            if (isInAppBrowser) { showInappOverlay(); return; }
+            downloadBlob(blob, base + '_拆分.zip');
+            pdfState('pdfsState', icon('check-circle') + ' 拆分完成，共 ' + total + ' 页，已打包下载：' + base + '_拆分.zip（' + fmtSize(blob.size) + '）');
+          });
+        });
+      }
+      // 提取页码范围
+      var pages = pdfParseRange(rangeStr, total);
+      if (pages === null || !pages.length) {
+        pdfState('pdfsState', icon('alert') + ' 页码范围格式不对，例：1-3,5,8-10（共 ' + total + ' 页）');
+        return;
+      }
+      pdfState('pdfsState', icon('refresh', 'spin') + ' 正在提取 ' + pages.length + ' 页…');
+      return PDFDocument.create().then(function(nd) {
+        var chain = Promise.resolve();
+        pages.forEach(function(idx) {
+          chain = chain.then(function() {
+            return nd.copyPages(doc, [idx]).then(function(ps) { nd.addPage(ps[0]); });
+          });
+        });
+        return chain.then(function() { return nd.save(); });
+      }).then(function(bytes) {
+        var blob = new Blob([bytes], { type: 'application/pdf' });
+        if (isInAppBrowser) { showInappOverlay(); return; }
+        downloadBlob(blob, base + '_提取' + pages.length + '页.pdf');
+        pdfState('pdfsState', icon('check-circle') + ' 提取完成，已下载：' + base + '_提取' + pages.length + '页.pdf（' + fmtSize(blob.size) + '）');
+      });
+    }).catch(function(e) {
+      pdfState('pdfsState', icon('alert') + ' 拆分失败：' + (e && e.message ? e.message : '未知错误'));
+    });
+  };
+  // ===================== 图片压缩（本地 canvas 处理，不上传） =====================
+  var imgcFiles = [];
+  window.imgcQSet = function() {
+    document.getElementById('imgcQLbl').textContent = document.getElementById('imgcQ').value + '%';
+    imgcEst();
+  };
+
+  // 实时估算：拖动质量滑块时显示预计压缩后总大小（防抖 + 复用已解码图片，避免卡顿）
+  var imgcEstBusy = false, imgcEstTimer = null;
+  function imgcEst() {
+    if (imgcEstBusy || imgcEstTimer) return;
+    imgcEstTimer = setTimeout(function() { imgcEstTimer = null; imgcEstimate(); }, 150);
+  }
+  function imgcEstimate() {
+    var label = document.getElementById('imgcEst');
+    if (!label) return;
+    var todo = imgcFiles.filter(function(it) { return it.checked !== false; });
+    if (!todo.length) { label.style.display = 'none'; return; }
+    var q = parseInt(document.getElementById('imgcQ').value, 10) / 100;
+    label.style.display = '';
+    label.textContent = '估算中…';
+    imgcEstBusy = true;
+    var idx = 0, orig = 0, comp = 0;
+    function next() {
+      if (idx >= todo.length) {
+        imgcEstBusy = false;
+        var pct = orig > 0 ? Math.round((1 - comp / orig) * 100) : 0;
+        label.textContent = '预计 ' + fmtSize(comp) + (pct > 0 ? '（省 ' + pct + '%）' : '（未变小）');
+        return;
+      }
+      var it = todo[idx];
+      function done() {
+        imgcCompressCached(it, q).then(function(size) {
+          orig += it.file.size; comp += size; idx++; next();
+        }).catch(function() { idx++; next(); });
+      }
+      if (it.cimg) { done(); }
+      else {
+        var img = new Image();
+        var url = URL.createObjectURL(it.file);
+        img.onload = function() { URL.revokeObjectURL(url); it.cimg = img; done(); };
+        img.onerror = function() { URL.revokeObjectURL(url); idx++; next(); };
+        img.src = url;
+      }
+    }
+    next();
+  }
+  function imgcCompressCached(it, q) {
+    return new Promise(function(resolve, reject) {
+      var type = it.file.type === 'image/png' ? 'image/png' : (it.file.type === 'image/webp' ? 'image/webp' : 'image/jpeg');
+      var cv = document.createElement('canvas');
+      cv.width = it.cimg.width; cv.height = it.cimg.height;
+      cv.getContext('2d').drawImage(it.cimg, 0, 0);
+      cv.toBlob(function(blob) {
+        if (!blob) { reject(new Error('编码失败')); return; }
+        resolve(Math.min(blob.size, it.file.size));
+      }, type, q);
+    });
+  }
+
+  // 选择文件（多选、追加、去重）
+  document.getElementById('imgcInput').addEventListener('change', function() {
+    var files = this.files ? Array.prototype.slice.call(this.files) : [];
+    this.value = '';
+    imgcAdd(files);
+  });
+  // 拖拽选择
+  var imgcDrop = document.getElementById('imgcDrop');
+  ['dragenter', 'dragover'].forEach(function(ev) {
+    imgcDrop.addEventListener(ev, function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      imgcDrop.classList.add('dragover');
+    });
+  });
+  ['dragleave', 'drop'].forEach(function(ev) {
+    imgcDrop.addEventListener(ev, function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      imgcDrop.classList.remove('dragover');
+      if (ev === 'drop' && e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+        imgcAdd(Array.prototype.slice.call(e.dataTransfer.files));
+      }
+    });
+  });
+  // 文件列表内的点击（勾选、移除、下载）不要冒泡到拖拽区，避免触发文件选择框
+  document.getElementById('imgcList').addEventListener('click', function(e) { e.stopPropagation(); });
+
+  function imgcAdd(files) {
+    if (!files.length) return;
+    var added = 0, dup = 0, bad = 0;
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      if (!/^image\/(png|jpe?g|webp|gif|bmp)$/i.test(f.type)) { bad++; continue; }
+      var isDup = false;
+      for (var j = 0; j < imgcFiles.length; j++) {
+        var o = imgcFiles[j].file;
+        if (o.name === f.name && o.size === f.size && o.lastModified === f.lastModified) { isDup = true; break; }
+      }
+      if (isDup) { dup++; continue; }
+      imgcFiles.push({ file: f, checked: true, result: null });
+      added++;
+    }
+    var msg = '';
+    if (added) msg = '已添加 ' + added + ' 张图片（共 ' + imgcFiles.length + ' 张），点「开始压缩」处理。';
+    else if (dup) msg = '选中的图片都已在列表里（重复项已忽略）。';
+    if (bad && !added) msg = (msg ? msg + ' ' : '') + '非图片文件已忽略。';
+    imgcRender(msg);
+  }
+
+  function imgcRender(msg) {
+    var list = document.getElementById('imgcList');
+    var hint = document.getElementById('imgcHint');
+    var dlAllBtn = document.getElementById('imgcDownloadAllBtn');
+    var clrBtn = document.getElementById('imgcClearBtn');
+    if (!imgcFiles.length) { list.innerHTML = ''; list.style.display = 'none'; hint.style.display = ''; if (dlAllBtn) dlAllBtn.style.display = 'none'; if (clrBtn) clrBtn.style.display = 'none'; var estEl = document.getElementById('imgcEst'); if (estEl) estEl.style.display = 'none'; return; }
+    hint.style.display = 'none';
+    if (clrBtn) clrBtn.style.display = '';
+    // 有压缩成功的结果才显示"全部下载"
+    if (dlAllBtn) dlAllBtn.style.display = imgcFiles.some(function(it) { return it.result && it.result.blob && !it.result.error; }) ? '' : 'none';
+    list.innerHTML = '';
+    for (var i = 0; i < imgcFiles.length; i++) {
+      (function(idx) {
+        var it = imgcFiles[idx];
+        var f = it.file;
+        var row = document.createElement('div');
+        row.className = 'file-item' + (it.checked === false ? ' off' : '');
+        var status = it.result ? (it.result.error ? icon('x-circle') + ' 失败' : it.result.statusText) : '等待压缩';
+        var dlHtml = '';
+        if (it.result && it.result.blob && !it.result.error) {
+          dlHtml = '<button type="button" class="fdl" title="下载压缩图片">' + icon('download') + '</button>';
+        }
+        row.innerHTML =
+          '<label class="fcheck"><input type="checkbox" ' + (it.checked !== false ? 'checked' : '') + '><span class="fake"></span></label>' +
+          '<svg class="icon" viewBox="0 0 24 24"><use href="#icon-image"></use></svg>' +
+          '<span class="fname" title="' + esc(f.name) + '">' + esc(f.name) + '</span>' +
+          '<span class="fsize">' + fmtSize(f.size) + '</span>' +
+          '<span class="fstatus">' + status + '</span>' +
+          dlHtml +
+          '<button type="button" class="fremove" title="移除">' + icon('x') + '</button>';
+        var cb = row.querySelector('input');
+        cb.addEventListener('change', function() {
+          it.checked = cb.checked;
+          row.classList.toggle('off', !cb.checked);
+          imgcEst();
+        });
+        row.querySelector('.fremove').addEventListener('click', function() {
+          imgcRemove(idx);
+        });
+        var fdl = row.querySelector('.fdl');
+        if (fdl) {
+          fdl.addEventListener('click', function() {
+            if (isInAppBrowser) { showInappOverlay(); return; }
+            if (it.result && it.result.blob) downloadBlob(it.result.blob, it.result.name || it.result.blob.name);
+          });
+        }
+        list.appendChild(row);
+      })(i);
+    }
+    if (msg) {
+      var tip = document.createElement('div');
+      tip.style.cssText = 'font-size:12px;color:#059669;margin-top:4px;padding:0 4px';
+      tip.textContent = msg;
+      list.insertBefore(tip, list.firstChild);
+    }
+    list.style.display = 'block';
+    imgcEst();
+  }
+
+  window.imgcRemove = function(idx) {
+    if (idx < 0 || idx >= imgcFiles.length) return;
+    imgcFiles.splice(idx, 1);
+    imgcRender();
+  };
+
+  window.imgcClear = function() {
+    imgcFiles = [];
+    imgcRender();
+  };
+
+  // 逐个压缩（递归串行，避免同时处理大图卡死浏览器；只处理勾选且未压缩的）
+  window.imgcGo = function() {
+    var todo = imgcFiles.filter(function(it) { return it.checked !== false && !it.result; });
+    if (!todo.length) {
+      imgcRender('没有待压缩的图片（请勾选未处理的图片）');
+      return;
+    }
+    var goBtn = document.getElementById('imgcGoBtn');
+    var origHtml = goBtn.innerHTML;
+    goBtn.disabled = true;
+    goBtn.innerHTML = icon('refresh', 'spin') + ' 压缩中…';
+    var q = parseInt(document.getElementById('imgcQ').value, 10) / 100;
+    var rows = document.getElementById('imgcList').querySelectorAll('.file-item');
+    var idx = 0;
+    function next() {
+      if (idx >= todo.length) {
+        goBtn.disabled = false;
+        goBtn.innerHTML = origHtml;
+        imgcRender('压缩完成，可点击每行右侧「下载」或上方「全部下载」保存。');
+        return;
+      }
+      var it = todo[idx];
+      var globalIdx = imgcFiles.indexOf(it);
+      var row = rows[globalIdx];
+      var statusEl = row.querySelector('.fstatus');
+      statusEl.innerHTML = icon('refresh') + ' 压缩中…';
+      imgcCompressOne(it.file, q, 0).then(function(r) {
+        var pct = r.original > 0 ? Math.round((1 - r.compressed / r.original) * 100) : 0;
+        var html = fmtSize(r.original) + ' → ' + fmtSize(r.compressed);
+        if (pct > 0) html += ' <span class="save">节省 ' + pct + '%</span>';
+        else html += '（未变小）';
+        statusEl.innerHTML = html;
+        it.result = r;
+        it.result.statusText = html;
+        idx++;
+        next();
+      }).catch(function(e) {
+        statusEl.innerHTML = icon('x-circle') + ' 失败';
+        it.result = { error: e.message, statusText: icon('x-circle') + ' 失败' };
+        idx++;
+        next();
+      });
+    }
+    next();
+  };
+
+  // 全部下载：逐个触发压缩成功的图片下载
+  window.imgcDownloadAll = function() {
+    if (isInAppBrowser) { showInappOverlay(); return; }
+    var done = imgcFiles.filter(function(it) { return it.result && it.result.blob && !it.result.error; });
+    if (!done.length) { imgcRender('没有可下载的压缩结果'); return; }
+    done.forEach(function(it, i) {
+      setTimeout(function() { downloadBlob(it.result.blob, it.result.name || it.result.blob.name); }, i * 300);
+    });
+  };
+
+  // 单张压缩：canvas 重绘 → 输出（JPEG/WebP 按质量压缩；PNG 保持格式，靠尺寸缩放减小体积）
+  function imgcCompressOne(file, quality, maxDim) {
+    return new Promise(function(resolve, reject) {
+      var img = new Image();
+      var url = URL.createObjectURL(file);
+      img.onload = function() {
+        try {
+          var w = img.width, h = img.height;
+          if (maxDim > 0) {
+            var scale = Math.min(1, maxDim / Math.max(w, h));
+            w = Math.max(1, Math.round(w * scale));
+            h = Math.max(1, Math.round(h * scale));
+          }
+          var cv = document.createElement('canvas');
+          cv.width = w; cv.height = h;
+          cv.getContext('2d').drawImage(img, 0, 0, w, h);
+          URL.revokeObjectURL(url);
+          var type = file.type === 'image/png' ? 'image/png' : (file.type === 'image/webp' ? 'image/webp' : 'image/jpeg');
+          var ext = type === 'image/png' ? 'png' : (type === 'image/webp' ? 'webp' : 'jpg');
+          cv.toBlob(function(blob) {
+            if (!blob) { reject(new Error('图片编码失败')); return; }
+            var outName = file.name.replace(/\.[^.]+$/, '') + '.' + ext;
+            // 压缩后反而变大 → 提供原图下载
+            if (blob.size >= file.size) resolve({ original: file.size, compressed: file.size, blob: file, name: file.name });
+            else resolve({ original: file.size, compressed: blob.size, blob: blob, name: outName });
+          }, type, quality);
+        } catch(e) {
+          URL.revokeObjectURL(url);
+          reject(e);
+        }
+      };
+      img.onerror = function() { URL.revokeObjectURL(url); reject(new Error('图片读取失败，可能已损坏')); };
+      img.src = url;
+    });
+  }
+
+  // ===================== 图片合并（网格拼图，本地 canvas） =====================
+  var imgmFiles = [];
+  var imgmBlob = null;
+  var imgmDragFrom = null;
+  document.getElementById('imgmInput').addEventListener('change', function() {
+    var files = this.files ? Array.prototype.slice.call(this.files) : [];
+    this.value = '';
+    imgmAdd(files);
+  });
+  var imgmDrop = document.getElementById('imgmDrop');
+  ['dragenter', 'dragover'].forEach(function(ev) {
+    imgmDrop.addEventListener(ev, function(e) { e.preventDefault(); e.stopPropagation(); imgmDrop.classList.add('dragover'); });
+  });
+  ['dragleave', 'drop'].forEach(function(ev) {
+    imgmDrop.addEventListener(ev, function(e) {
+      e.preventDefault(); e.stopPropagation();
+      imgmDrop.classList.remove('dragover');
+      if (ev === 'drop' && e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) imgmAdd(Array.prototype.slice.call(e.dataTransfer.files));
+    });
+  });
+  document.getElementById('imgmList').addEventListener('click', function(e) { e.stopPropagation(); });
+
+  function imgmAdd(files) {
+    var added = 0, dup = 0;
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      if (!/^image\/(png|jpe?g|webp|gif|bmp)$/i.test(f.type)) continue;
+      var isDup = false;
+      for (var j = 0; j < imgmFiles.length; j++) {
+        var o = imgmFiles[j].file;
+        if (o.name === f.name && o.size === f.size && o.lastModified === f.lastModified) { isDup = true; break; }
+      }
+      if (isDup) { dup++; continue; }
+      imgmFiles.push({ file: f, checked: true });
+      added++;
+    }
+    var msg = added ? '已添加 ' + added + ' 张（共 ' + imgmFiles.length + ' 张），点「合并」。' : (dup ? '重复的图片已忽略。' : '');
+    imgmRender(msg);
+  }
+
+  function imgmRender(msg) {
+    var list = document.getElementById('imgmList');
+    var hint = document.getElementById('imgmHint');
+    var clrBtn = document.getElementById('imgmClearBtn');
+    if (!imgmFiles.length) { list.innerHTML = ''; list.style.display = 'none'; hint.style.display = ''; if (clrBtn) clrBtn.style.display = 'none'; return; }
+    hint.style.display = 'none';
+    if (clrBtn) clrBtn.style.display = '';
+    list.innerHTML = '';
+    for (var i = 0; i < imgmFiles.length; i++) {
+      (function(idx) {
+        var it = imgmFiles[idx];
+        var f = it.file;
+        var row = document.createElement('div');
+        row.className = 'file-item' + (it.checked === false ? ' off' : '');
+        row.draggable = true;
+        row.innerHTML =
+          '<label class="fcheck"><input type="checkbox" ' + (it.checked !== false ? 'checked' : '') + '><span class="fake"></span></label>' +
+          '<svg class="icon" viewBox="0 0 24 24"><use href="#icon-image"></use></svg>' +
+          '<span class="fname" title="' + esc(f.name) + '">' + esc(f.name) + '</span>' +
+          '<span class="fsize">' + fmtSize(f.size) + '</span>' +
+          '<button type="button" class="fremove" title="移除">' + icon('x') + '</button>';
+        var cb = row.querySelector('input');
+        cb.addEventListener('change', function() {
+          it.checked = cb.checked;
+          row.classList.toggle('off', !cb.checked);
+        });
+        row.querySelector('.fremove').addEventListener('click', function() { imgmRemove(idx); });
+        row.addEventListener('dragstart', function(e) {
+          imgmDragFrom = idx;
+          row.classList.add('dragging');
+          try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(idx)); } catch(err) {}
+        });
+        row.addEventListener('dragend', function() { row.classList.remove('dragging'); });
+        row.addEventListener('dragover', function(e) {
+          if (imgmDragFrom === null || imgmDragFrom === idx) return;
+          e.preventDefault();
+          row.classList.add('drop-target');
+        });
+        row.addEventListener('dragleave', function() { row.classList.remove('drop-target'); });
+        row.addEventListener('drop', function(e) {
+          e.preventDefault();
+          row.classList.remove('drop-target');
+          if (imgmDragFrom !== null) imgmMove(imgmDragFrom, idx);
+          imgmDragFrom = null;
+        });
+        list.appendChild(row);
+      })(i);
+    }
+    if (msg) {
+      var tip = document.createElement('div');
+      tip.style.cssText = 'font-size:12px;color:#059669;margin-top:4px;padding:0 4px';
+      tip.textContent = msg;
+      list.insertBefore(tip, list.firstChild);
+    }
+    list.style.display = 'block';
+  }
+
+  window.imgmRemove = function(idx) {
+    if (idx < 0 || idx >= imgmFiles.length) return;
+    imgmFiles.splice(idx, 1);
+    imgmBlob = null;
+    document.getElementById('imgmStage').style.display = 'none';
+    document.getElementById('imgmStatus').style.display = 'none';
+    imgmRender();
+  };
+
+  function imgmMove(from, to) {
+    if (from === to || from < 0 || to < 0 || from >= imgmFiles.length || to >= imgmFiles.length) return;
+    var f = imgmFiles.splice(from, 1)[0];
+    imgmFiles.splice(to, 0, f);
+    imgmBlob = null;
+    document.getElementById('imgmStage').style.display = 'none';
+    document.getElementById('imgmStatus').style.display = 'none';
+    imgmRender();
+  }
+
+  window.imgmClear = function() {
+    imgmFiles = [];
+    imgmBlob = null;
+    imgmRender();
+    document.getElementById('imgmStage').style.display = 'none';
+    document.getElementById('imgmStatus').style.display = 'none';
+  };
+
+  // 布局计算：返回 { cols, rows }
+  function imgmLayout(n, cols, rows) {
+    if (cols <= 0 && rows <= 0) {
+      cols = n <= 1 ? 1 : (n <= 3 ? 2 : (n <= 6 ? 3 : 4));
+      return { cols: cols, rows: Math.ceil(n / cols) };
+    }
+    if (cols <= 0) {
+      rows = Math.min(rows, n);
+      cols = Math.ceil(n / rows);
+      return { cols: cols, rows: rows };
+    }
+    cols = Math.min(cols, n);
+    var need = Math.ceil(n / cols);
+    if (rows > 0 && rows < need) rows = need; // 手动行数放不下时补足
+    return { cols: cols, rows: Math.max(1, rows || need) };
+  }
+
+  function imgmLoad(file) {
+    return new Promise(function(resolve, reject) {
+      var img = new Image();
+      var url = URL.createObjectURL(file);
+      img.onload = function() { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = function() { URL.revokeObjectURL(url); reject(new Error('图片读取失败：' + file.name)); };
+      img.src = url;
+    });
+  }
+
+  window.imgmGo = function() {
+    var btn = document.querySelector('#imgSub-m .btn.primary');
+    var status = document.getElementById('imgmStatus');
+    var todo = imgmFiles.filter(function(it) { return it.checked !== false; });
+    if (!todo.length) { imgmStatus.style.display = ''; imgmStatus.textContent = '请先选择图片'; return; }
+    var colsIn = parseInt(document.getElementById('imgmCols').value, 10) || 0;
+    var rowsIn = parseInt(document.getElementById('imgmRows').value, 10) || 0;
+    var lay = imgmLayout(todo.length, colsIn, rowsIn);
+    var cols = lay.cols, rows = lay.rows;
+    if (colsIn > 0 && cols !== colsIn) document.getElementById('imgmCols').value = cols;
+    if (rowsIn > 0 && rows !== rowsIn) document.getElementById('imgmRows').value = rows;
+    var old = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = icon('refresh') + ' 合并中…';
+    status.style.display = '';
+    status.innerHTML = '按 ' + cols + ' 列 × ' + rows + ' 行拼图，请稍候…';
+    Promise.all(todo.map(function(it) { return imgmLoad(it.file); })).then(function(imgs) {
+      var cellW = 0, cellH = 0;
+      imgs.forEach(function(im) {
+        cellW = Math.max(cellW, im.naturalWidth);
+        cellH = Math.max(cellH, im.naturalHeight);
+      });
+      var gap = 6;
+      var totalW = cols * cellW + (cols - 1) * gap;
+      var totalH = rows * cellH + (rows - 1) * gap;
+      // 限制总尺寸（最长边 4096），保证稳定不卡死
+      var cap = 4096;
+      var sc = Math.min(1, cap / Math.max(totalW, totalH));
+      cellW = Math.max(1, Math.round(cellW * sc));
+      cellH = Math.max(1, Math.round(cellH * sc));
+      gap = Math.max(1, Math.round(gap * sc));
+      var cv = document.createElement('canvas');
+      cv.width = cols * cellW + (cols - 1) * gap;
+      cv.height = rows * cellH + (rows - 1) * gap;
+      var ctx = cv.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, cv.width, cv.height);
+      imgs.forEach(function(im, i) {
+        var r = Math.floor(i / cols), c = i % cols;
+        var iw = Math.max(1, Math.round(im.naturalWidth * sc)), ih = Math.max(1, Math.round(im.naturalHeight * sc));
+        var sx = (cellW - iw) / 2, sy = (cellH - ih) / 2;
+        ctx.drawImage(im, c * (cellW + gap) + sx, r * (cellH + gap) + sy, iw, ih);
+      });
+      // 预览：缩到最长边 1024 显示，避免大图拖慢页面
+      var disp = document.getElementById('imgmCanvas');
+      var ds = Math.min(1, 1024 / Math.max(cv.width, cv.height));
+      disp.width = Math.max(1, Math.round(cv.width * ds));
+      disp.height = Math.max(1, Math.round(cv.height * ds));
+      disp.getContext('2d').drawImage(cv, 0, 0, disp.width, disp.height);
+      document.getElementById('imgmStage').style.display = '';
+      status.innerHTML = '正在生成下载文件（' + cv.width + '×' + cv.height + '，稍候）…';
+      // 下载用完整尺寸 PNG（异步生成，不卡主线程）
+      imgmBlob = null;
+      cv.toBlob(function(blob) {
+        if (blob) {
+          imgmBlob = blob;
+          status.innerHTML = icon('check-circle') + ' 合并完成，可下载（共 ' + cols + '×' + rows + ' 格）';
+        } else {
+          status.innerHTML = icon('alert') + ' 生成失败：图片过大或内存不足，请减少图片或缩小图片重试';
+        }
+        btn.disabled = false;
+        btn.innerHTML = old;
+      }, 'image/png');
+    }).catch(function(e) {
+      status.innerHTML = icon('alert') + ' 处理失败：' + esc(e.message);
+      btn.disabled = false;
+      btn.innerHTML = old;
+    });
+  };
+
+  window.imgmDownload = function() {
+    if (!imgmBlob) { var s = document.getElementById('imgmStatus'); s.style.display = ''; s.innerHTML = icon('alert') + ' 请先点「合并」生成结果'; return; }
+    if (isInAppBrowser) { showInappOverlay(); return; }
+    downloadBlob(imgmBlob, 'merged-grid.png');
+  };
+
+  // ===================== 提取音频（视频 → 音频，优先服务端 ffmpeg 秒级提取） =====================
+  var aeFiles = [], aeVideo = null, aeRec = null, aeChunks = [], aeBlob = null, aeName = 'extracted-audio';
+  var aeTimer = null, aeQueueIdx = -1, aeQueueStop = false;
+  document.getElementById('aeInput').addEventListener('change', function() {
+    var files = this.files ? Array.prototype.slice.call(this.files) : [];
+    this.value = '';
+    aeAdd(files);
+  });
+  var aeDrop = document.getElementById('aeDrop');
+  ['dragenter', 'dragover'].forEach(function(ev) {
+    aeDrop.addEventListener(ev, function(e) { e.preventDefault(); e.stopPropagation(); aeDrop.classList.add('dragover'); });
+  });
+  ['dragleave', 'drop'].forEach(function(ev) {
+    aeDrop.addEventListener(ev, function(e) {
+      e.preventDefault(); e.stopPropagation();
+      aeDrop.classList.remove('dragover');
+      if (ev === 'drop' && e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) aeAdd(Array.prototype.slice.call(e.dataTransfer.files));
+    });
+  });
+  document.getElementById('aeList').addEventListener('click', function(e) { e.stopPropagation(); });
+
+  function aeStateMsg(msg) {
+    var el = document.getElementById('aeState');
+    el.style.display = '';
+    el.innerHTML = msg;
+  }
+
+  function aeAdd(files) {
+    if (!files.length) return;
+    var added = 0, dup = 0, bad = 0;
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      if (!/^video\//i.test(f.type)) { bad++; continue; }
+      var isDup = false;
+      for (var j = 0; j < aeFiles.length; j++) {
+        var o = aeFiles[j].file;
+        if (o.name === f.name && o.size === f.size && o.lastModified === f.lastModified) { isDup = true; break; }
+      }
+      if (isDup) { dup++; continue; }
+      aeFiles.push({ file: f, checked: true, statusText: '', blob: null, name: '', ext: '', error: '' });
+      added++;
+    }
+    var msg = '';
+    if (added) msg = '已添加 ' + added + ' 个视频（共 ' + aeFiles.length + ' 个），点「提取」开始。';
+    else if (dup) msg = '选中的视频都已在列表里（重复项已忽略）。';
+    if (bad && !added) msg = (msg ? msg + ' ' : '') + '非视频文件已忽略。';
+    aeRender(msg);
+  }
+
+  function aeRender(msg) {
+    var list = document.getElementById('aeList');
+    var hint = document.getElementById('aeHint');
+    var dlAllBtn = document.getElementById('aeDownloadAllBtn');
+    if (!aeFiles.length) { list.innerHTML = ''; list.style.display = 'none'; hint.style.display = ''; if (dlAllBtn) dlAllBtn.style.display = 'none'; return; }
+    hint.style.display = 'none';
+    // 有提取成功的结果才显示"全部下载"
+    if (dlAllBtn) dlAllBtn.style.display = aeFiles.some(function(it) { return it.blob && !it.error; }) ? '' : 'none';
+    list.innerHTML = '';
+    for (var i = 0; i < aeFiles.length; i++) {
+      (function(idx) {
+        var it = aeFiles[idx];
+        var f = it.file;
+        var row = document.createElement('div');
+        row.className = 'file-item' + (it.checked === false ? ' off' : '');
+        var status = it.error ? icon('x-circle') + ' 失败' : (it.statusText || '等待提取');
+        row.innerHTML =
+          '<label class="fcheck"><input type="checkbox" ' + (it.checked !== false ? 'checked' : '') + '><span class="fake"></span></label>' +
+          '<svg class="icon" viewBox="0 0 24 24"><use href="#icon-video"></use></svg>' +
+          '<span class="fname" title="' + esc(f.name) + '">' + esc(f.name) + '</span>' +
+          '<span class="fsize">' + fmtSize(f.size) + '</span>' +
+          '<span class="fstatus"' + (it.error ? ' title="' + esc(it.error) + '" style="color:#dc2626"' : '') + '>' + status + '</span>' +
+          '<button type="button" class="fremove" title="移除">' + icon('x') + '</button>';
+        var cb = row.querySelector('input');
+        cb.addEventListener('change', function() {
+          it.checked = cb.checked;
+          row.classList.toggle('off', !cb.checked);
+        });
+        row.querySelector('.fremove').addEventListener('click', function() { aeRemove(idx); });
+        if (it.blob && !it.error) {
+          var btn = document.createElement('button');
+          btn.className = 'btn';
+          btn.style.cssText = 'padding:4px 10px;font-size:12px;min-width:0;margin-left:4px';
+          btn.innerHTML = icon('download');
+          btn.title = '下载音频';
+          btn.onclick = function() { aeDownloadItem(idx); };
+          row.appendChild(btn);
+        }
+        list.appendChild(row);
+      })(i);
+    }
+    if (msg) {
+      var tip = document.createElement('div');
+      tip.style.cssText = 'font-size:12px;color:#059669;margin-top:4px;padding:0 4px';
+      tip.textContent = msg;
+      list.insertBefore(tip, list.firstChild);
+    }
+    list.style.display = 'block';
+  }
+
+  window.aeRemove = function(idx) {
+    if (idx < 0 || idx >= aeFiles.length) return;
+    aeFiles.splice(idx, 1);
+    aeRender();
+  };
+
+  window.aeDownloadItem = function(idx) {
+    var it = aeFiles[idx];
+    if (!it || !it.blob) return;
+    if (isInAppBrowser) { showInappOverlay(); return; }
+    downloadBlob(it.blob, (it.name || 'extracted-audio') + '.' + (it.ext || 'm4a'));
+  };
+
+  // 全部下载：逐个触发提取成功的音频下载
+  window.aeDownloadAll = function() {
+    if (isInAppBrowser) { showInappOverlay(); return; }
+    var done = aeFiles.filter(function(it) { return it.blob && !it.error; });
+    if (!done.length) { aeStateMsg(icon('alert') + ' 没有可下载的音频'); return; }
+    done.forEach(function(it, i) {
+      setTimeout(function() { downloadBlob(it.blob, (it.name || 'extracted-audio') + '.' + (it.ext || 'm4a')); }, i * 300);
+    });
+  };
+
+  // 选择浏览器支持的音频输出格式：优先 m4a（手机/微信通用），其次 webm
+  function aePickMime() {
+    var cands = [
+      { m: 'audio/mp4;codecs=mp4a.40.2', ext: 'm4a' },
+      { m: 'audio/mp4', ext: 'm4a' },
+      { m: 'audio/webm;codecs=opus', ext: 'webm' },
+      { m: 'audio/webm', ext: 'webm' }
+    ];
+    for (var i = 0; i < cands.length; i++) {
+      if (window.MediaRecorder && MediaRecorder.isTypeSupported(cands[i].m)) return cands[i];
+    }
+    return null;
+  }
+
+  function aeFmtTime(s) {
+    var m = Math.floor(s / 60), ss = Math.floor(s % 60);
+    return m + ':' + ('0' + ss).slice(-2);
+  }
+
+  var aeAbort = null;
+  var aeFmt = null;
+  var aeBusy = false; // 提取进行中标志（防止重复触发）
+
+  window.aeStart = function() {
+    if (aeBusy) return;
+    var todo = aeFiles.filter(function(it) { return it.checked !== false && !it.blob && !it.error; });
+    if (!todo.length) { aeStateMsg(icon('alert') + ' 请先选择视频文件'); return; }
+    aeBusy = true;
+    aeQueueStop = false;
+    document.getElementById('aeResult').style.display = 'none';
+    document.getElementById('aeStopRow').style.display = '';
+    aeProcessQueue();
+  };
+
+  function aeProcessQueue() {
+    if (aeQueueStop) { aeCleanup(); aeBusy = false; aeStateMsg(icon('x-circle') + ' 已停止'); return; }
+    var todo = aeFiles.filter(function(it) { return it.checked !== false && !it.blob && !it.error; });
+    if (!todo.length) { aeCleanup(); aeBusy = false; aeStateMsg(icon('check-circle') + ' 全部提取完成'); document.getElementById('aeStopRow').style.display = 'none'; return; }
+    var it = todo[0];
+    aeQueueIdx = aeFiles.indexOf(it);
+    it.statusText = icon('refresh') + ' 提取中…';
+    aeRender();
+    aeChunks = [];
+    aeBlob = null;
+    aeName = (it.file.name.replace(/\.[^.]+$/, '') || 'video') + '-audio';
+    // 本地文件：浏览器内 ffmpeg.wasm 提取（秒级，不上传）
+    aeDecodeLocal(it.file);
+  }
+
+  // 用 ffmpeg.wasm 在浏览器本地提取音频（不上传服务器，秒级完成）
+  // 复用与"本地转码播放"相同的 ffmpeg.wasm 引擎，全部在浏览器内完成
+  var aeFFmpeg = null, aeFFmpegLoading = null;
+  function aeTranscodeProgress(ev) {
+    var r = ev && ev.ratio;
+    if (typeof r === 'number' && isFinite(r) && r > 0) {
+      var pct = Math.round(Math.min(r, 1) * 100);
+      aeStateMsg(icon('refresh', 'spin') + ' 正在提取 <b>' + pct + '%</b> …（本地处理，不上传）');
+    }
+  }
+  // ---- ffmpeg.wasm 引擎加载：本地自托管文件 + 显示下载进度（提速）----
+  var FF_FILES = {
+    lib: '../assets/vendor/ffmpeg/ffmpeg.min.js?v=2',
+    core: '../assets/vendor/ffmpeg/ffmpeg-core.js?v=2',
+    wasm: '../assets/vendor/ffmpeg/ffmpeg-core.wasm?v=2'
+  };
+  var ffmpegLibLoading = null;
+  function ffmpegLoadLib() {
+    if (window.FFmpegWASM) return Promise.resolve();
+    if (ffmpegLibLoading) return ffmpegLibLoading;
+    ffmpegLibLoading = new Promise(function(resolve, reject) {
+      var s = document.createElement('script');
+      s.src = FF_FILES.lib;
+      s.onload = resolve;
+      s.onerror = function() { ffmpegLibLoading = null; reject(new Error('ffmpeg 库加载失败，请刷新重试')); };
+      document.head.appendChild(s);
+    });
+    return ffmpegLibLoading;
+  }
+  function ffmpegBlob(url, label, onP) {
+    return new Promise(function(resolve, reject) {
+      var x = new XMLHttpRequest();
+      x.open('GET', url, true);
+      x.responseType = 'blob';
+      x.onprogress = function(e) { if (e.lengthComputable && onP) onP(e.loaded, e.total); };
+      x.onload = function() {
+        if (x.status >= 200 && x.status < 300) resolve(x.response);
+        else reject(new Error(label + ' 下载失败（HTTP ' + x.status + '），请刷新重试'));
+      };
+      x.onerror = function() { reject(new Error(label + ' 下载失败（网络错误），请刷新重试')); };
+      x.send();
+    });
+  }
+  function ffmpegSize(n) {
+    if (!n) return '0 B';
+    var u = ['B', 'KB', 'MB', 'GB'], i = 0;
+    while (n >= 1024 && i < u.length - 1) { n /= 1024; i++; }
+    return (i ? n.toFixed(1) : n) + ' ' + u[i];
+  }
+  function ffmpegDlUI(el, label, loaded, total) {
+    var pct = total ? Math.min(100, Math.round(loaded / total * 100)) : 0;
+    el.style.display = '';
+    el.innerHTML = '<div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:' + pct + '%"></div></div><div class="prog-txt">' + label + '　<b>' + pct + '%</b>　' + ffmpegSize(loaded) + ' / ' + ffmpegSize(total) + '</div></div>';
+  }
+  // 下载核心文件（带实时进度条）并创建引擎实例（0.12 API：Worker 内转码，主线程不卡）
+  function ffmpegLoadEngine(stateEl, label, transProgress) {
+    return ffmpegLoadLib().then(function() {
+      if (!window.FFmpegWASM || !window.FFmpegWASM.FFmpeg) throw new Error('ffmpeg 库加载失败，请刷新重试');
+      ffmpegDlUI(stateEl, label, 0, 1);
+      return Promise.all([
+        ffmpegBlob(FF_FILES.core, '核心脚本'),
+        ffmpegBlob(FF_FILES.wasm, '解码器', function(d, t) { ffmpegDlUI(stateEl, label, d, t); })
+      ]);
+    }).then(function(b) {
+      var f = new window.FFmpegWASM.FFmpeg();
+      f.on('progress', function(ev) {
+        if (transProgress && ev && typeof ev.progress === 'number' && isFinite(ev.progress) && ev.progress > 0) {
+          transProgress({ ratio: ev.progress });
+        }
+      });
+      return f.load({
+        coreURL: URL.createObjectURL(b[0]),
+        wasmURL: URL.createObjectURL(b[1])
+      }).then(function() {
+        ffmpegDlUI(stateEl, label, 1, 1);
+        return f;
+      });
+    });
+  }
+  function aeLoadFFmpeg() {
+    if (aeFFmpeg && aeFFmpeg.loaded) return Promise.resolve(aeFFmpeg);
+    if (aeFFmpegLoading) return aeFFmpegLoading;
+    aeFFmpegLoading = ffmpegLoadEngine(document.getElementById('aeState'),
+      '正在加载音频提取引擎（约 32MB，仅首次，本站资源更流畅）', aeTranscodeProgress)
+      .then(function(f) { aeFFmpeg = f; return f; })
+      .catch(function(e) {
+        aeFFmpeg = null; aeFFmpegLoading = null;
+        throw (e && e.message) ? e : new Error('提取引擎加载失败，请刷新重试');
+      });
+    return aeFFmpegLoading;
+  }
+  function aeDecodeLocal(file) {
+    var inExt = (file.name.match(/\.([^.]+)$/) || [, 'mp4'])[1].toLowerCase();
+    var inName = 'ae_in.' + inExt, outName = 'ae_out.m4a';
+    aeLoadFFmpeg().then(function() {
+      aeStateMsg(icon('refresh') + ' 正在读取文件 <b>' + esc(file.name) + '</b> …');
+      return file.arrayBuffer();
+    }).then(function(buf) {
+      var ff = aeFFmpeg;
+      aeStateMsg(icon('refresh', 'spin') + ' 正在提取音频 …（本地处理，不上传）');
+      var extract = function(args) {
+        return ff.exec(args).then(function() { return ff.readFile(outName); });
+      };
+      return ff.deleteFile(inName).catch(function() {})
+        .then(function() { return ff.deleteFile(outName).catch(function() {}); })
+        .then(function() { return ff.writeFile(inName, new Uint8Array(buf)); })
+        // 先尝试直接复制音轨（秒级），失败再转 AAC
+        .then(function() {
+          return extract(['-i', inName, '-vn', '-acodec', 'copy', outName])
+            .catch(function() {
+              return ff.deleteFile(outName).catch(function() {})
+                .then(function() { return extract(['-i', inName, '-vn', '-acodec', 'aac', '-b:a', '192k', outName]); });
+            });
+        });
+    }).then(function(out) {
+      if (aeQueueStop) return; // 用户已停止，忽略结果
+      if (!out || !out.length) { aeQueueFail('提取失败：未生成音频，可能视频无音轨'); return; }
+      aeFmt = { m: 'audio/mp4', ext: 'm4a' };
+      aeFinishServer(new Blob([out], { type: 'audio/mp4' }));
+    }).catch(function(e) {
+      if (aeQueueStop) return; // 用户已停止，忽略错误
+      aeQueueFail(e && e.message ? e.message : '提取失败');
+    });
+  }
+
+  // 服务端提取完成后的收尾（与 aeFinish 类似，但 blob 直接来自服务端）
+  function aeFinishServer(blob) {
+    aeBlob = blob;
+    if (aeQueueIdx >= 0) {
+      var it = aeFiles[aeQueueIdx];
+      if (it) {
+        it.blob = blob;
+        it.ext = 'm4a';
+        it.name = aeName;
+        it.statusText = icon('check-circle') + ' 完成';
+        aeRender();
+      }
+      aeCleanup();
+      aeProcessQueue();
+      return;
+    }
+    document.getElementById('aeStopRow').style.display = 'none';
+    document.getElementById('aeAudio').src = URL.createObjectURL(blob);
+    document.getElementById('aeResult').style.display = '';
+    aeStateMsg(icon('check-circle') + ' 提取完成，可试听 / 下载');
+    aeCleanup();
+  }
+
+  function aeLoadVideo(src, isRemote) {
+    aeStateMsg(icon('refresh') + ' 正在加载视频…');
+    aeVideo = document.createElement('video');
+    if (isRemote) aeVideo.crossOrigin = 'anonymous';
+    aeVideo.preload = 'auto';
+    aeVideo.volume = 0;
+    aeVideo.muted = true;
+    // 不能 display:none，部分浏览器 captureStream 会拿不到音轨；用不可见占位元素
+    aeVideo.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;';
+    document.body.appendChild(aeVideo);
+    aeVideo.src = src;
+    var started = false;
+    aeVideo.onloadedmetadata = function() {
+      if (!aeVideo.videoWidth && !aeVideo.videoHeight && !aeVideo.duration) {
+        aeQueueFail('无法解析视频内容，请改用本地文件');
+        return;
+      }
+    };
+    aeVideo.onerror = function() {
+      aeQueueFail('视频加载失败：链接可能无效或不允许跨域，请改用本地文件');
+    };
+    aeVideo.onplay = function() {
+      if (started) return;
+      started = true;
+      // captureStream 的音轨在播放开始后才就绪，需要轮询等待
+      var stream = null;
+      try {
+        stream = aeVideo.captureStream ? aeVideo.captureStream() : null;
+      } catch (e) { stream = null; }
+      if (!stream) { aeQueueFail('该浏览器不支持提取音频，请用 Chrome / Edge / 安卓浏览器'); return; }
+      aeStateMsg(icon('refresh') + ' 正在初始化音轨…');
+      var tries = 0;
+      var wtimer = setInterval(function() {
+        tries++;
+        var t = stream.getAudioTracks()[0];
+        if (t) {
+          clearInterval(wtimer);
+          try {
+            var mStream = new MediaStream([t]);
+            aeRec = new MediaRecorder(mStream, { mimeType: aeFmt.m });
+            aeRec.ondataavailable = function(e) { if (e.data && e.data.size) aeChunks.push(e.data); };
+            aeRec.onstop = function() { aeFinish(); };
+            aeRec.start(500);
+            aeStateMsg(icon('refresh') + ' 录制中…');
+            aeTimer = setInterval(function() {
+              aeStateMsg(icon('refresh') + ' 录制中…（' + aeFmtTime(aeVideo.currentTime || 0) + ' / ' + aeFmtTime(aeVideo.duration || 0) + '）');
+            }, 1000);
+          } catch (e) {
+            aeQueueFail('该浏览器不支持提取音频，请用 Chrome / Edge / 安卓浏览器');
+          }
+        } else if (tries > 50) { // 5 秒内音轨未就绪
+          clearInterval(wtimer);
+          aeQueueFail('未能获取音频轨道：视频可能没有声音，或该浏览器不支持提取');
+        }
+      }, 100);
+    };
+    aeVideo.onended = function() { aeStop(false); };
+    aeVideo.play().catch(function() {
+      aeQueueFail('视频无法播放：链接可能不允许跨域，请改用本地文件');
+    });
+  }
+
+  function aeQueueFail(msg) {
+    if (aeQueueIdx >= 0) {
+      var it = aeFiles[aeQueueIdx];
+      if (it) { it.error = msg; it.statusText = icon('x-circle') + ' 失败'; aeRender(); }
+      aeStateMsg(icon('alert') + ' ' + msg);
+      aeCleanup();
+      aeProcessQueue();
+    } else {
+      aeStateMsg(icon('alert') + ' ' + msg);
+      aeCleanup();
+    }
+  }
+
+  window.aeStop = function(stopQueue) {
+    if (stopQueue !== false) aeQueueStop = true;
+    if (aeAbort) { try { aeAbort.abort(); } catch (e) {} aeAbort = null; }
+    if (aeTimer) { clearInterval(aeTimer); aeTimer = null; }
+    if (aeRec && aeRec.state !== 'inactive') {
+      aeStateMsg('正在生成音频文件…');
+      try { aeRec.stop(); } catch (e) {}
+    } else {
+      aeCleanup();
+      if (aeQueueIdx >= 0) aeProcessQueue();
+      else aeStateMsg(icon('x-circle') + ' 已停止');
+    }
+  };
+
+  function aeFinish() {
+    var fmt = aePickMime() || { ext: 'm4a' };
+    aeBlob = new Blob(aeChunks, { type: fmt.m });
+    if (aeQueueIdx >= 0) {
+      var it = aeFiles[aeQueueIdx];
+      if (it) {
+        it.blob = aeBlob;
+        it.ext = fmt.ext;
+        it.name = aeName;
+        it.statusText = icon('check-circle') + ' 完成';
+        aeRender();
+      }
+      aeCleanup();
+      aeProcessQueue();
+      return;
+    }
+    aeStateMsg('正在生成音频文件…');
+    setTimeout(function() {
+      document.getElementById('aeStopRow').style.display = 'none';
+      document.getElementById('aeAudio').src = URL.createObjectURL(aeBlob);
+      document.getElementById('aeResult').style.display = '';
+      aeStateMsg(icon('check-circle') + ' 提取完成，可试听 / 下载');
+      aeCleanup();
+    }, 120);
+  }
+
+  function aeCleanup() {
+    if (aeAbort) { try { aeAbort.abort(); } catch (e) {} aeAbort = null; }
+    if (aeVideo) {
+      aeVideo.pause();
+      aeVideo.removeAttribute('src');
+      try { aeVideo.load(); } catch (e) {}
+      if (aeVideo.parentNode) aeVideo.parentNode.removeChild(aeVideo);
+      aeVideo = null;
+    }
+    aeRec = null;
+    document.getElementById('aeStopRow').style.display = 'none';
+  }
+
+  window.aeDownload = function() {
+    if (!aeBlob) return;
+    if (isInAppBrowser) { showInappOverlay(); return; }
+    var ext = (aeFmt && aeFmt.ext) || 'm4a';
+    downloadBlob(aeBlob, aeName + '.' + ext);
+  };
+
+  // ===================== 格式转换（音视频互转，本地 ffmpeg.wasm） =====================
+  var fcFiles = [], fcFmt = 'mp4', fcBusy = false, fcQueueStop = false, fcQueueIdx = -1;
+  var fcT0 = 0, fcTicker = null;
+  var fcFFmpeg = null, fcFFmpegLoading = null;
+  var fcAudioExt = /\.(mp3|wav|flac|aac|m4a|ogg|oga|opus|wma|ncm|kgm|vpr)$/i;
+
+  document.getElementById('fcInput').addEventListener('change', function() {
+    var files = this.files ? Array.prototype.slice.call(this.files) : [];
+    this.value = '';
+    fcAdd(files);
+  });
+  var fcDrop = document.getElementById('fcDrop');
+  ['dragenter', 'dragover'].forEach(function(ev) {
+    fcDrop.addEventListener(ev, function(e) { e.preventDefault(); e.stopPropagation(); fcDrop.classList.add('dragover'); });
+  });
+  ['dragleave', 'drop'].forEach(function(ev) {
+    fcDrop.addEventListener(ev, function(e) {
+      e.preventDefault(); e.stopPropagation();
+      fcDrop.classList.remove('dragover');
+      if (ev === 'drop' && e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) fcAdd(Array.prototype.slice.call(e.dataTransfer.files));
+    });
+  });
+  document.getElementById('fcList').addEventListener('click', function(e) { e.stopPropagation(); });
+
+  function fcStateMsg(msg) {
+    var el = document.getElementById('fcState');
+    el.style.display = '';
+    el.innerHTML = msg;
+  }
+
+  window.fcSetFmt = function(fmt) {
+    fcFmt = fmt;
+    document.querySelectorAll('.fc-fmt').forEach(function(b) {
+      b.classList.toggle('active', b.getAttribute('data-fmt') === fmt);
+    });
+  };
+
+  // 根据文件类型动态调整可选格式：音频文件不能转视频（隐藏 MP4）
+  function fcUpdateFmts() {
+    var hasVideo = fcFiles.length === 0 || fcFiles.some(function(it) { return !fcAudioExt.test(it.file.name); });
+    document.querySelectorAll('.fc-fmt').forEach(function(b) {
+      var fmt = b.getAttribute('data-fmt');
+      b.style.display = (fmt === 'mp4' && !hasVideo) ? 'none' : '';
+    });
+    if (fcFmt === 'mp4' && !hasVideo) fcSetFmt('mp3');
+  }
+
+  function fcAdd(files) {
+    if (!files.length) return;
+    var added = 0, dup = 0;
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      var isDup = false;
+      for (var j = 0; j < fcFiles.length; j++) {
+        var o = fcFiles[j].file;
+        if (o.name === f.name && o.size === f.size && o.lastModified === f.lastModified) { isDup = true; break; }
+      }
+      if (isDup) { dup++; continue; }
+      fcFiles.push({ file: f, checked: true, blob: null, name: '', ext: '', error: '' });
+      added++;
+    }
+    var msg = '';
+    if (added) msg = '已添加 ' + added + ' 个文件（共 ' + fcFiles.length + ' 个），点「开始转换」。';
+    else if (dup) msg = '选中的文件都已在列表里（重复项已忽略）。';
+    fcUpdateFmts();
+    fcRender(msg);
+  }
+
+  function fcRender(msg) {
+    var list = document.getElementById('fcList');
+    var hint = document.getElementById('fcHint');
+    var dlAllBtn = document.getElementById('fcDownloadAllBtn');
+    if (!fcFiles.length) { list.innerHTML = ''; list.style.display = 'none'; hint.style.display = ''; if (dlAllBtn) dlAllBtn.style.display = 'none'; return; }
+    hint.style.display = 'none';
+    if (dlAllBtn) dlAllBtn.style.display = fcFiles.some(function(it) { return it.blob && !it.error; }) ? '' : 'none';
+    list.innerHTML = '';
+    for (var i = 0; i < fcFiles.length; i++) {
+      (function(idx) {
+        var it = fcFiles[idx];
+        var f = it.file;
+        var row = document.createElement('div');
+        row.className = 'file-item' + (it.checked === false ? ' off' : '');
+        var status = it.error ? icon('x-circle') + ' 失败' : (it.statusText || '等待转换');
+        row.innerHTML =
+          '<label class="fcheck"><input type="checkbox" ' + (it.checked !== false ? 'checked' : '') + '><span class="fake"></span></label>' +
+          '<svg class="icon" viewBox="0 0 24 24"><use href="#icon-file"></use></svg>' +
+          '<span class="fname" title="' + esc(f.name) + '">' + esc(f.name) + '</span>' +
+          '<span class="fsize">' + fmtSize(f.size) + '</span>' +
+          '<span class="fstatus"' + (it.error ? ' title="' + esc(it.error) + '" style="color:#dc2626"' : '') + '>' + status + '</span>' +
+          '<button type="button" class="fremove" title="移除">' + icon('x') + '</button>';
+        var cb = row.querySelector('input');
+        cb.addEventListener('change', function() {
+          it.checked = cb.checked;
+          row.classList.toggle('off', !cb.checked);
+        });
+        row.querySelector('.fremove').addEventListener('click', function() { fcRemove(idx); });
+        if (it.blob && !it.error) {
+          var btn = document.createElement('button');
+          btn.className = 'btn';
+          btn.style.cssText = 'padding:4px 10px;font-size:12px;min-width:0;margin-left:4px';
+          btn.innerHTML = icon('download');
+          btn.title = '下载转换结果';
+          btn.onclick = function() { fcDownloadItem(idx); };
+          row.appendChild(btn);
+        }
+        list.appendChild(row);
+      })(i);
+    }
+    if (msg) {
+      var tip = document.createElement('div');
+      tip.style.cssText = 'font-size:12px;color:#059669;margin-top:4px;padding:0 4px';
+      tip.textContent = msg;
+      list.insertBefore(tip, list.firstChild);
+    }
+    list.style.display = 'block';
+  }
+
+  window.fcRemove = function(idx) {
+    if (idx < 0 || idx >= fcFiles.length) return;
+    fcFiles.splice(idx, 1);
+    fcUpdateFmts();
+    fcRender();
+  };
+
+  window.fcDownloadItem = function(idx) {
+    var it = fcFiles[idx];
+    if (!it || !it.blob) return;
+    if (isInAppBrowser) { showInappOverlay(); return; }
+    downloadBlob(it.blob, (it.name || 'converted') + '.' + (it.ext || fcFmt));
+  };
+
+  window.fcDownloadAll = function() {
+    if (isInAppBrowser) { showInappOverlay(); return; }
+    var done = fcFiles.filter(function(it) { return it.blob && !it.error; });
+    if (!done.length) { fcStateMsg(icon('alert') + ' 没有可下载的文件'); return; }
+    done.forEach(function(it, i) {
+      setTimeout(function() { downloadBlob(it.blob, (it.name || 'converted') + '.' + (it.ext || fcFmt)); }, i * 300);
+    });
+  };
+
+  window.fcStart = function() {
+    if (fcBusy) return;
+    var todo = fcFiles.filter(function(it) { return it.checked !== false && !it.blob && !it.error; });
+    if (!todo.length) { fcStateMsg(icon('alert') + ' 请先选择文件'); return; }
+    fcBusy = true;
+    fcQueueStop = false;
+    document.getElementById('fcStopRow').style.display = '';
+    fcProcessQueue();
+  };
+
+  window.fcStop = function() { fcQueueStop = true; };
+
+  function fcProcessQueue() {
+    if (fcQueueStop) { fcBusy = false; fcStateMsg(icon('x-circle') + ' 已停止'); document.getElementById('fcStopRow').style.display = 'none'; return; }
+    var todo = fcFiles.filter(function(it) { return it.checked !== false && !it.blob && !it.error; });
+    if (!todo.length) { fcBusy = false; fcStateMsg(icon('check-circle') + ' 全部转换完成'); document.getElementById('fcStopRow').style.display = 'none'; return; }
+    var it = todo[0];
+    fcQueueIdx = fcFiles.indexOf(it);
+    it.statusText = icon('refresh') + ' 转换中…';
+    fcRender();
+    fcDecodeLocal(it);
+  }
+
+  // 目标格式 → ffmpeg 参数（音频格式一律 -vn；mp4 视频 + 音频，纯音频输入则只封装音轨）
+  function fcArgs(fmt, inName, outName, isAudioInput) {
+    var audio = {
+      mp3: ['-vn', '-c:a', 'libmp3lame', '-b:a', '192k'],
+      wav: ['-vn', '-c:a', 'pcm_s16le'],
+      m4a: ['-vn', '-c:a', 'aac', '-b:a', '192k'],
+      flac: ['-vn', '-c:a', 'flac'],
+      ogg: ['-vn', '-c:a', 'libvorbis', '-b:a', '192k']
+    };
+    if (fmt === 'mp4') {
+      if (isAudioInput) return ['-i', inName, '-vn', '-c:a', 'aac', '-b:a', '192k', outName];
+      return ['-i', inName, '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '28', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', outName];
+    }
+    if (audio[fmt]) return ['-i', inName].concat(audio[fmt], [outName]);
+    return null;
+  }
+
+  function fcTranscodeProgress(ev) {
+    var r = ev && ev.ratio;
+    if (typeof r === 'number' && isFinite(r) && r > 0) {
+      var pct = Math.round(Math.min(r, 1) * 100);
+      fcStateMsg(icon('refresh', 'spin') + ' 正在转换 <b>' + pct + '%</b> …（本地处理，不上传）');
+    }
+  }
+
+  function fcLoadFFmpeg() {
+    if (fcFFmpeg && fcFFmpeg.loaded) return Promise.resolve(fcFFmpeg);
+    if (fcFFmpegLoading) return fcFFmpegLoading;
+    fcFFmpegLoading = ffmpegLoadEngine(document.getElementById('fcState'),
+      '正在下载格式转换引擎（约 23MB，仅首次，本站资源更流畅）', fcTranscodeProgress)
+      .then(function(f) { fcFFmpeg = f; return f; })
+      .catch(function(e) {
+        fcFFmpeg = null; fcFFmpegLoading = null;
+        throw (e && e.message) ? e : new Error('转换引擎加载失败，请刷新重试');
+      });
+    return fcFFmpegLoading;
+  }
+
+  // 加密音频（ncm / kgm / vpr）先本地解密，返回真实音频数据和格式
+  function fcDecryptFile(file, ext) {
+    return file.arrayBuffer().then(function(buf) {
+      var dec = ext === 'ncm'
+        ? MusicDecrypt.decryptNcm(buf)
+        : Promise.resolve(MusicDecrypt.decryptKgm(buf, ext === 'vpr'));
+      return dec.then(function(r) {
+        return { data: r.data, ext: (r.format || 'mp3').toLowerCase() };
+      });
+    });
+  }
+
+  function fcDecodeLocal(it) {
+    var file = it.file;
+    var rawExt = (file.name.match(/\.([^.]+)$/) || [, 'mp4'])[1].toLowerCase();
+    var isAudioInput = fcAudioExt.test(file.name);
+    // 音频文件不能转视频格式（混合列表时 MP4 仍可见，逐个拦截）
+    if (fcFmt === 'mp4' && isAudioInput) {
+      fcQueueFail('音频文件无法转换为视频格式（MP4），请改选音频格式');
+      return;
+    }
+    var isEncrypted = rawExt === 'ncm' || rawExt === 'kgm' || rawExt === 'vpr';
+    // 准备输入数据：加密文件先本地解密，普通文件直接读取
+    var prep = isEncrypted
+      ? fcDecryptFile(file, rawExt)
+      : file.arrayBuffer().then(function(buf) { return { data: new Uint8Array(buf), ext: rawExt }; });
+
+    prep.then(function(r) {
+      var inName = 'fc_in.' + r.ext, outName = 'fc_out.' + fcFmt;
+      return fcLoadFFmpeg().then(function() {
+        fcStateMsg(icon('refresh') + ' 正在读取文件 <b>' + esc(file.name) + '</b> …');
+        var ff = fcFFmpeg;
+        var bigTip = (fcFmt === 'mp4' && r.data.length > 300 * 1024 * 1024)
+          ? icon('alert') + ' 文件较大（约 ' + Math.round(r.data.length / 1024 / 1024) + ' MB），本地转码需要较长时间，请耐心等待 '
+          : '';
+        fcStateMsg(icon('refresh', 'spin') + ' 正在转换 <b>' + esc(file.name) + '</b> → ' + fcFmt.toUpperCase() + ' …' + bigTip);
+        var args = fcArgs(fcFmt, inName, outName, isAudioInput);
+        return ff.deleteFile(inName).catch(function() {})
+          .then(function() { return ff.deleteFile(outName).catch(function() {}); })
+          .then(function() { return ff.writeFile(inName, r.data); })
+          .then(function() { return ff.exec(args); })
+          .then(function() { return ff.readFile(outName); });
+      });
+    }).then(function(out) {
+      if (fcQueueStop) { fcProcessQueue(); return; }
+      if (!out || !out.length) { fcQueueFail('转换失败：未生成文件'); return; }
+      var item = fcFiles[fcQueueIdx];
+      if (item) {
+        item.blob = new Blob([out], { type: 'application/octet-stream' });
+        item.ext = fcFmt;
+        item.name = (item.file.name.replace(/\.[^.]+$/, '') || 'converted');
+        item.statusText = icon('check-circle') + ' 完成';
+        fcRender();
+      }
+      fcProcessQueue();
+    }).catch(function(e) {
+      if (fcTicker) { clearInterval(fcTicker); fcTicker = null; }
+      if (fcQueueStop) { fcProcessQueue(); return; }
+      fcQueueFail(e && e.message ? e.message : '转换失败');
+    });
+  }
+
+  function fcQueueFail(msg) {
+    var item = fcFiles[fcQueueIdx];
+    if (item) {
+      item.error = msg;
+      item.statusText = icon('x-circle') + ' 失败';
+      fcRender();
+    }
+    fcProcessQueue();
+  }
+
+  // ===================== 网页录音 / 录屏（捕获任意网页正在播放的内容） =====================
+  var wrStream = null, wrRec = null, wrChunks = [], wrBlob = null, wrTimer = null, wrSec = 0, wrMode = 'audio', wrFmt = null;
+
+  function wrState(msg) {
+    var el = document.getElementById('wrState');
+    el.style.display = '';
+    el.innerHTML = msg;
+  }
+
+  function wrPickMime(mode) {
+    if (mode === 'video') {
+      // MP4(H.264) 优先：新版 Chrome/Edge 的 MediaRecorder 支持直接录 mp4，任何播放器都能看；老浏览器自动回退 webm
+      var vCands = [
+        { m: 'video/mp4;codecs=avc1.42E01E,mp4a.40.2', ext: 'mp4' },
+        { m: 'video/mp4;codecs=avc1.64001F,mp4a.40.2', ext: 'mp4' },
+        { m: 'video/mp4', ext: 'mp4' },
+        { m: 'video/webm;codecs=vp9,opus', ext: 'webm' },
+        { m: 'video/webm;codecs=vp8,opus', ext: 'webm' },
+        { m: 'video/webm', ext: 'webm' }
+      ];
+      for (var i = 0; i < vCands.length; i++) {
+        if (window.MediaRecorder && MediaRecorder.isTypeSupported(vCands[i].m)) return vCands[i];
+      }
+      return null;
+    }
+    return aePickMime();
+  }
+
+  window.wrStart = function(mode) {
+    mode = mode || 'audio';
+    if (wrRec && wrRec.state === 'recording') return;
+    wrMode = mode;
+    document.getElementById('wrConfirm').style.display = 'flex';
+  };
+
+  window.wrCancel = function() {
+    document.getElementById('wrConfirm').style.display = 'none';
+  };
+
+  window.wrBegin = function() {
+    var mode = wrMode;
+    document.getElementById('wrConfirm').style.display = 'none';
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+      wrState(icon('alert') + ' 该浏览器不支持网页录制，请用最新 Chrome / Edge');
+      return;
+    }
+    document.getElementById('wrResult').style.display = 'none';
+    document.getElementById('wrAudio').style.display = 'none';
+    document.getElementById('wrVideo').style.display = 'none';
+    wrState(icon('refresh') + ' 等待选择要录制的画面…');
+    navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+      .then(function(stream) {
+        var aTracks = stream.getAudioTracks();
+        var vTracks = stream.getVideoTracks();
+        if (!aTracks.length) {
+          stream.getTracks().forEach(function(t) { t.stop(); });
+          wrState(icon('alert') + ' 所选窗口没有捕获到声音：请在浏览器弹窗中<b>勾选"分享标签页音频"</b>，或换一个正在出声的标签页');
+          return;
+        }
+        // 音频模式：丢弃视频轨；视频模式：保留全部
+        if (mode === 'audio') {
+          vTracks.forEach(function(t) { t.stop(); });
+        }
+        var useTracks = mode === 'video' ? stream.getTracks() : aTracks;
+        wrStream = stream;
+        wrChunks = [];
+        wrSec = 0;
+        var fmt = wrPickMime(mode) || { m: (mode === 'video' ? 'video/webm' : 'audio/webm;codecs=opus'), ext: 'webm' };
+        var mStream = new MediaStream(useTracks);
+        try {
+          wrRec = new MediaRecorder(mStream, { mimeType: fmt.m });
+        } catch (e) {
+          // 降级：去掉 codecs 参数
+          var fallback = mode === 'video' ? 'video/webm' : 'audio/webm';
+          wrRec = new MediaRecorder(mStream, { mimeType: fallback });
+          fmt = { m: fallback, ext: 'webm' };
+        }
+        wrFmt = fmt;
+        wrRec.ondataavailable = function(e) { if (e.data && e.data.size) wrChunks.push(e.data); };
+        wrRec.onstop = function() { wrFinish(); };
+        wrRec.start(500);
+        document.getElementById('wrStopRow').style.display = '';
+        // 用户点浏览器顶部"停止共享"按钮时自动停止
+        (aTracks[0] || useTracks[0]).addEventListener('ended', function() { wrStop(); });
+        var verb = mode === 'video' ? '录屏中' : '录音中';
+        wrTimer = setInterval(function() {
+          wrSec++;
+          wrState(icon('refresh') + ' ' + verb + '… ' + aeFmtTime(wrSec));
+        }, 1000);
+        wrState(icon('check-circle') + ' ' + verb + '…（点下方"停止录制"，或点浏览器顶部的"停止共享"）');
+      })
+      .catch(function(err) {
+        wrState(icon('alert') + ' 未开始录制：' + ((err && err.message) || '已取消选择'));
+      });
+  };
+
+  window.wrStop = function() {
+    if (wrRec && wrRec.state !== 'inactive') {
+      wrState('正在生成文件…');
+      try { wrRec.stop(); } catch (e) {}
+    } else {
+      wrCleanup();
+    }
+  };
+
+  function wrFinish() {
+    var mode = wrMode;
+    var fmt = wrFmt || (wrPickMime(mode) || { m: (mode === 'video' ? 'video/webm' : 'audio/webm'), ext: 'webm' });
+    setTimeout(function() {
+      wrBlob = new Blob(wrChunks, { type: fmt.m });
+      var url = URL.createObjectURL(wrBlob);
+      document.getElementById('wrStopRow').style.display = 'none';
+      if (mode === 'video') {
+        var v = document.getElementById('wrVideo');
+        v.src = url;
+        v.style.display = '';
+      } else {
+        document.getElementById('wrAudio').src = url;
+        document.getElementById('wrAudio').style.display = '';
+      }
+      document.getElementById('wrResult').style.display = '';
+      var label = mode === 'video' ? '录屏完成' : '录音完成';
+      wrState(icon('check-circle') + ' ' + label + '（' + aeFmtTime(wrSec) + '），' + fmt.ext.toUpperCase() + ' 格式，可预览 / 下载');
+      wrCleanup();
+    }, 120);
+  }
+
+  function wrCleanup() {
+    if (wrTimer) { clearInterval(wrTimer); wrTimer = null; }
+    if (wrStream) {
+      try { wrStream.getTracks().forEach(function(t) { t.stop(); }); } catch (e) {}
+      wrStream = null;
+    }
+    wrRec = null;
+    document.getElementById('wrStopRow').style.display = 'none';
+  }
+
+  window.wrDownload = function() {
+    if (!wrBlob) return;
+    if (isInAppBrowser) { showInappOverlay(); return; }
+    var mode = wrMode;
+    var fmt = wrFmt || (wrPickMime(mode) || { m: (mode === 'video' ? 'video/webm' : 'audio/webm'), ext: 'webm' });
+    var prefix = mode === 'video' ? 'screen-record' : 'recorded-audio';
+    var now = new Date();
+    var ts = now.getFullYear() + '' + ('0' + (now.getMonth() + 1)).slice(-2) + ('0' + now.getDate()).slice(-2) + '-' + ('0' + now.getHours()).slice(-2) + ('0' + now.getMinutes()).slice(-2);
+    downloadBlob(wrBlob, prefix + '-' + ts + '.' + fmt.ext);
+  };
+
+})();
+</script>
+</body>
+</html>

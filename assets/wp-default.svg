@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e0f2fe"/>
+      <stop offset="0.45" stop-color="#f5f5f7"/>
+      <stop offset="1" stop-color="#ede9fe"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="0.18" cy="0.12" r="0.6">
+      <stop offset="0" stop-color="#fef9c3" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#fef9c3" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="0.88" cy="0.82" r="0.55">
+      <stop offset="0" stop-color="#c7d2fe" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#c7d2fe" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow3" cx="0.8" cy="0.15" r="0.45">
+      <stop offset="0" stop-color="#fbcfe8" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#fbcfe8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#base)"/>
+  <rect width="1920" height="1080" fill="url(#glow1)"/>
+  <rect width="1920" height="1080" fill="url(#glow2)"/>
+  <rect width="1920" height="1080" fill="url(#glow3)"/>
+</svg>

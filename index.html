@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>酸柠檬</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 2 24 20'%3E%3Cpath d='M12 3c-4.6 0-8 3.2-8 7.2 0 3.8 3.2 8.3 8 8.3s8-4.5 8-8.3C20 6.2 16.6 3 12 3z' fill='%23facc15' stroke='%23eab308' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12 3c-1-1.8-3.5-2.5-5.5-1.8 1 1.5 3.5 2 5.5 1.8z' fill='%2378350f'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="assets/icons.css?v=64309f72">
+    <link rel="stylesheet" href="css/style.css?v=877a2789">
+    <script>
+      var _hmt = _hmt || [];
+      (function() {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?63b7d85356770788df516f35bed1ae33";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+      })();
+    </script>
+</head>
+<body>
+<script src="assets/icons.js?v=125a0bb4"></script>
+
+<div id="wp"></div>
+
+<div id="app">
+    <div class="clock-row">
+        <svg class="icon logo-inline" style="color:#facc15" viewBox="0 0 24 24"><use href="#icon-lemon"></use></svg>
+        <span id="clock">00:00:00</span>
+    </div>
+    <div id="date">加载中…</div>
+
+    <div class="search-wrap">
+        <div class="engine-dd" id="engineDD">
+            <button class="engine-in-btn" id="engineDDBtn" type="button" onclick="toggleEngineDD(event)">
+                <span id="engineDDLabel">必应</span>
+                <svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5l3 3 3-3"/></svg>
+            </button>
+            <div class="engine-dd-panel" id="engineDDPanel"></div>
+        </div>
+        <input id="searchBox" class="search-box" placeholder="搜索或输入网址…" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" readonly onfocus="this.removeAttribute('readonly')"
+               onkeydown="if(event.key==='Enter')doSearch(this.value)">
+        <button class="search-go-btn" id="searchGoBtn" onclick="doSearch(document.getElementById('searchBox').value)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <circle cx="11" cy="11" r="7"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+        </button>
+        <div id="searchHint" class="search-hint" style="display:none"></div>
+    </div>
+
+</div>
+
+<div class="bottom-dock" id="bottomDock"></div>
+
+<!-- ======== 设置面板 ======== -->
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>设置</h2>
+            <button class="modal-close" onclick="toggleSettings()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-x"></use></svg></button>
+        </div>
+
+        <div class="m-group">
+            <h3>效果</h3>
+            <div class="wp-grid" id="wpGrid"></div>
+            <div class="add-row" style="margin-top:8px">
+                <input class="inp" id="customWp" placeholder="自定义壁纸URL (回车生效)" style="margin:0;flex:2" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')"
+                  onkeydown="if(event.key==='Enter')setCustWp(this.value)">
+                <button class="btn-sm" onclick="setCustWp(document.getElementById('customWp').value)">添加</button>
+            </div>
+            <div class="s-row">
+                <span>模糊</span>
+                <input class="range" type="range" id="blurR" min="0" max="20" oninput="setBlur(this.value)">
+            </div>
+            <div class="s-row">
+                <span>暗度</span>
+                <input class="range" type="range" id="briR" min="40" max="120" oninput="setBright(this.value)">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ======== 网站快捷入口弹窗 ======== -->
+<div class="add-overlay" id="shortPanelOverlay">
+    <div class="add-dialog" style="width:540px">
+        <div class="modal-header">
+            <h3 style="margin:0">网站快捷入口</h3>
+            <button class="modal-close" onclick="toggleShortPanel()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-x"></use></svg></button>
+        </div>
+        <!-- 网格视图 -->
+        <div class="short-grid" id="shortGrid" style="margin-top:4px"></div>
+        <input type="file" id="importShortFile" accept=".json,.html" style="display:none" onchange="importShorts(this)">
+        <!-- 内联添加/编辑表单（不叠加弹窗，直接在当前弹窗内切换） -->
+        <div id="shortAddForm" style="display:none;margin-top:6px">
+            <h3 id="shortAddTitle" style="margin:0 0 12px;color:#1f2937">添加网站</h3>
+            <div class="edit-fields">
+                            <input class="inp" id="shortAddIcon" placeholder="图标 SVG 或留空（自动获取）" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')">
+                <input class="inp" id="shortAddName" placeholder="网站名称 *" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')">
+                <input class="inp" id="shortAddUrl" placeholder="网址 (https://...) *" autocomplete="off" readonly onfocus="this.removeAttribute('readonly')">
+            </div>
+            <div class="add-row" style="justify-content:flex-end;margin-top:12px">
+                <button class="btn-sm btn-outline" onclick="shortAddCancel()">取消</button>
+                <button class="btn-sm" onclick="shortAddSave()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======== 确认弹窗 ======== -->
+<div class="add-overlay" id="confirmOverlay">
+    <div class="add-dialog" style="width:360px">
+        <h3 id="confirmTitle" style="color:#1f2937">确认</h3>
+        <p id="confirmMsg" style="font-size:12px;color:#4b5563;margin-bottom:12px"></p>
+        <div class="add-row" style="justify-content:flex-end">
+            <button class="btn-sm btn-outline" onclick="closeConfirm()">取消</button>
+            <button class="btn-sm del" onclick="execConfirm()">确认</button>
+        </div>
+    </div>
+</div>
+
+<!-- ======== 右键菜单 ======== -->
+<div class="ctx-menu" id="ctxMenu">
+    <div class="ctx-item" onclick="editShortcut()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-edit"></use></svg> 编辑</div>
+    <div class="ctx-item danger" onclick="deleteShortcut()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-trash"></use></svg> 删除</div>
+</div>
+
+<script src="js/script.js?v=brand02" defer></script>
+
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>在线播放器 · 酸柠檬</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 2 24 20'%3E%3Cpath d='M12 3c-4.6 0-8 3.2-8 7.2 0 3.8 3.2 8.3 8 8.3s8-4.5 8-8.3C20 6.2 16.6 3 12 3z' fill='%23facc15' stroke='%23eab308' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12 3c-1-1.8-3.5-2.5-5.5-1.8 1 1.5 3.5 2 5.5 1.8z' fill='%2378350f'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="../assets/icons.css">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei","Segoe UI",sans-serif; background:#f5f5f7; color:#1d1d1f; min-height:100vh; }
+  .topbar { background:rgba(255,255,255,.82); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-bottom:1px solid rgba(29,29,31,.06); box-shadow:0 2px 12px rgba(29,29,31,.04); display:flex; align-items:center; gap:12px; padding:8px 20px; min-height:52px; position:sticky; top:0; z-index:100; }
+  .topbar .logo { font-size:1.2rem; font-weight:700; color:#0ea5e9; flex-shrink:0; }
+  @supports (-webkit-background-clip: text) or (background-clip: text) { .topbar .logo { background:linear-gradient(135deg,#0ea5e9,#6366f1); background-clip:text; -webkit-background-clip:text; color:transparent; } }
+  .topbar a.home { color:#4b5563; text-decoration:none; font-size:13px; padding:5px 12px; border-radius:8px; border:1px solid #d1d5db; flex-shrink:0; white-space:nowrap; margin-left:auto; }
+  .topbar a.home:hover { color:#1f2937; border-color:#10b981; }
+  .wrap { max-width:920px; margin:0 auto; padding:14px 12px 40px; }
+  .card { background:#fff; border:1px solid rgba(29,29,31,.06); border-radius:18px; box-shadow:0 4px 20px rgba(29,29,31,.05); padding:16px; }
+  .card + .card { margin-top:14px; }
+  .card-title { font-size:14px; font-weight:700; color:#1f2937; display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .card-title use[href="#icon-play"]{color:#ef4444}
+  .player-box { position:relative; width:100%; background:#000; border-radius:12px; overflow:hidden; }
+  .player-box video { display:block; width:100%; max-height:70vh; aspect-ratio:16/9; background:#000; }
+  .ph { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; color:#9ca3af; pointer-events:none; }
+  .ph svg { width:56px; height:56px; opacity:.4; }
+  .ph .ph-txt { font-size:13px; }
+  .player-box.playing .ph { display:none; }
+  .url-row { display:flex; gap:8px; margin-top:12px; }
+  .url-row input { flex:1; min-width:0; border:1px solid #d1d5db; border-radius:10px; padding:10px 12px; font-size:14px; outline:none; background:#fff; color:#1d1d1f; }
+  .url-row input:focus { border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,.12); }
+  .url-row button { flex-shrink:0; display:inline-flex; align-items:center; gap:6px; padding:0 22px; background:#10b981; color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; transition:all .15s; }
+  .url-row button:hover { background:#059669; }
+  .url-row button svg { width:15px; height:15px; }
+  .fmt { font-size:12px; color:#6b7280; margin-top:8px; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .fmt b { font-weight:600; color:#374151; }
+  .fmt .tag { font-size:11px; color:#0d9488; background:#ccfbf1; border:1px solid #99f6e4; padding:1px 8px; border-radius:999px; }
+  .status { font-size:12px; color:#f59e0b; margin-top:8px; display:none; align-items:center; gap:6px; }
+  .status.show { display:flex; }
+  .status.err { color:#ef4444; }
+  .status svg { width:14px; height:14px; flex-shrink:0; }
+  .his-title { font-size:12px; color:#6b7280; margin:12px 0 6px; display:flex; align-items:center; gap:6px; }
+  .his-title use[href="#icon-clock"]{color:#0ea5e9}
+  #hisList { display:flex; flex-wrap:wrap; gap:6px; }
+  #hisList:empty::after { content:'暂无播放记录'; font-size:12px; color:#9ca3af; }
+  .his-chip { max-width:100%; display:inline-flex; align-items:center; gap:5px; background:#f3f4f6; border:1px solid rgba(29,29,31,.06); border-radius:8px; padding:5px 10px; font-size:12px; color:#374151; cursor:pointer; transition:all .15s; }
+  .his-chip:hover { background:#e5e7eb; }
+  .his-chip span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:220px; }
+  .his-chip .x { color:#9ca3af; font-weight:700; padding:0 2px; }
+  .his-chip .x:hover { color:#ef4444; }
+  .empty { font-size:12px; color:#9ca3af; }
+  @media (max-width:560px) {
+    .url-row button { padding:0 16px; }
+    .his-chip span { max-width:140px; }
+  }
+</style>
+</head>
+<body>
+<script src="../assets/icons.js" defer></script>
+<div class="topbar">
+  <span class="logo">在线播放器</span>
+  <a class="home" href="../index.html">首页</a>
+</div>
+<div class="wrap">
+  <div class="card">
+    <div class="card-title"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-play"></use></svg> 播放链接</div>
+    <div class="player-box" id="playerBox">
+      <video id="video" controls playsinline preload="auto"></video>
+      <div class="ph" id="ph">
+        <svg class="icon" viewBox="0 0 24 24"><use href="#icon-play"></use></svg>
+        <span class="ph-txt">粘贴视频链接，点击播放</span>
+      </div>
+    </div>
+    <div class="url-row">
+      <input id="url" placeholder="粘贴视频地址，例如 https://example.com/video.mp4 或 ...m3u8" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+             onkeydown="if(event.key==='Enter')goPlay()">
+      <button onclick="goPlay()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-play"></use></svg> 播放</button>
+    </div>
+    <div class="fmt"><b>支持格式：</b><span class="tag">MP4</span><span class="tag">M3U8</span><span class="tag">FLV</span><span class="tag">DASH(.mpd)</span><span style="color:#9ca3af">视频地址需可公开访问</span></div>
+    <div class="status" id="status"></div>
+    <div class="his-title"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-clock"></use></svg> 最近播放</div>
+    <div id="hisList"></div>
+  </div>
+</div>
+<script src="../assets/vendor/hls.min.js"></script>
+<script src="../assets/vendor/flv.min.js"></script>
+<script src="../assets/vendor/dash.all.min.js"></script>
+<script>
+(function(){
+  var video=document.getElementById('video'), box=document.getElementById('playerBox');
+  var statusEl=document.getElementById('status');
+  var hls=null, flvP=null, dashP=null, cur='';
+  var LS_KEY='player_history';
+
+  function setStatus(msg,isErr){
+    statusEl.innerHTML='<svg class="icon" viewBox="0 0 24 24"><use href="#'+(isErr?'icon-alert':'icon-zap')+'"></use></svg> '+msg;
+    statusEl.className='status show'+(isErr?' err':'');
+  }
+  function clearStatus(){ statusEl.className='status'; statusEl.innerHTML=''; }
+
+  function stopAll(){
+    if(hls){ try{hls.destroy();}catch(e){} hls=null; }
+    if(flvP){ try{flvP.destroy();}catch(e){} flvP=null; }
+    if(dashP){ try{dashP.destroy();}catch(e){} dashP=null; }
+    video.removeAttribute('src'); video.load();
+  }
+
+  function detect(url){
+    var p=url.split('?')[0].split('#')[0].toLowerCase();
+    if(/\.m3u8($|\/)/.test(p)) return 'hls';
+    if(/\.flv($|\/)/.test(p)) return 'flv';
+    if(/\.mpd($|\/)/.test(p)) return 'dash';
+    if(/\.(mp4|webm|ogg|ogv|mov|m4v|mkv|avi|wmv|ts)($|\/)/.test(p)) return 'native';
+    return 'auto';
+  }
+
+  function getHistory(){
+    try{ return JSON.parse(localStorage.getItem(LS_KEY)||'[]'); }catch(e){ return []; }
+  }
+  function saveHistory(url){
+    var h=getHistory().filter(function(x){return x!==url;});
+    h.unshift(url);
+    localStorage.setItem(LS_KEY, JSON.stringify(h.slice(0,8)));
+    renderHistory();
+  }
+  function renderHistory(){
+    var el=document.getElementById('hisList');
+    var h=getHistory();
+    el.innerHTML=h.map(function(u){
+      var s=u.replace(/^https?:\/\//,'');
+      return '<span class="his-chip" title="'+u+'"><span onclick="window.__p(\''+u.replace(/'/g,'\\\'')+'\')">'+s+'</span><span class="x" onclick="delHis(this)">&times;</span></span>';
+    }).join('');
+  }
+  window.__p=function(u){ play(u); };
+  window.delHis=function(span){
+    var url=span.parentElement.getAttribute('title');
+    var h=getHistory().filter(function(x){return x!==url;});
+    localStorage.setItem(LS_KEY, JSON.stringify(h));
+    renderHistory();
+    span.parentElement.remove();
+  };
+
+  function play(url){
+    url=(url||'').trim();
+    if(!url) return;
+    cur=url;
+    clearStatus();
+    stopAll();
+    var t=detect(url);
+    setStatus('正在加载…');
+    try{
+      if(t==='hls'){
+        if(window.Hls && Hls.isSupported()){
+          hls=new Hls();
+          hls.on(Hls.Events.ERROR,function(ev,data){
+            if(data.fatal){ setStatus('直播源加载失败：'+data.details,true); }
+          });
+          hls.loadSource(url); hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED,function(){ video.play().catch(function(){}); });
+        }else if(video.canPlayType('application/vnd.apple.mpegurl')){
+          video.src=url; video.play().catch(function(){});
+        }else{
+          setStatus('当前浏览器不支持 M3U8 直播流',true); return;
+        }
+      }else if(t==='flv'){
+        if(window.flvjs && flvjs.isSupported()){
+          flvP=flvjs.createPlayer({type:'flv',url:url,isLive:true});
+          flvP.attachMediaElement(video);
+          flvP.on(flvjs.Events.ERROR,function(){ setStatus('FLV 流加载失败',true); });
+          flvP.load(); flvP.play();
+        }else{
+          setStatus('当前浏览器不支持 FLV 播放',true); return;
+        }
+      }else if(t==='dash'){
+        if(window.dashjs){
+          dashP=dashjs.MediaPlayer().create();
+          dashP.on(dashP.events.ERROR,function(){ setStatus('DASH 流加载失败',true); });
+          dashP.initialize(video,url,true);
+        }else{
+          setStatus('当前浏览器不支持 DASH 播放',true); return;
+        }
+      }else{
+        video.src=url; video.play().catch(function(){});
+      }
+      saveHistory(url);
+      box.classList.add('playing');
+    }catch(e){
+      setStatus('播放出错：'+e.message,true);
+    }
+  }
+  window.play=play;
+  window.goPlay=function(){ play(document.getElementById('url').value); };
+
+  video.addEventListener('playing',function(){ clearStatus(); box.classList.add('playing'); });
+  video.addEventListener('waiting',function(){ setStatus('缓冲中…'); });
+  video.addEventListener('error',function(){
+    if(cur) setStatus('播放失败，请检查链接是否有效或可公开访问',true);
+  });
+
+  renderHistory();
+  // 读取 URL 参数 ?url=
+  try{
+    var m=location.search.match(/[?&]url=([^&]+)/);
+    if(m){ document.getElementById('url').value=decodeURIComponent(m[1]); play(decodeURIComponent(m[1])); }
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
