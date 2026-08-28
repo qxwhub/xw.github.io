@@ -449,9 +449,6 @@
       <!-- 免服务器配对二维码：配对码/应答码生成后显示，对方可扫码自动填入 -->
       <div class="sdp-qr-wrap" id="lanSdpQrWrap" style="display:none">
         <canvas id="lanSdpQr"></canvas>
-        <div class="sdp-actions">
-          <button class="btn" id="lanSdpScanBtn" onclick="lanSdpScan()" style="display:none"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-scan"></use></svg> 扫码获取配对码</button>
-        </div>
       </div>
       <!-- 摄像头扫码预览 -->
       <div class="sdp-scan" id="lanSdpScanBox" style="display:none">
@@ -460,6 +457,7 @@
         <div class="sdp-actions"><button class="btn" onclick="lanSdpScanStop()">取消</button></div>
       </div>
       <div class="sdp-actions">
+        <button class="btn" id="lanSdpScanBtn" onclick="lanSdpScan()" style="display:none"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-scan"></use></svg> 扫码获取配对码</button>
         <button class="btn" id="lanSdpActBtn" onclick="lanSdpAct()"></button>
         <button class="btn" id="lanSdpCopyBtn" onclick="lanSdpCopy()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-clipboard"></use></svg> 复制</button>
       </div>
@@ -1467,18 +1465,19 @@
     var qrWrap = document.getElementById('lanSdpQrWrap');
     var scanBtn = document.getElementById('lanSdpScanBtn');
     qrWrap.style.display = (sdpState === 'offer-ready' || sdpState === 'answer-ready') ? '' : 'none';
-    scanBtn.style.display = (sdpState === 'offer-input' || sdpState === 'answer-input') ? '' : 'none';
+    // 扫码按钮显示时机：需要填入配对码/应答码时（接收方 idle 态也显示，方便直接扫码）
+    scanBtn.style.display = (sdpState === 'offer-input' || sdpState === 'answer-input' || (sdpState === 'idle' && !isSender)) ? '' : 'none';
     if (sdpState === 'idle') {
       if (isSender) {
         guide.innerHTML = '公共信令连不上时用这个，全程不走任何服务器，断网也能传。<br>① 点「生成配对码」；② 复制发给对方；③ 对方回发「应答码」后粘贴即可直连。';
         act.innerHTML = icon('zap') + ' 生成配对码';
         act.disabled = false;
       } else {
-        guide.innerHTML = '对方连不上信令服务器时用这个，全程不走任何服务器。<br>① 让对方点「免服务器配对」生成配对码发给你；② 点下方按钮粘贴配对码提交；③ 把生成的应答码复制发回给对方。';
+        guide.innerHTML = '对方点「免服务器配对」生成配对码后，你可以扫码或粘贴获取。<br>① 点下方「扫码获取配对码」扫对方屏幕上的二维码（或粘贴对方发来的配对码）；② 提交后生成应答码，发回给对方即可直连。';
         act.innerHTML = icon('clipboard') + ' 粘贴配对码';
         act.disabled = false;
         area.readOnly = false;
-        area.placeholder = '（点下方按钮后粘贴对方发来的配对码）';
+        area.placeholder = '（点下方按钮粘贴或扫码获取对方发来的配对码）';
       }
       copy.disabled = true;
       return;
@@ -1502,12 +1501,12 @@
       return;
     }
     if (sdpState === 'answer-input') {
-      guide.innerHTML = '把对方发来的配对码完整粘贴到下面，点「提交配对码」，生成的应答码会显示出来供你复制发回。';
+      guide.innerHTML = '把对方发来的配对码扫码或粘贴到下面，点「提交配对码」，生成的应答码会显示出来供你扫码/复制发回。';
       act.innerHTML = icon('check-circle') + ' 提交配对码';
       act.disabled = false;
       area.readOnly = false;
       area.value = '';
-      area.placeholder = '粘贴对方发来的配对码…';
+      area.placeholder = '粘贴或扫码填入对方发来的配对码…';
       copy.disabled = true;
       return;
     }
@@ -1676,6 +1675,11 @@
               area.readOnly = false;
               area.value = res.data;
               lanSdpScanStop();
+              // 接收方 idle 态扫码：自动进入 answer-input，可直接提交
+              if (sdpState === 'idle' && lanRole === 'receiver') {
+                sdpState = 'answer-input';
+                lanSdpRender();
+              }
               lanState(icon('check-circle') + ' 已识别配对码，点下方按钮提交即可', '#059669');
               return;
             }
