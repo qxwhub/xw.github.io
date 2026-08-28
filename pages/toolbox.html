@@ -1483,7 +1483,7 @@
       return;
     }
     if (sdpState === 'offer-ready') {
-      guide.innerHTML = '配对码已生成，点「复制」发给对方；对方提交后会发回应答码，拿到后点「粘贴应答码并连接」。';
+      guide.innerHTML = '配对码已生成，点「复制」发给对方；对方提交后会生成应答码发回，你拿到后点「粘贴应答码并连接」完成直连。';
       act.innerHTML = '粘贴应答码并连接';
       act.disabled = false;
       area.readOnly = true;
@@ -1511,8 +1511,8 @@
       return;
     }
     // answer-ready
-    guide.innerHTML = '应答码已生成，点「复制」发回给对方；对方提交后会自动开始传输，本页自动接收保存。';
-    act.innerHTML = '等待对方确认…';
+    guide.innerHTML = '应答码已生成，点「复制」发回给对方；等对方提交应答码后会自动开始传输，本页自动接收保存。';
+    act.innerHTML = '等待对方提交应答码…';
     act.disabled = true;
     area.readOnly = true;
     copy.disabled = !area.value;
