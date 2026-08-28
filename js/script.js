@@ -265,8 +265,14 @@ var wpIdx  = (function() {
   if (idx < 0) idx = 0;
   return idx;
 })();
-var blurVal    = parseInt(localStorage.getItem('lime_blur') || '0');
-var briVal     = parseInt(localStorage.getItem('lime_bri') || '100');
+// 解析 localStorage 的数值设置：杜绝 NaN → 传给 CSS blur(NaNpx) 时浏览器变成极端模糊
+function _numClamp(raw, fallback, min, max) {
+  var n = parseInt(raw, 10);
+  if (isNaN(n) || !isFinite(n)) n = fallback;
+  return Math.min(Math.max(n, min), max);
+}
+var blurVal    = _numClamp(localStorage.getItem('lime_blur'),    0,   0, 40);
+var briVal     = _numClamp(localStorage.getItem('lime_bri'),   100, 30, 150);
 
 var ctxIdx     = -1;   // 捷径右键索引
 
@@ -371,12 +377,12 @@ function setCustWp(u) {
   document.getElementById('customWp').value = '';
 }
 function setBlur(v) {
-  blurVal = parseInt(v);
+  blurVal = _numClamp(v, 0, 0, 40);
   document.getElementById('wp').style.setProperty('--wp-blur', blurVal + 'px');
   localStorage.setItem('lime_blur', blurVal);
 }
 function setBright(v) {
-  briVal = parseInt(v);
+  briVal = _numClamp(v, 100, 30, 150);
   document.getElementById('wp').style.setProperty('--wp-bright', (briVal / 100).toString());
   localStorage.setItem('lime_bri', briVal);
 }

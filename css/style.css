@@ -10,6 +10,9 @@
   --shadow: 0 10px 40px rgba(29,29,31,.08);
   --font: -apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei","Segoe UI",sans-serif;
   --tran: .3s cubic-bezier(.4,0,.2,1);
+  /* 壁纸滤镜 CSS 变量兜底（JS 未执行 / localStorage 脏值时仍保持清晰） */
+  --wp-blur: 0px;
+  --wp-bright: 1;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body {
