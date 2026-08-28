@@ -3189,15 +3189,17 @@
       aeStateMsg(icon('refresh', 'spin') + ' 正在提取 <b>' + pct + '%</b> …（本地处理，不上传）');
     }
   }
-  // ---- ffmpeg.wasm 引擎加载：unpkg CDN 优先（实测快约 11 倍），本站自托管回退，带下载进度 ----
+  // ---- ffmpeg.wasm 引擎加载：多源按序尝试（unpkg 最快 → jsdelivr → 本站自托管兜底），带实时已下载量 ----
   var FF_FILES = {
     lib: '../assets/vendor/ffmpeg/ffmpeg.min.js?v=2',
     core: [
       'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
+      'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
       '../assets/vendor/ffmpeg/ffmpeg-core.js?v=2'
     ],
     wasm: [
       'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm',
+      'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm',
       '../assets/vendor/ffmpeg/ffmpeg-core.wasm?v=2'
     ]
   };
