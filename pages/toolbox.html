@@ -111,6 +111,16 @@
      .sdp-qr-wrap canvas { max-width:100%; width:264px; height:264px; border-radius:10px; background:#fff; padding:8px; box-shadow:0 1px 4px rgba(0,0,0,.08); box-sizing:border-box; }
     .sdp-scan { margin-top:10px; text-align:center; }
     .sdp-scan video { width:100%; max-width:240px; max-height:320px; border-radius:10px; background:#000; }
+    /* 免服务器配对：左右双栏（自己的码 / 对方的码） */
+    .sdp-cols { display:flex; gap:10px; margin-top:12px; }
+    .sdp-cols.rev { flex-direction:row-reverse; }
+    .sdp-col { flex:1; min-width:0; border:1px dashed #d1d5db; border-radius:10px; padding:10px 8px; text-align:center; }
+    .sdp-col-title { font-size:12px; color:#4b5563; margin-bottom:8px; }
+    .sdp-slot { min-height:130px; display:flex; align-items:center; justify-content:center; }
+    .sdp-slot canvas { max-width:100%; width:150px; height:150px; border-radius:8px; background:#fff; padding:6px; box-sizing:border-box; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+    .sdp-slot-empty { color:#9ca3af; font-size:11.5px; line-height:1.7; }
+    .sdp-slot.clickable { cursor:pointer; }
+    .sdp-slot.clickable:active { background:#f3f4f6; }
 
     /* 加入确认弹窗（手机扫码/链接打开时） */
     .modal-mask { position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:200; padding:20px; }
@@ -445,11 +455,23 @@
     <div class="pair-box" id="lanSdpBox" style="display:none">
       <label id="lanSdpTitle">免服务器配对（不用信令服务器）</label>
       <div class="hint" id="lanSdpGuide"></div>
-      <textarea id="lanSdpArea" rows="4" readonly placeholder=""></textarea>
-      <!-- 免服务器配对二维码：配对码/应答码生成后显示，对方可扫码自动填入 -->
-      <div class="sdp-qr-wrap" id="lanSdpQrWrap" style="display:none">
-        <canvas id="lanSdpQr"></canvas>
+      <!-- 左右双栏：一侧显示自己的配对码/接收码，另一侧是对方的码（空位，点击选择二维码图片识别） -->
+      <div class="sdp-cols" id="lanSdpCols">
+        <div class="sdp-col">
+          <div class="sdp-col-title" id="sdpMineTitle">我的配对码</div>
+          <div class="sdp-slot" id="sdpMineSlot">
+            <span class="sdp-slot-empty" id="sdpMineEmpty">点上方按钮生成后显示</span>
+            <canvas id="lanSdpQr" style="display:none"></canvas>
+          </div>
+        </div>
+        <div class="sdp-col">
+          <div class="sdp-col-title" id="sdpTheirsTitle">对方的接收码</div>
+          <div class="sdp-slot clickable" id="sdpTheirsSlot" onclick="lanSdpPickImage()">
+            <span class="sdp-slot-empty" id="sdpTheirsHint"><svg class="icon" viewBox="0 0 24 24" style="width:22px;height:22px;margin-bottom:4px"><use href="#icon-scan"></use></svg><br>把配对码发给对方生成接收码<br>点击选择接收方的二维码</span>
+          </div>
+        </div>
       </div>
+      <textarea id="lanSdpArea" rows="3" readonly placeholder=""></textarea>
       <!-- 摄像头扫码预览 -->
       <div class="sdp-scan" id="lanSdpScanBox" style="display:none">
         <video id="lanSdpScanVideo" playsinline muted></video>
@@ -461,6 +483,7 @@
         <button class="btn" id="lanSdpActBtn" onclick="lanSdpAct()"></button>
         <button class="btn" id="lanSdpCopyBtn" onclick="lanSdpCopy()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-clipboard"></use></svg> 复制</button>
       </div>
+      <input type="file" id="lanSdpFileInput" accept="image/*" style="display:none" onchange="lanSdpFileChanged(this)">
     </div>
   </div>
 
@@ -1461,11 +1484,19 @@
     var act = document.getElementById('lanSdpActBtn');
     var copy = document.getElementById('lanSdpCopyBtn');
     var isSender = lanRole === 'sender';
-    // 二维码显隐：配对码/应答码已生成时显示二维码；需要输入码时才显示扫码按钮
-    var qrWrap = document.getElementById('lanSdpQrWrap');
-    var scanBtn = document.getElementById('lanSdpScanBtn');
-    qrWrap.style.display = (sdpState === 'offer-ready' || sdpState === 'answer-ready') ? '' : 'none';
+    // 左右双栏：接收方左右对调，标题/提示按角色切换
+    var cols = document.getElementById('lanSdpCols');
+    if (cols) cols.classList.toggle('rev', !isSender);
+    var mineTitle = document.getElementById('sdpMineTitle');
+    var theirsTitle = document.getElementById('sdpTheirsTitle');
+    if (mineTitle) mineTitle.textContent = isSender ? '我的配对码' : '我的接收码';
+    if (theirsTitle) theirsTitle.textContent = isSender ? '对方的接收码' : '对方的配对码';
+    var theirsHint = document.getElementById('sdpTheirsHint');
+    if (theirsHint) {
+      theirsHint.innerHTML = '<svg class="icon" viewBox="0 0 24 24" style="width:22px;height:22px;margin-bottom:4px"><use href="#icon-scan"></use></svg><br>' + (isSender ? '把配对码发给对方生成接收码<br>点击选择接收方的二维码' : '点击选择发送方配对码的二维码');
+    }
     // 扫码按钮显示时机：需要填入配对码/应答码时（接收方 idle 态也显示，方便直接扫码）
+    var scanBtn = document.getElementById('lanSdpScanBtn');
     scanBtn.style.display = (sdpState === 'offer-input' || sdpState === 'answer-input' || (sdpState === 'idle' && !isSender)) ? '' : 'none';
     if (sdpState === 'idle') {
       if (isSender) {
@@ -1642,7 +1673,27 @@
   function lanSdpShowQr() {
     var area = document.getElementById('lanSdpArea');
     var cv = document.getElementById('lanSdpQr');
-    if (area && area.value && cv) { try { drawQr(area.value, cv); } catch(e) {} }
+    if (area && area.value && cv) {
+      try { drawQr(area.value, cv); } catch(e) {}
+      cv.style.display = '';
+      var empty = document.getElementById('sdpMineEmpty');
+      if (empty) empty.style.display = 'none';
+    }
+  }
+
+  // 识别到配对码/应答码后统一填入：接收方 idle 自动进 answer-input，发送方 offer-ready 自动进 offer-input
+  function lanSdpFillCode(text) {
+    var area = document.getElementById('lanSdpArea');
+    if (sdpState === 'idle' && lanRole === 'receiver') {
+      sdpState = 'answer-input';
+      lanSdpRender();
+    } else if (sdpState === 'offer-ready') {
+      sdpState = 'offer-input';
+      lanSdpRender();
+    }
+    area.readOnly = false;
+    area.value = text;
+    lanState(icon('check-circle') + ' 已识别配对码，点下方按钮提交即可', '#059669');
   }
 
   // 摄像头扫码识别配对码/应答码（把对方屏幕上的二维码对准摄像头）
@@ -1671,16 +1722,8 @@
             ctx.drawImage(video, 0, 0, w, h);
             var res = jsQR(ctx.getImageData(0, 0, w, h).data, w, h);
             if (res && res.data && res.data.indexOf('LIME1:') === 0) {
-              var area = document.getElementById('lanSdpArea');
-              area.readOnly = false;
-              area.value = res.data;
               lanSdpScanStop();
-              // 接收方 idle 态扫码：自动进入 answer-input，可直接提交
-              if (sdpState === 'idle' && lanRole === 'receiver') {
-                sdpState = 'answer-input';
-                lanSdpRender();
-              }
-              lanState(icon('check-circle') + ' 已识别配对码，点下方按钮提交即可', '#059669');
+              lanSdpFillCode(res.data);
               return;
             }
           }
@@ -1703,6 +1746,29 @@
     if (box) box.style.display = 'none';
     var video = document.getElementById('lanSdpScanVideo');
     if (video) video.srcObject = null;
+  };
+
+  // 点击对方二维码空位：弹出文件选择，选对方发来的二维码图片识别填入
+  window.lanSdpPickImage = function() {
+    if (isInAppBrowser) { showInappOverlay(); return; }
+    document.getElementById('lanSdpFileInput').click();
+  };
+
+  window.lanSdpFileChanged = function(input) {
+    var f = input.files && input.files[0];
+    if (!f) return;
+    lanState('正在识别二维码图片…', '#2563eb');
+    recognizeQrImage(f).then(function(text) {
+      if (!text || text.indexOf('LIME1:') !== 0) {
+        lanState(icon('x-circle') + ' 图片中未识别到配对码/接收码二维码，请选择对方发来的二维码截图', '#ef4444');
+        return;
+      }
+      lanSdpFillCode(text);
+    }).catch(function(e) {
+      lanState(icon('x-circle') + ' ' + (e && e.message || e), '#ef4444');
+    }).then(function() {
+      input.value = '';
+    });
   };
 
 
