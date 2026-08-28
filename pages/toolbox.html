@@ -115,12 +115,14 @@
     .sdp-col:last-child { background:#fff7ed; border:1px dashed #fdba74; }
     .sdp-col-title { font-size:12px; margin-bottom:6px; font-weight:600; }
     .sdp-slot { min-height:120px; display:flex; align-items:center; justify-content:center; border-radius:8px; }
+    .sdp-col:first-child .sdp-slot { background:#dbeafe; }
+    .sdp-col:last-child .sdp-slot { background:#ffedd5; }
     .sdp-slot canvas { max-width:100%; width:100%; height:auto; border-radius:6px; background:#fff; box-sizing:border-box; box-shadow:0 1px 4px rgba(0,0,0,.08); }
     .sdp-col .dl-btn { margin-top:6px; width:100%; }
     .sdp-slot-empty { color:#9ca3af; font-size:11.5px; line-height:1.7; }
-    .sdp-slot.clickable { cursor:pointer; transition:background .15s; }
-    .sdp-slot.clickable:hover { background:#ffedd5; }
-    .sdp-slot.clickable:active { background:#fed7aa; }
+    .sdp-slot.clickable { cursor:pointer; transition:background .15s, box-shadow .15s; }
+    .sdp-col:last-child .sdp-slot.clickable:hover { background:#fdba74; box-shadow:inset 0 0 0 2px #f97316; }
+    .sdp-col:last-child .sdp-slot.clickable:active { background:#fb923c; }
 
     /* 加入确认弹窗（手机扫码/链接打开时） */
     .modal-mask { position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:200; padding:20px; }
@@ -1476,7 +1478,7 @@
         guide.innerHTML = '全程不走任何服务器，断网也能传。<br>点上方「发送」自动生成配对码，下载二维码发给对方；对方识别后会回发接收码，点右侧空位选图/粘贴识别即可直连。';
         if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = icon('link') + ' 发送'; }
       } else {
-        guide.innerHTML = '把对方发来的配对码粘贴到右侧框，或点框选二维码图片，接收码会自动生成，下载发给对方即可直连。';
+        guide.innerHTML = '';
       }
       return;
     }
