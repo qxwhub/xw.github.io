@@ -3189,11 +3189,17 @@
       aeStateMsg(icon('refresh', 'spin') + ' 正在提取 <b>' + pct + '%</b> …（本地处理，不上传）');
     }
   }
-  // ---- ffmpeg.wasm 引擎加载：本地自托管文件 + 显示下载进度（提速）----
+  // ---- ffmpeg.wasm 引擎加载：unpkg CDN 优先（实测快约 11 倍），本站自托管回退，带下载进度 ----
   var FF_FILES = {
     lib: '../assets/vendor/ffmpeg/ffmpeg.min.js?v=2',
-    core: '../assets/vendor/ffmpeg/ffmpeg-core.js?v=2',
-    wasm: '../assets/vendor/ffmpeg/ffmpeg-core.wasm?v=2'
+    core: [
+      'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
+      '../assets/vendor/ffmpeg/ffmpeg-core.js?v=2'
+    ],
+    wasm: [
+      'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm',
+      '../assets/vendor/ffmpeg/ffmpeg-core.wasm?v=2'
+    ]
   };
   var ffmpegLibLoading = null;
   function ffmpegLoadLib() {
@@ -3208,19 +3214,27 @@
     });
     return ffmpegLibLoading;
   }
-  function ffmpegBlob(url, label, onP) {
-    return new Promise(function(resolve, reject) {
-      var x = new XMLHttpRequest();
-      x.open('GET', url, true);
-      x.responseType = 'blob';
-      x.onprogress = function(e) { if (e.lengthComputable && onP) onP(e.loaded, e.total); };
-      x.onload = function() {
-        if (x.status >= 200 && x.status < 300) resolve(x.response);
-        else reject(new Error(label + ' 下载失败（HTTP ' + x.status + '），请刷新重试'));
-      };
-      x.onerror = function() { reject(new Error(label + ' 下载失败（网络错误），请刷新重试')); };
-      x.send();
-    });
+  function ffmpegBlob(list, label, onP) {
+    if (typeof list === 'string') list = [list];
+    function one(i) {
+      if (i >= list.length) return Promise.reject(new Error(label + ' 下载失败（所有源均不可用），请刷新重试'));
+      return new Promise(function(resolve, reject) {
+        var x = new XMLHttpRequest();
+        x.open('GET', list[i], true);
+        x.responseType = 'blob';
+        x.onprogress = function(e) { if (e.lengthComputable && onP) onP(e.loaded, e.total); };
+        x.onload = function() {
+          if (x.status >= 200 && x.status < 300) resolve(x.response);
+          else reject(new Error('HTTP ' + x.status));
+        };
+        x.onerror = function() { reject(new Error('网络错误')); };
+        x.send();
+      }).catch(function(e) {
+        if (onP) onP(0, 0); // 当前源失败，进度清零并切换备用源
+        return one(i + 1);
+      });
+    }
+    return one(0);
   }
   function ffmpegSize(n) {
     if (!n) return '0 B';
@@ -3262,7 +3276,7 @@
     if (aeFFmpeg && aeFFmpeg.loaded) return Promise.resolve(aeFFmpeg);
     if (aeFFmpegLoading) return aeFFmpegLoading;
     aeFFmpegLoading = ffmpegLoadEngine(document.getElementById('aeState'),
-      '正在加载音频提取引擎（约 32MB，仅首次，本站资源更流畅）', aeTranscodeProgress)
+      '正在加载音频提取引擎（约 32MB，仅首次，CDN 加速下载）', aeTranscodeProgress)
       .then(function(f) { aeFFmpeg = f; return f; })
       .catch(function(e) {
         aeFFmpeg = null; aeFFmpegLoading = null;
@@ -3654,7 +3668,7 @@
     if (fcFFmpeg && fcFFmpeg.loaded) return Promise.resolve(fcFFmpeg);
     if (fcFFmpegLoading) return fcFFmpegLoading;
     fcFFmpegLoading = ffmpegLoadEngine(document.getElementById('fcState'),
-      '正在下载格式转换引擎（约 23MB，仅首次，本站资源更流畅）', fcTranscodeProgress)
+      '正在下载格式转换引擎（约 32MB，仅首次，CDN 加速下载）', fcTranscodeProgress)
       .then(function(f) { fcFFmpeg = f; return f; })
       .catch(function(e) {
         fcFFmpeg = null; fcFFmpegLoading = null;
