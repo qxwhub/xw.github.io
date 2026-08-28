@@ -139,22 +139,6 @@
     .modal-opts { display:flex; flex-direction:column; gap:10px; margin:4px 0 16px; }
     .modal-opt-btn { width:100%; justify-content:center; padding:11px 16px; font-size:14px; }
 
-    /* 接收方：两个入口按钮（提取码 / 扫描接收）并排 */
-    .recv-actions { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
-    .recv-actions .join-btn-big { padding:0 26px; }
-    /* 提取码入口：白色按钮，与发送方「线上存取」对称；扫描接收保持绿色 */
-    .join-btn-big.white { background:#ffffff; color:#1f2937; border:1px solid #d1d5db; box-shadow:0 4px 16px rgba(16,185,129,.12); }
-    .join-btn-big.white:hover { background:#f0fdf4; border-color:#10b981; color:#059669; transform:translateY(-2px); }
-    .join-btn-big.white:active { transform:translateY(0); }
-    .join-btn-big.white.active { background:#ecfdf5; border-color:#10b981; color:#059669; }
-
-    /* 接收方：扫描接收 */
-    .recv-join-area { display:flex; flex-direction:column; align-items:center; gap:12px; padding:36px 0 24px; }
-    .join-btn-big { display:inline-flex; flex-direction:row; align-items:center; justify-content:center; gap:8px; height:48px; padding:0 32px; border-radius:10px; background:#10b981; color:#fff; cursor:pointer; transition:all .2s; box-shadow:0 4px 16px rgba(16,185,129,.25); border:none; font-size:15px; font-weight:600; }
-    .join-btn-big:hover { background:#059669; transform:translateY(-2px); box-shadow:0 6px 20px rgba(16,185,129,.35); }
-    .join-btn-big:active { transform:translateY(0); }
-    .join-btn-big .scan-icon { width:20px; height:20px; flex-shrink:0; }
-
     /* 窄屏：紧凑布局 */
     @media (max-width:420px) {
       .sub-tabs { gap:6px; }
@@ -389,10 +373,6 @@
       <div class="btn-row">
         <button class="btn primary blue" id="lanSdpSendBtn" onclick="lanSdpSend()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-link"></use></svg> 发送</button>
       </div>
-      <div class="prog-wrap" id="lanGenProg" style="display:none">
-        <div class="prog-bar"><div class="prog-fill" id="lanGenFill"></div></div>
-        <div class="prog-txt" id="lanGenTxt">正在连接信令服务器…</div>
-      </div>
       <!-- 线上存取已移除（GitHub Pages 版无服务器存储） -->
       <div class="prog-wrap" id="lanSendProg" style="display:none">
         <div class="prog-bar"><div class="prog-fill" id="lanSendFill"></div></div>
@@ -402,10 +382,6 @@
 
     <!-- 接收方视图 -->
     <div id="lanRecvView" style="display:none">
-      <div class="prog-wrap" id="lanGenProg2" style="display:none">
-        <div class="prog-bar"><div class="prog-fill" id="lanGenFill2"></div></div>
-        <div class="prog-txt" id="lanGenTxt2">正在连接…</div>
-      </div>
       <div class="prog-wrap" id="lanRecvProg" style="display:none">
         <div class="prog-bar"><div class="prog-fill" id="lanRecvFill"></div></div>
         <div class="prog-txt" id="lanRecvTxt"></div>
@@ -413,7 +389,7 @@
       <div class="done-box" id="lanDoneBox"></div>
     </div>
 
-    <!-- 免服务器配对：复制粘贴 SDP 直连（无需任何信令服务器，公共信令连不上/完全离线时使用） -->
+    <!-- 免服务器配对：SDP 直连（全程不走任何服务器） -->
     <div class="pair-box" id="lanSdpBox" style="display:none">
       <label id="lanSdpTitle">配对直连（免服务器）</label>
       <div class="hint" id="lanSdpGuide"></div>
@@ -1035,7 +1011,6 @@
   function onLanOpen() {
     // 接收方专用：已连接发送方
     lanConnected = true;
-    document.getElementById('lanGenProg2').style.display = 'none';
     lanState(icon('check-circle') + ' 已连接，可以开始传输了！', '#059669');
     document.getElementById('lanRecvProg').style.display = '';
     lanRecvMeta = null; lanRecvParts = []; lanRecvBytes = 0;
@@ -1063,9 +1038,6 @@
     lanSending = false;
     document.getElementById('lanSendProg').style.display = 'none';
     document.getElementById('lanRecvProg').style.display = 'none';
-    // 失败/取消时也隐藏"正在连接…"进度条，避免卡住
-    document.getElementById('lanGenProg').style.display = 'none';
-    document.getElementById('lanGenProg2').style.display = 'none';
   }
 
   // ==================== 免服务器配对（SDP 直连，零服务器） ====================
@@ -2090,27 +2062,6 @@
     }
     if (ok) flash();
   }
-
-  // ===================== 扫码/链接自动进入 =====================
-  // 旧版 ?r= 配对码链接：即时传输已停用，打开时直接引导进接收方走免服务器配对
-  (function() {
-    var r = '';
-    try {
-      var sp = new URLSearchParams(location.search);
-      r = (sp.get('r') || '').trim();
-    } catch(e) {
-      r = (location.search.match(/[?&]r=([^&]+)/) || [])[1] || '';
-    }
-    if (!r) return;
-    // 微信/QQ内浏览器：显示遮罩提示跳转浏览器
-    if (isInAppBrowser) {
-      showInappOverlay();
-      return;
-    }
-    // 旧版「即时传输」链接已停用：直接进入接收方并显示配对框，走粘贴配对码流程
-    switchLanRole('receiver');
-    lanState(icon('receive') + ' 已进入接收方，把对方发来的配对码粘贴到右侧框即可', '#059669');
-  })();
 
   // ===================== 工具箱：工具切换 =====================
   window.switchTool = function(name) {
