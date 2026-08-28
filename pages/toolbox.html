@@ -101,6 +101,12 @@
     .qr-wrap canvas { max-width:320px; width:100%; height:auto; background:#fff; border-radius:10px; border:1px solid #e5e7eb; }
     .qr-wrap .btn { min-width:160px; }
 
+    /* 免服务器配对：配对码文本框与按钮 */
+    #lanSdpArea { width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #d1d5db; border-radius:10px; font-size:12px; line-height:1.5; font-family:ui-monospace,Consolas,monospace; background:#f9fafb; color:#374151; outline:none; resize:vertical; margin-top:8px; word-break:break-all; }
+    #lanSdpArea:focus { border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,.12); }
+    #lanSdpArea[readonly] { background:#f3f4f6; }
+    .sdp-actions { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+
     /* 加入确认弹窗（手机扫码/链接打开时） */
     .modal-mask { position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:200; padding:20px; }
     .modal { background:#ffffff; border:1px solid #e5e7eb; border-radius:14px; padding:22px 24px; max-width:380px; width:100%; box-shadow:0 16px 48px rgba(0,0,0,.2); }
@@ -381,6 +387,7 @@
       </div>
       <div class="btn-row">
         <button class="btn primary blue" id="lanOfferBtn" onclick="lanCreateOffer()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-signal"></use></svg> 即时传输</button>
+        <button class="btn" onclick="lanOpenSdp()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-link"></use></svg> 免服务器配对</button>
       </div>
       <div class="prog-wrap" id="lanGenProg" style="display:none">
         <div class="prog-bar"><div class="prog-fill" id="lanGenFill"></div></div>
@@ -409,6 +416,10 @@
             <svg class="scan-icon" viewBox="0 0 24 24"><use href="#icon-scan"></use></svg>
             <span>扫描接收</span>
           </label>
+          <button class="join-btn-big white" onclick="lanOpenSdp()">
+            <svg class="scan-icon" viewBox="0 0 24 24"><use href="#icon-link"></use></svg>
+            <span>免服务器配对</span>
+          </button>
         </div>
         <input type="file" id="lanQrFileInput" accept="image/*" capture="environment" style="display:none">
       </div>
@@ -421,6 +432,17 @@
         <div class="prog-txt" id="lanRecvTxt"></div>
       </div>
       <div class="done-box" id="lanDoneBox"></div>
+    </div>
+
+    <!-- 免服务器配对：复制粘贴 SDP 直连（无需任何信令服务器，公共信令连不上/完全离线时使用） -->
+    <div class="pair-box" id="lanSdpBox" style="display:none">
+      <label id="lanSdpTitle">免服务器配对（不用信令服务器）</label>
+      <div class="hint" id="lanSdpGuide"></div>
+      <textarea id="lanSdpArea" rows="4" readonly placeholder=""></textarea>
+      <div class="sdp-actions">
+        <button class="btn" id="lanSdpActBtn" onclick="lanSdpAct()"></button>
+        <button class="btn" id="lanSdpCopyBtn" onclick="lanSdpCopy()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-clipboard"></use></svg> 复制</button>
+      </div>
     </div>
   </div>
 
@@ -842,6 +864,7 @@
   var lanRole = 'sender';
   var MAX_LAN_RECEIVERS = 10; // 单个二维码最多同时接收设备数（避免连接过多导致浏览器卡顿）
   var peer = null, conn = null, conns = [], lanConnected = false, lanSending = false;
+  var sdpPcs = []; // 免服务器配对（SDP 直连）的 RTCPeerConnection 列表，支持多台设备分别配对
   // 接收完成回执（ACK）统计
   var lanTargetCount = 0, lanAckOk = 0, lanAckFail = 0, lanAckTimer = null;
   var lanSendCancelled = false;
@@ -930,7 +953,7 @@
   window.lanCreateOffer = function() {
     if (!lanFiles.length) { lanState('请先选择文件或文件夹，再点「即时传输」', '#d97706'); return; }
     if (!lanCheckedCount()) { lanState('请先勾选要传输的文件（默认为全选，取消勾选的文件不会发送）', '#d97706'); return; }
-    if (peer) lanClose();
+    lanClose();
     var genProg = document.getElementById('lanGenProg');
     var genFill = document.getElementById('lanGenFill');
     var genTxt = document.getElementById('lanGenTxt');
@@ -962,7 +985,7 @@
             lanState(icon('alert') + ' 信令连接中断，正在自动重连（' + reconnTimes + '/3）…', '#d97706');
             try { peer.reconnect(); } catch(e) {}
           } else {
-            lanState(icon('alert') + ' 信令连接多次断开，二维码可能已失效，请重新点「即时传输」生成', '#d97706');
+            lanState(icon('alert') + ' 信令连接多次断开，二维码可能已失效，请重新点「即时传输」生成；仍连不上可改用「免服务器配对」（复制粘贴配对码直连）', '#d97706');
           }
         });
         peer.on('reconnected', function() {
@@ -1048,6 +1071,7 @@
     code = String(code).toUpperCase().replace(/[^A-Z0-9]/g, '');
     if (!code) { lanState('未识别到有效的连接信息，请重试', '#d97706'); return; }
     if (peer) lanClose();
+    sdpCleanup();
     var genProg = document.getElementById('lanGenProg2');
     var genFill = document.getElementById('lanGenFill2');
     var genTxt = document.getElementById('lanGenTxt2');
@@ -1079,7 +1103,7 @@
       setTimeout(function() {
         if (!joined) {
           // 信令服务器一直没连上（如网络不通），也给出提示，避免卡在"正在连接…"
-          lanState(icon('x-circle') + ' 连接信令服务器超时，请检查网络后重试', '#ef4444');
+          lanState(icon('x-circle') + ' 连接信令服务器超时，请检查网络后重试；公共信令在国内可能连不上，可让发送方改用「免服务器配对」（复制粘贴配对码直连）', '#ef4444');
           lanClose();
           return;
         }
@@ -1296,6 +1320,7 @@
     conns = [];
     if (conn) { try { conn.close(); } catch(e) {} conn = null; }
     if (peer) { try { peer.destroy(); } catch(e) {} peer = null; }
+    sdpCleanup();
     lanConnected = false;
     lanSending = false;
     document.getElementById('lanSendProg').style.display = 'none';
@@ -1304,6 +1329,287 @@
     document.getElementById('lanGenProg').style.display = 'none';
     document.getElementById('lanGenProg2').style.display = 'none';
   }
+
+  // ==================== 免服务器配对（复制粘贴 SDP 直连，零服务器） ====================
+  // 公共信令服务器（0.peerjs.com 在境外）国内连接不稳定，信令连不上时可改用本模式：
+  // 发送方生成配对码 → 复制发给对方 → 对方提交后生成应答码发回 → 发送方提交应答码 → 纯 WebRTC 直连开始传文件。
+  // 全程不走任何服务器，局域网内/完全断网也能用。
+  var sdpState = 'idle'; // idle | offer-ready | offer-input | answer-input | answer-ready
+
+  function sdpCleanup() {
+    sdpPcs.forEach(function(pc) { try { pc.close(); } catch(e) {} });
+    sdpPcs = [];
+    sdpState = 'idle';
+    var b = document.getElementById('lanSdpBox');
+    if (b) b.style.display = 'none';
+  }
+
+  // 配对码 = base64(JSON)，带 LIME1: 前缀便于识别/校验
+  function sdpEncode(pc, role) {
+    var json = JSON.stringify({ v: 1, role: role, sdp: pc.localDescription.sdp });
+    var bytes = new TextEncoder().encode(json);
+    var bin = '';
+    for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return 'LIME1:' + btoa(bin).replace(/\+/g, '-').replace(/\//g, '_');
+  }
+  function sdpDecode(code) {
+    if (typeof code !== 'string') return null;
+    code = code.trim();
+    if (code.indexOf('LIME1:') === 0) code = code.slice(6);
+    code = code.replace(/-/g, '+').replace(/_/g, '/');
+    try {
+      var bin = atob(code);
+      var bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return JSON.parse(new TextDecoder().decode(bytes));
+    } catch(e) { return null; }
+  }
+
+  // 等待 ICE 候选收集完成（否则配对码里没有可用地址，无法直连）
+  function waitIceGather(pc) {
+    return new Promise(function(resolve) {
+      var done = false, timer;
+      function finish() { if (!done) { done = true; clearTimeout(timer); resolve(); } }
+      timer = setTimeout(finish, 2500);
+      try { pc.addEventListener('icegatheringstatechange', function() { if (pc.iceGatheringState === 'complete') finish(); }); } catch(e) {}
+    });
+  }
+
+  function sdpIceConfig() {
+    return { iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun.qq.com:3478' },
+      { urls: 'stun:stun.miwifi.com:3478' },
+      { urls: 'stun:stun.chat.bilibili.com:3478' }
+    ]};
+  }
+
+  // 把原生 RTCDataChannel 包装成与 PeerJS DataConnection 兼容的对象，直接复用现有传输管线
+  function wrapRtcChannel(dc, pc) {
+    var c = {
+      open: false,
+      binaryType: 'arraybuffer',
+      dataChannel: dc,
+      _handlers: {},
+      on: function(ev, fn) {
+        if (ev === 'open' && c.open) { fn(c); return c; }
+        (c._handlers[ev] = c._handlers[ev] || []).push(fn);
+        return c;
+      },
+      send: function(data) {
+        if (dc.readyState !== 'open') throw new Error('通道已断开');
+        if (data instanceof ArrayBuffer) dc.send(new Uint8Array(data));
+        else if (ArrayBuffer.isView(data)) dc.send(data);
+        else dc.send(data);
+      },
+      close: function() { try { dc.close(); } catch(e) {} }
+    };
+    dc.binaryType = 'arraybuffer';
+    dc.onopen = function() {
+      c.open = true;
+      (c._handlers['open'] || []).slice().forEach(function(fn) { fn(c); });
+      document.getElementById('lanSdpBox').style.display = 'none';
+    };
+    dc.onmessage = function(ev) { (c._handlers['data'] || []).slice().forEach(function(fn) { fn(ev.data, c); }); };
+    dc.onerror = function(e) { (c._handlers['error'] || []).slice().forEach(function(fn) { fn(e); }); };
+    dc.onclose = function() {
+      c.open = false;
+      (c._handlers['close'] || []).slice().forEach(function(fn) { fn(); });
+      var i = sdpPcs.indexOf(pc);
+      if (i >= 0) { sdpPcs.splice(i, 1); try { pc.close(); } catch(e) {} }
+      if (sdpState !== 'idle') sdpState = 'idle';
+    };
+    return c;
+  }
+
+  // 打开免服务器配对面板（按当前角色初始化）
+  window.lanOpenSdp = function() {
+    lanClose();
+    document.getElementById('lanCodeBox').style.display = 'none';
+    document.getElementById('lanSdpBox').style.display = '';
+    document.getElementById('lanSdpArea').value = '';
+    sdpState = 'idle';
+    lanSdpRender();
+    var box = document.getElementById('lanSdpBox');
+    if (box.scrollIntoView) box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
+  function lanSdpRender() {
+    var guide = document.getElementById('lanSdpGuide');
+    var area = document.getElementById('lanSdpArea');
+    var act = document.getElementById('lanSdpActBtn');
+    var copy = document.getElementById('lanSdpCopyBtn');
+    var isSender = lanRole === 'sender';
+    if (sdpState === 'idle') {
+      if (isSender) {
+        guide.innerHTML = '公共信令连不上时用这个，全程不走任何服务器，断网也能传。<br>① 点「生成配对码」；② 复制发给对方；③ 对方回发「应答码」后粘贴即可直连。';
+        act.innerHTML = icon('zap') + ' 生成配对码';
+        act.disabled = false;
+      } else {
+        guide.innerHTML = '对方连不上信令服务器时用这个，全程不走任何服务器。<br>① 让对方点「免服务器配对」生成配对码发给你；② 点下方按钮粘贴配对码提交；③ 把生成的应答码复制发回给对方。';
+        act.innerHTML = icon('clipboard') + ' 粘贴配对码';
+        act.disabled = false;
+        area.readOnly = false;
+        area.placeholder = '（点下方按钮后粘贴对方发来的配对码）';
+      }
+      copy.disabled = true;
+      return;
+    }
+    if (sdpState === 'offer-ready') {
+      guide.innerHTML = '配对码已生成，点「复制」发给对方；对方提交后会发回应答码，拿到后点「粘贴应答码并连接」。';
+      act.innerHTML = '粘贴应答码并连接';
+      act.disabled = false;
+      area.readOnly = true;
+      copy.disabled = !area.value;
+      return;
+    }
+    if (sdpState === 'offer-input') {
+      guide.innerHTML = '把对方发回的应答码完整粘贴到下面，点「提交应答码」完成直连，随后自动开始发送文件。';
+      act.innerHTML = icon('check-circle') + ' 提交应答码';
+      act.disabled = false;
+      area.readOnly = false;
+      area.value = '';
+      area.placeholder = '粘贴对方发来的应答码…';
+      copy.disabled = true;
+      return;
+    }
+    if (sdpState === 'answer-input') {
+      guide.innerHTML = '把对方发来的配对码完整粘贴到下面，点「提交配对码」，生成的应答码会显示出来供你复制发回。';
+      act.innerHTML = icon('check-circle') + ' 提交配对码';
+      act.disabled = false;
+      area.readOnly = false;
+      area.value = '';
+      area.placeholder = '粘贴对方发来的配对码…';
+      copy.disabled = true;
+      return;
+    }
+    // answer-ready
+    guide.innerHTML = '应答码已生成，点「复制」发回给对方；对方提交后会自动开始传输，本页自动接收保存。';
+    act.innerHTML = '等待对方确认…';
+    act.disabled = true;
+    area.readOnly = true;
+    copy.disabled = !area.value;
+  }
+
+  window.lanSdpAct = function() {
+    if (sdpState === 'idle') {
+      if (lanRole === 'sender') { lanSdpCreateOffer(); return; }
+      sdpState = 'answer-input';
+      lanSdpRender();
+      return;
+    }
+    if (sdpState === 'offer-ready') { sdpState = 'offer-input'; lanSdpRender(); return; }
+    if (sdpState === 'offer-input') { lanSdpSubmitAnswer(); return; }
+    if (sdpState === 'answer-input') { lanSdpSubmitOffer(); return; }
+  };
+
+  // 发送方：生成配对码（offer）
+  function lanSdpCreateOffer() {
+    if (!lanFiles.length) { lanState('请先选择文件或文件夹，再点「免服务器配对」', '#d97706'); return; }
+    if (!lanCheckedCount()) { lanState('请先勾选要传输的文件（默认为全选）', '#d97706'); return; }
+    var act = document.getElementById('lanSdpActBtn');
+    act.disabled = true;
+    act.innerHTML = '正在生成…';
+    lanState('正在生成配对码…');
+    var pc = new RTCPeerConnection(sdpIceConfig());
+    sdpPcs.push(pc);
+    var dc = pc.createDataChannel('lime', { ordered: true });
+    var wrapped = wrapRtcChannel(dc, pc);
+    setupConn(wrapped);
+    pc.createOffer().then(function(offer) {
+      return pc.setLocalDescription(offer);
+    }).then(function() {
+      return waitIceGather(pc);
+    }).then(function() {
+      document.getElementById('lanSdpArea').value = sdpEncode(pc, 'offer');
+      sdpState = 'offer-ready';
+      lanSdpRender();
+      lanState(icon('check-circle') + ' 配对码已生成，复制发给对方（全程不走服务器）', '#059669');
+    }).catch(function(e) {
+      act.disabled = false;
+      lanState('生成失败：' + (e && e.message || e), '#ef4444');
+    });
+  }
+
+  // 接收方：提交对方配对码 → 生成应答码（answer）
+  function lanSdpSubmitOffer() {
+    var data = sdpDecode(document.getElementById('lanSdpArea').value);
+    if (!data || !data.sdp || data.role !== 'offer') {
+      lanState('配对码无效，请完整复制对方发来的配对码后重试', '#ef4444');
+      return;
+    }
+    var act = document.getElementById('lanSdpActBtn');
+    act.disabled = true;
+    act.innerHTML = '正在生成应答码…';
+    var pc = new RTCPeerConnection(sdpIceConfig());
+    sdpPcs.push(pc);
+    pc.ondatachannel = function(e) {
+      var wrapped = wrapRtcChannel(e.channel, pc);
+      conn = wrapped; // 接收方回执（ACK）依赖全局 conn
+      setupConn(wrapped);
+    };
+    pc.setRemoteDescription({ type: 'offer', sdp: data.sdp }).then(function() {
+      return pc.createAnswer();
+    }).then(function(answer) {
+      return pc.setLocalDescription(answer);
+    }).then(function() {
+      return waitIceGather(pc);
+    }).then(function() {
+      document.getElementById('lanSdpArea').value = sdpEncode(pc, 'answer');
+      sdpState = 'answer-ready';
+      lanSdpRender();
+      lanState(icon('check-circle') + ' 应答码已生成，复制发回给对方（全程不走服务器）', '#059669');
+    }).catch(function(e) {
+      act.disabled = false;
+      sdpState = 'answer-input';
+      lanSdpRender();
+      lanState('提交失败：' + (e && e.message || e), '#ef4444');
+    });
+  }
+
+  // 发送方：提交对方应答码 → 完成直连
+  function lanSdpSubmitAnswer() {
+    var data = sdpDecode(document.getElementById('lanSdpArea').value);
+    if (!data || !data.sdp || data.role !== 'answer') {
+      lanState('应答码无效，请完整复制对方发回的应答码后重试', '#ef4444');
+      return;
+    }
+    var pc = sdpPcs[0];
+    if (!pc) { lanState('配对已失效，请重新点「生成配对码」', '#ef4444'); return; }
+    var act = document.getElementById('lanSdpActBtn');
+    act.disabled = true;
+    act.innerHTML = '正在连接…';
+    pc.setRemoteDescription({ type: 'answer', sdp: data.sdp }).then(function() {
+      lanState(icon('check-circle') + ' 应答码已提交，直连成功后自动开始发送', '#059669');
+    }).catch(function(e) {
+      act.disabled = false;
+      lanState('连接失败：' + (e && e.message || e) + '（请确认应答码是对方用「免服务器配对」生成的）', '#ef4444');
+    });
+  }
+
+  window.lanSdpCopy = function() {
+    var area = document.getElementById('lanSdpArea');
+    if (!area.value) return;
+    function done() {
+      var btn = document.getElementById('lanSdpCopyBtn');
+      btn.innerHTML = icon('check-circle') + ' 已复制';
+      setTimeout(lanSdpRender, 1400);
+    }
+    function fallback() {
+      area.readOnly = false;
+      area.select();
+      area.setSelectionRange(0, area.value.length);
+      try { document.execCommand('copy'); } catch(e) {}
+      done();
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(area.value).then(done, fallback);
+    } else {
+      fallback();
+    }
+  };
+
 
   // ---- 选择文件/文件夹（为即时传输准备） ----
   // files: FileList | File[]（按钮选择）或 [{file, path}] 预构建数组（拖拽，绕过 webkitRelativePath 只读限制）
