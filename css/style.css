@@ -22,9 +22,17 @@ body {
   position:fixed; inset:0; z-index:-1;
   background: var(--bg) center/cover no-repeat;
   filter: blur(var(--wp-blur,0px)) brightness(var(--wp-bright,1));
-  image-rendering: -webkit-optimize-contrast;
-  image-rendering: crisp-edges;
+  -webkit-filter: blur(var(--wp-blur,0px)) brightness(var(--wp-bright,1));
   opacity: .95; transition: all .6s ease; transform: scale(1);
+  /* iOS Safari：避免 filter 将 SVG 背景栅格化为 CSS 像素位图导致模糊
+     用 will-change + translateZ(0) 触发高 DPR 合成层；
+     绝对不要写 image-rendering: crisp-edges（会破坏 SVG 抗锯齿） */
+  will-change: transform, filter;
+  -webkit-transform: translateZ(0) scale(1);
+}
+/* 移动端（高 DPR）：再放大合成层尺寸，确保 iOS Safari 不按 CSS 像素位图化 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+  #wp { -webkit-transform: translateZ(0) scale(1); }
 }
 #wp.focus-blur {
   filter: blur(6px) brightness(.85);
