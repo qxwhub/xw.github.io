@@ -390,10 +390,10 @@
         <span id="lanDropHint"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-folder-open"></use></svg> 点击选择文件/文件夹，或拖到这里</span>
         <div class="file-list" id="lanFileList" style="display:none"></div>
       </div>
+      <div class="hint" style="margin-bottom:8px">选好文件后点「即时传输」生成二维码，对方扫码即自动发送；连不上公共服务器时可用「免服务器配对」。</div>
       <div class="btn-row">
-        <!-- 即时传输（依赖公共信令服务器）入口已隐藏：文件传输统一走免服务器配对，无需任何服务器 -->
-        <button class="btn primary blue" id="lanOfferBtn" onclick="lanCreateOffer()" style="display:none"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-signal"></use></svg> 即时传输</button>
-        <button class="btn primary blue" onclick="lanOpenSdp()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-link"></use></svg> 免服务器配对</button>
+        <button class="btn primary blue" id="lanOfferBtn" onclick="lanCreateOffer()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-signal"></use></svg> 即时传输</button>
+        <button class="btn" onclick="lanOpenSdp()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-link"></use></svg> 免服务器配对</button>
       </div>
       <div class="prog-wrap" id="lanGenProg" style="display:none">
         <div class="prog-bar"><div class="prog-fill" id="lanGenFill"></div></div>
@@ -417,13 +417,13 @@
     <!-- 接收方视图 -->
     <div id="lanRecvView" style="display:none">
       <div class="recv-join-area">
+        <div class="hint" style="margin-bottom:12px;text-align:center">让对方在「我是发送方」里点「即时传输」生成二维码，然后点下方「扫描接收」扫码，文件会自动收到并保存。</div>
         <div class="recv-actions">
-          <!-- 扫描接收（依赖公共信令服务器）入口已隐藏：统一走免服务器配对 -->
-          <label class="join-btn-big" id="lanJoinBtn" for="lanQrFileInput" style="display:none">
+          <label class="join-btn-big" id="lanJoinBtn" for="lanQrFileInput">
             <svg class="scan-icon" viewBox="0 0 24 24"><use href="#icon-scan"></use></svg>
             <span>扫描接收</span>
           </label>
-          <button class="join-btn-big" onclick="lanOpenSdp()">
+          <button class="join-btn-big white" onclick="lanOpenSdp()">
             <svg class="scan-icon" viewBox="0 0 24 24"><use href="#icon-link"></use></svg>
             <span>免服务器配对</span>
           </button>
