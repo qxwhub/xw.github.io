@@ -106,6 +106,11 @@
     #lanSdpArea:focus { border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,.12); }
     #lanSdpArea[readonly] { background:#f3f4f6; }
     .sdp-actions { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+    /* 免服务器配对二维码与摄像头扫码 */
+    .sdp-qr-wrap { text-align:center; margin-top:10px; }
+    .sdp-qr-wrap canvas { max-width:100%; width:200px; height:200px; border-radius:10px; background:#fff; padding:8px; box-shadow:0 1px 4px rgba(0,0,0,.08); box-sizing:border-box; }
+    .sdp-scan { margin-top:10px; text-align:center; }
+    .sdp-scan video { width:100%; max-width:240px; max-height:320px; border-radius:10px; background:#000; }
 
     /* 加入确认弹窗（手机扫码/链接打开时） */
     .modal-mask { position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:200; padding:20px; }
@@ -439,6 +444,19 @@
       <label id="lanSdpTitle">免服务器配对（不用信令服务器）</label>
       <div class="hint" id="lanSdpGuide"></div>
       <textarea id="lanSdpArea" rows="4" readonly placeholder=""></textarea>
+      <!-- 免服务器配对二维码：配对码/应答码生成后显示，对方可扫码自动填入 -->
+      <div class="sdp-qr-wrap" id="lanSdpQrWrap" style="display:none">
+        <canvas id="lanSdpQr"></canvas>
+        <div class="sdp-actions">
+          <button class="btn" id="lanSdpScanBtn" onclick="lanSdpScan()" style="display:none"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-scan"></use></svg> 扫码获取配对码</button>
+        </div>
+      </div>
+      <!-- 摄像头扫码预览 -->
+      <div class="sdp-scan" id="lanSdpScanBox" style="display:none">
+        <video id="lanSdpScanVideo" playsinline muted></video>
+        <div class="hint">将对方屏幕上的二维码对准摄像头…</div>
+        <div class="sdp-actions"><button class="btn" onclick="lanSdpScanStop()">取消</button></div>
+      </div>
       <div class="sdp-actions">
         <button class="btn" id="lanSdpActBtn" onclick="lanSdpAct()"></button>
         <button class="btn" id="lanSdpCopyBtn" onclick="lanSdpCopy()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-clipboard"></use></svg> 复制</button>
@@ -865,6 +883,7 @@
   var MAX_LAN_RECEIVERS = 10; // 单个二维码最多同时接收设备数（避免连接过多导致浏览器卡顿）
   var peer = null, conn = null, conns = [], lanConnected = false, lanSending = false;
   var sdpPcs = []; // 免服务器配对（SDP 直连）的 RTCPeerConnection 列表，支持多台设备分别配对
+  var sdpScanStream = null, sdpScanRaf = null; // 免服务器配对：摄像头扫码识别配对码
   // 接收完成回执（ACK）统计
   var lanTargetCount = 0, lanAckOk = 0, lanAckFail = 0, lanAckTimer = null;
   var lanSendCancelled = false;
@@ -1337,6 +1356,7 @@
   var sdpState = 'idle'; // idle | offer-ready | offer-input | answer-input | answer-ready
 
   function sdpCleanup() {
+    lanSdpScanStop();
     sdpPcs.forEach(function(pc) { try { pc.close(); } catch(e) {} });
     sdpPcs = [];
     sdpState = 'idle';
@@ -1441,6 +1461,11 @@
     var act = document.getElementById('lanSdpActBtn');
     var copy = document.getElementById('lanSdpCopyBtn');
     var isSender = lanRole === 'sender';
+    // 二维码显隐：配对码/应答码已生成时显示二维码；需要输入码时才显示扫码按钮
+    var qrWrap = document.getElementById('lanSdpQrWrap');
+    var scanBtn = document.getElementById('lanSdpScanBtn');
+    qrWrap.style.display = (sdpState === 'offer-ready' || sdpState === 'answer-ready') ? '' : 'none';
+    scanBtn.style.display = (sdpState === 'offer-input' || sdpState === 'answer-input') ? '' : 'none';
     if (sdpState === 'idle') {
       if (isSender) {
         guide.innerHTML = '公共信令连不上时用这个，全程不走任何服务器，断网也能传。<br>① 点「生成配对码」；② 复制发给对方；③ 对方回发「应答码」后粘贴即可直连。';
@@ -1524,8 +1549,9 @@
     }).then(function() {
       document.getElementById('lanSdpArea').value = sdpEncode(pc, 'offer');
       sdpState = 'offer-ready';
+      lanSdpShowQr();
       lanSdpRender();
-      lanState(icon('check-circle') + ' 配对码已生成，复制发给对方（全程不走服务器）', '#059669');
+      lanState(icon('check-circle') + ' 配对码已生成，复制或扫码发给对方（全程不走服务器）', '#059669');
     }).catch(function(e) {
       act.disabled = false;
       lanState('生成失败：' + (e && e.message || e), '#ef4444');
@@ -1558,8 +1584,9 @@
     }).then(function() {
       document.getElementById('lanSdpArea').value = sdpEncode(pc, 'answer');
       sdpState = 'answer-ready';
+      lanSdpShowQr();
       lanSdpRender();
-      lanState(icon('check-circle') + ' 应答码已生成，复制发回给对方（全程不走服务器）', '#059669');
+      lanState(icon('check-circle') + ' 应答码已生成，复制或扫码发回给对方（全程不走服务器）', '#059669');
     }).catch(function(e) {
       act.disabled = false;
       sdpState = 'answer-input';
@@ -1608,6 +1635,68 @@
     } else {
       fallback();
     }
+  };
+
+  // 配对码/应答码生成后同步显示二维码，对方可扫码自动填入
+  function lanSdpShowQr() {
+    var area = document.getElementById('lanSdpArea');
+    var cv = document.getElementById('lanSdpQr');
+    if (area && area.value && cv) { try { drawQr(area.value, cv); } catch(e) {} }
+  }
+
+  // 摄像头扫码识别配对码/应答码（把对方屏幕上的二维码对准摄像头）
+  window.lanSdpScan = function() {
+    if (isInAppBrowser) { showInappOverlay(); return; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      lanState('当前浏览器不支持摄像头扫码，请手动复制粘贴配对码', '#ef4444');
+      return;
+    }
+    lanState('正在打开摄像头…', '#2563eb');
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(function(stream) {
+      sdpScanStream = stream;
+      var box = document.getElementById('lanSdpScanBox');
+      var video = document.getElementById('lanSdpScanVideo');
+      box.style.display = '';
+      video.srcObject = stream;
+      video.play();
+      function tick() {
+        if (!sdpScanStream) return;
+        if (video.readyState >= video.HAVE_ENOUGH_DATA) {
+          var w = video.videoWidth, h = video.videoHeight;
+          if (w && h) {
+            var cv = document.createElement('canvas');
+            cv.width = w; cv.height = h;
+            var ctx = cv.getContext('2d');
+            ctx.drawImage(video, 0, 0, w, h);
+            var res = jsQR(ctx.getImageData(0, 0, w, h).data, w, h);
+            if (res && res.data && res.data.indexOf('LIME1:') === 0) {
+              var area = document.getElementById('lanSdpArea');
+              area.readOnly = false;
+              area.value = res.data;
+              lanSdpScanStop();
+              lanState(icon('check-circle') + ' 已识别配对码，点下方按钮提交即可', '#059669');
+              return;
+            }
+          }
+        }
+        sdpScanRaf = requestAnimationFrame(tick);
+      }
+      sdpScanRaf = requestAnimationFrame(tick);
+    }).catch(function(e) {
+      lanState('无法打开摄像头：' + (e && e.message || e) + '（请允许摄像头权限，或手动复制粘贴配对码）', '#ef4444');
+    });
+  };
+
+  window.lanSdpScanStop = function() {
+    if (sdpScanRaf) { cancelAnimationFrame(sdpScanRaf); sdpScanRaf = null; }
+    if (sdpScanStream) {
+      sdpScanStream.getTracks().forEach(function(t) { t.stop(); });
+      sdpScanStream = null;
+    }
+    var box = document.getElementById('lanSdpScanBox');
+    if (box) box.style.display = 'none';
+    var video = document.getElementById('lanSdpScanVideo');
+    if (video) video.srcObject = null;
   };
 
 
