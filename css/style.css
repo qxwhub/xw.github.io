@@ -22,6 +22,8 @@ body {
   position:fixed; inset:0; z-index:-1;
   background: var(--bg) center/cover no-repeat;
   filter: blur(var(--wp-blur,0px)) brightness(var(--wp-bright,1));
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
   opacity: .95; transition: all .6s ease; transform: scale(1);
 }
 #wp.focus-blur {
