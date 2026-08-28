@@ -3222,7 +3222,7 @@
         var x = new XMLHttpRequest();
         x.open('GET', list[i], true);
         x.responseType = 'blob';
-        x.onprogress = function(e) { if (e.lengthComputable && onP) onP(e.loaded, e.total); };
+        x.onprogress = function(e) { if (e.lengthComputable && onP) onP(true, e.loaded, e.total); else if (onP) onP(false, e.loaded, e.total); };
         x.onload = function() {
           if (x.status >= 200 && x.status < 300) resolve(x.response);
           else reject(new Error('HTTP ' + x.status));
@@ -3230,7 +3230,7 @@
         x.onerror = function() { reject(new Error('网络错误')); };
         x.send();
       }).catch(function(e) {
-        if (onP) onP(0, 0); // 当前源失败，进度清零并切换备用源
+        if (onP) onP(false, 0, 0); // 当前源失败，进度清零并切换备用源
         return one(i + 1);
       });
     }
@@ -3242,19 +3242,24 @@
     while (n >= 1024 && i < u.length - 1) { n /= 1024; i++; }
     return (i ? n.toFixed(1) : n) + ' ' + u[i];
   }
-  function ffmpegDlUI(el, label, loaded, total) {
-    var pct = total ? Math.min(100, Math.round(loaded / total * 100)) : 0;
+  function ffmpegDlUI(el, label, loaded, total, hasTotal) {
     el.style.display = '';
-    el.innerHTML = '<div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:' + pct + '%"></div></div><div class="prog-txt">' + label + '　<b>' + pct + '%</b>　' + ffmpegSize(loaded) + ' / ' + ffmpegSize(total) + '</div></div>';
+    if (hasTotal) {
+      var pct = total ? Math.min(100, Math.round(loaded / total * 100)) : 0;
+      el.innerHTML = '<div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:' + pct + '%"></div></div><div class="prog-txt">' + label + '　<b>' + pct + '%</b>　' + ffmpegSize(loaded) + ' / ' + ffmpegSize(total) + '</div></div>';
+    } else {
+      // 源未提供总大小（分块传输）时：不显示百分比，只显示实时已下载量
+      el.innerHTML = '<div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:100%;opacity:.35"></div></div><div class="prog-txt">' + label + '　已下载 <b>' + ffmpegSize(loaded) + '</b>，请稍候…</div></div>';
+    }
   }
   // 下载核心文件（带实时进度条）并创建引擎实例（0.12 API：Worker 内转码，主线程不卡）
   function ffmpegLoadEngine(stateEl, label, transProgress) {
     return ffmpegLoadLib().then(function() {
       if (!window.FFmpegWASM || !window.FFmpegWASM.FFmpeg) throw new Error('ffmpeg 库加载失败，请刷新重试');
-      ffmpegDlUI(stateEl, label, 0, 1);
+      ffmpegDlUI(stateEl, label, 0, 0, false);
       return Promise.all([
         ffmpegBlob(FF_FILES.core, '核心脚本'),
-        ffmpegBlob(FF_FILES.wasm, '解码器', function(d, t) { ffmpegDlUI(stateEl, label, d, t); })
+        ffmpegBlob(FF_FILES.wasm, '解码器', function(h, d, t) { ffmpegDlUI(stateEl, label, d, t, h); })
       ]);
     }).then(function(b) {
       var f = new window.FFmpegWASM.FFmpeg();
@@ -3267,7 +3272,7 @@
         coreURL: URL.createObjectURL(b[0]),
         wasmURL: URL.createObjectURL(b[1])
       }).then(function() {
-        ffmpegDlUI(stateEl, label, 1, 1);
+        ffmpegDlUI(stateEl, label, 1, 1, true);
         return f;
       });
     });
