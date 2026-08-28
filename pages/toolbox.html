@@ -373,7 +373,7 @@
 
   <!-- ==================== 工具：文件传输（默认选中） ==================== -->
   <div class="tool-view active" id="view-file">
-  <!-- ==================== 文件传输（即时传输 · P2P） ==================== -->
+  <!-- ==================== 文件传输（免服务器配对 · P2P 直连） ==================== -->
   <div class="panel" id="lanPanel">
     <div class="sub-tabs">
       <div class="sub-tab active" id="lanTabSend" onclick="switchLanRole('sender')"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-send"></use></svg> 我是发送方</div>
@@ -391,8 +391,9 @@
         <div class="file-list" id="lanFileList" style="display:none"></div>
       </div>
       <div class="btn-row">
-        <button class="btn primary blue" id="lanOfferBtn" onclick="lanCreateOffer()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-signal"></use></svg> 即时传输</button>
-        <button class="btn" onclick="lanOpenSdp()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-link"></use></svg> 免服务器配对</button>
+        <!-- 即时传输（依赖公共信令服务器）入口已隐藏：文件传输统一走免服务器配对，无需任何服务器 -->
+        <button class="btn primary blue" id="lanOfferBtn" onclick="lanCreateOffer()" style="display:none"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-signal"></use></svg> 即时传输</button>
+        <button class="btn primary blue" onclick="lanOpenSdp()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-link"></use></svg> 免服务器配对</button>
       </div>
       <div class="prog-wrap" id="lanGenProg" style="display:none">
         <div class="prog-bar"><div class="prog-fill" id="lanGenFill"></div></div>
@@ -417,11 +418,12 @@
     <div id="lanRecvView" style="display:none">
       <div class="recv-join-area">
         <div class="recv-actions">
-          <label class="join-btn-big" id="lanJoinBtn" for="lanQrFileInput">
+          <!-- 扫描接收（依赖公共信令服务器）入口已隐藏：统一走免服务器配对 -->
+          <label class="join-btn-big" id="lanJoinBtn" for="lanQrFileInput" style="display:none">
             <svg class="scan-icon" viewBox="0 0 24 24"><use href="#icon-scan"></use></svg>
             <span>扫描接收</span>
           </label>
-          <button class="join-btn-big white" onclick="lanOpenSdp()">
+          <button class="join-btn-big" onclick="lanOpenSdp()">
             <svg class="scan-icon" viewBox="0 0 24 24"><use href="#icon-link"></use></svg>
             <span>免服务器配对</span>
           </button>
