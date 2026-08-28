@@ -454,6 +454,7 @@
           <div class="sdp-col-title" id="sdpTheirsTitle">对方的接收码</div>
           <div class="sdp-slot clickable" id="sdpTheirsSlot" onclick="lanSdpPickImage()">
             <span class="sdp-slot-empty" id="sdpTheirsHint"><svg class="icon" viewBox="0 0 24 24" style="width:22px;height:22px;margin-bottom:4px"><use href="#icon-scan"></use></svg><br>把配对码发给对方生成接收码<br>点击选择接收方的二维码</span>
+            <img id="sdpTheirsImg" alt="对方二维码" style="display:none;width:100%;height:auto;border-radius:6px;border:2px solid #f59e0b;background:#fff;padding:3px;box-sizing:border-box">
           </div>
         </div>
       </div>
@@ -865,7 +866,7 @@
   }
 
   // ===================== 二维码绘制 =====================
-  function drawQr(text, canvas) {
+  function drawQr(text, canvas, color) {
     var qr = qrcode(0, 'L');
     qr.addData(text, 'Byte');
     qr.make();
@@ -878,7 +879,7 @@
     var ctx = canvas.getContext('2d');
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#000000';
+    ctx.fillStyle = color || '#000000';
     for (var r = 0; r < n; r++) {
       for (var c = 0; c < n; c++) {
         if (qr.isDark(r, c)) ctx.fillRect(c*px, r*px, px, px);
@@ -1458,8 +1459,8 @@
     if (cols) cols.classList.toggle('rev', !isSender);
     var mineTitle = document.getElementById('sdpMineTitle');
     var theirsTitle = document.getElementById('sdpTheirsTitle');
-    if (mineTitle) mineTitle.textContent = isSender ? '我的配对码' : '我的接收码';
-    if (theirsTitle) theirsTitle.textContent = isSender ? '对方的接收码' : '对方的配对码';
+    if (mineTitle) { mineTitle.textContent = isSender ? '我的配对码' : '我的接收码'; mineTitle.style.color = '#2563eb'; }
+    if (theirsTitle) { theirsTitle.textContent = isSender ? '对方的接收码' : '对方的配对码'; theirsTitle.style.color = '#f59e0b'; }
     var theirsHint = document.getElementById('sdpTheirsHint');
     if (theirsHint) {
       theirsHint.innerHTML = '<svg class="icon" viewBox="0 0 24 24" style="width:22px;height:22px;margin-bottom:4px"><use href="#icon-scan"></use></svg><br>' + (isSender ? '把配对码发给对方生成接收码<br>点击选择或粘贴接收方的二维码' : '点击选择或粘贴发送方配对码的二维码');
@@ -1631,11 +1632,11 @@
     }, 'image/png');
   };
 
-  // 配对码/接收码生成后同步显示二维码，对方可扫码自动填入
+  // 配对码/接收码生成后同步显示二维码，对方可扫码自动填入（自己的码统一用蓝色，与对方二维码区分）
   function lanSdpShowQr() {
     var cv = document.getElementById('lanSdpQr');
     if (sdpCurrentCode && cv) {
-      try { drawQr(sdpCurrentCode, cv); } catch(e) {}
+      try { drawQr(sdpCurrentCode, cv, '#2563eb'); } catch(e) {}
       cv.style.display = '';
       var empty = document.getElementById('sdpMineEmpty');
       if (empty) empty.style.display = 'none';
@@ -1667,6 +1668,24 @@
     document.getElementById('lanSdpPopup').style.display = 'none';
   };
 
+  // 对方二维码图片识别成功后，回显到左侧框
+  function lanSdpShowTheirsImg(file) {
+    var img = document.getElementById('sdpTheirsImg');
+    var hint = document.getElementById('sdpTheirsHint');
+    if (img && file) {
+      img.src = URL.createObjectURL(file);
+      img.style.display = '';
+      if (hint) hint.style.display = 'none';
+    }
+  }
+  // 文本配对码填入时：隐藏图片回显，提示已识别
+  function lanSdpMarkTheirsText() {
+    var img = document.getElementById('sdpTheirsImg');
+    var hint = document.getElementById('sdpTheirsHint');
+    if (img) img.style.display = 'none';
+    if (hint) { hint.style.display = ''; hint.innerHTML = icon('check-circle') + ' 已识别对方二维码'; }
+  }
+
   // 右侧框支持粘贴：直接粘贴配对码文本，或粘贴二维码图片自动识别
   // 事件挂 document（普通 div 无焦点收不到 paste），仅当配对面板可见时处理
   document.addEventListener('paste', function(e) {
@@ -1686,6 +1705,7 @@
             lanState(icon('x-circle') + ' 图片中未识别到配对码/接收码二维码，请粘贴对方发的二维码截图', '#ef4444');
             return;
           }
+          lanSdpShowTheirsImg(f);
           lanSdpFillCode(text);
         }).catch(function(err) {
           lanState(icon('x-circle') + ' ' + (err && err.message || err), '#ef4444');
@@ -1698,6 +1718,7 @@
     var m = txt && txt.match(/LIME1:[A-Za-z0-9_-]+/);
     if (m) {
       e.preventDefault();
+      lanSdpMarkTheirsText();
       lanSdpFillCode(m[0]);
     }
   });
@@ -1729,6 +1750,7 @@
         lanState(icon('x-circle') + ' 图片中未识别到配对码/接收码二维码，请选择对方发来的二维码截图', '#ef4444');
         return;
       }
+      lanSdpShowTheirsImg(f);
       lanSdpFillCode(text);
     }).catch(function(e) {
       lanState(icon('x-circle') + ' ' + (e && e.message || e), '#ef4444');
