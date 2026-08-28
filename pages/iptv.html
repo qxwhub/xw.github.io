@@ -454,6 +454,141 @@
     if(/^(jpg|jpeg|png|gif|webp|bmp|svg|ico|avif|heic)$/.test(ext)) return 'image';
     return 'other';
   }
+
+  // ---- 本地视频懒转码：仅当浏览器无法直接播放时，才下载 ffmpeg 引擎（多源 CDN 回退），转换后播放 ----
+  var ipConvSeq = 0; // 转码令牌：切台/切文件时自增，使进行中的转码作废
+  var IP_FF_FILES = {
+    lib: '../assets/vendor/ffmpeg/ffmpeg.min.js?v=2',
+    core: [
+      'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
+      'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
+      '../assets/vendor/ffmpeg/ffmpeg-core.js?v=2'
+    ],
+    wasm: [
+      'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm',
+      'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm',
+      '../assets/vendor/ffmpeg/ffmpeg-core.wasm?v=2'
+    ]
+  };
+  var ipFF = null, ipFFLoading = null;
+  function ipFfmpegSize(n){ if(!n) return '0 B'; var u=['B','KB','MB','GB'],i=0; while(n>=1024&&i<u.length-1){n/=1024;i++;} return (i?n.toFixed(1):n)+' '+u[i]; }
+  function ipFfmpegBlob(list, label, onP){
+    if(typeof list==='string') list=[list];
+    function one(i){
+      if(i>=list.length) return Promise.reject(new Error(label+' 下载失败（所有源均不可用），请刷新重试'));
+      return new Promise(function(resolve,reject){
+        var x=new XMLHttpRequest();
+        x.open('GET', list[i], true);
+        x.responseType='blob';
+        x.onprogress=function(e){ if(onP) onP(e.lengthComputable, e.loaded, e.total); };
+        x.onload=function(){ if(x.status>=200&&x.status<300) resolve(x.response); else reject(new Error('HTTP '+x.status)); };
+        x.onerror=function(){ reject(new Error('网络错误')); };
+        x.send();
+      }).catch(function(){ if(onP) onP(false,0,0); return one(i+1); });
+    }
+    return one(0);
+  }
+  function ipFfmpegDl(loaded, total, hasTotal){
+    if(hasTotal){ var pct=total?Math.min(100,Math.round(loaded/total*100)):0; setStatus('正在下载转换引擎（约 32MB，CDN 加速）：<b>'+pct+'%</b>　'+ipFfmpegSize(loaded)+' / '+ipFfmpegSize(total)); }
+    else setStatus('正在下载转换引擎（约 32MB，CDN 加速）：已下载 <b>'+ipFfmpegSize(loaded)+'</b>，请稍候…');
+  }
+  function ipLoadFFmpeg(){
+    if(ipFF&&ipFF.loaded) return Promise.resolve(ipFF);
+    if(ipFFLoading) return ipFFLoading;
+    ipFFLoading=new Promise(function(resolve,reject){
+      var s=document.createElement('script');
+      s.src=IP_FF_FILES.lib;
+      s.onload=resolve;
+      s.onerror=function(){ ipFFLoading=null; reject(new Error('ffmpeg 库加载失败，请刷新重试')); };
+      document.head.appendChild(s);
+    }).then(function(){
+      if(!window.FFmpegWASM||!window.FFmpegWASM.FFmpeg) throw new Error('ffmpeg 库加载失败，请刷新重试');
+      return Promise.all([
+        ipFfmpegBlob(IP_FF_FILES.core, '核心脚本'),
+        ipFfmpegBlob(IP_FF_FILES.wasm, '解码器', function(h,d,t){ ipFfmpegDl(d,t,h); })
+      ]);
+    }).then(function(b){
+      var f=new window.FFmpegWASM.FFmpeg();
+      f.on('progress', function(ev){
+        if(ev&&typeof ev.progress==='number'&&isFinite(ev.progress)&&ev.progress>0){
+          setStatus('正在转换格式：<b>'+Math.round(Math.min(ev.progress,1)*100)+'%</b>（本地处理，不上传，大文件需稍等）');
+        }
+      });
+      return f.load({coreURL:URL.createObjectURL(b[0]), wasmURL:URL.createObjectURL(b[1])}).then(function(){ ipFF=f; return f; });
+    }).catch(function(e){
+      ipFF=null; ipFFLoading=null;
+      throw (e&&e.message)?e:new Error('转换引擎加载失败，请刷新重试');
+    });
+    return ipFFLoading;
+  }
+  // 浏览器原生能直接播放的格式：直接播，不下载引擎
+  function canNativePlay(ext){
+    if(/^(mp3|wav|flac|aac|m4a|ogg|oga|opus)$/.test(ext)) return true; // 音频原生可解
+    if(/^(mp4|m4v|webm|mov|ogv)$/.test(ext)) return true; // 常见视频容器原生可放
+    return false;
+  }
+  // 探测 blob 能否被浏览器解码：重封装产物先验一下，避免"重封装成功但黑屏"（如 HEVC/AC3 编码）
+  function ipProbePlayable(blob){
+    return new Promise(function(resolve){
+      var v=document.createElement('video');
+      v.muted=true; v.preload='metadata';
+      var done=false;
+      function fin(ok){ if(done) return; done=true; if(v.src){ try{URL.revokeObjectURL(v.src);}catch(e){} } v.removeAttribute('src'); resolve(ok); }
+      v.onloadedmetadata=function(){ fin(true); };
+      v.onerror=function(){ fin(false); };
+      v.src=URL.createObjectURL(blob);
+      setTimeout(function(){ fin(false); }, 8000); // 8秒无结果视为不可播，回退完整转码
+    });
+  }
+  // 浏览器放不了的格式：懒加载引擎转换后播放（先秒级重封装，探测不可播再完整转码）
+  function ipPlayConvert(blob, name, ext){
+    var seq=ipConvSeq;
+    var inName='ip_in.'+ext, outName='ip_out.mp4';
+    if(blob.size>1073741824){ // 超过 1GB：内存有限，先预警
+      setStatus('文件较大（'+ipFfmpegSize(blob.size)+'），浏览器内转码内存有限，请耐心等待，可能较慢…');
+    }else{
+      setStatus('浏览器不支持 '+ext.toUpperCase()+'，正在加载转换引擎（约 32MB，仅首次，CDN 加速）…');
+    }
+    ipLoadFFmpeg().then(function(){
+      if(seq!==ipConvSeq) return Promise.reject({abort:1});
+      setStatus('正在读取文件…');
+      return blob.arrayBuffer();
+    }).then(function(buf){
+      var f=ipFF;
+      function doFull(){
+        return f.deleteFile(outName).catch(function(){})
+          .then(function(){ return f.exec(['-i', inName, '-map', '0:v:0', '-map', '0:a:0?', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '23', '-c:a', 'aac', '-b:a', '128k', outName]); });
+      }
+      return f.deleteFile(inName).catch(function(){})
+        .then(function(){ return f.deleteFile(outName).catch(function(){}); })
+        .then(function(){ return f.writeFile(inName, new Uint8Array(buf)); })
+        // 第一步：秒级重封装（只换容器不改编码，源已是 H.264 时几秒完成）
+        .then(function(){ return f.exec(['-i', inName, '-map', '0:v:0', '-map', '0:a:0?', '-c', 'copy', outName]); })
+        .then(function(){ return f.readFile(outName); })
+        // 重封装产物先探测浏览器能否解码：不能（如 HEVC/AC3）则回退完整转码
+        .then(function(out){
+          if(!out||!out.length) return doFull().then(function(){ return f.readFile(outName); });
+          return ipProbePlayable(new Blob([out], {type:'video/mp4'})).then(function(ok){
+            if(ok) return out;
+            setStatus('该文件编码浏览器不识别，正在完整转码（需稍等）…');
+            return doFull().then(function(){ return f.readFile(outName); });
+          });
+        });
+    }).then(function(out){
+      if(seq!==ipConvSeq) return Promise.reject({abort:1});
+      if(!out||!out.length){ setStatus('转换失败：未生成可播放文件，可先在工具箱用"格式转换"转好再播', true); return; }
+      var b=new Blob([out], {type:'video/mp4'});
+      video.src=URL.createObjectURL(b);
+      video.play().catch(function(){});
+      setStatus('已转换为 MP4 开始播放（本地处理，不上传）');
+      renderTv(); renderLocal();
+    }).catch(function(e){
+      if(e&&e.abort) return; // 已切换播放，忽略
+      video.removeAttribute('src');
+      setStatus('转换播放失败：'+((e&&e.message)||'未知错误')+'，可先在工具箱用"格式转换"转好再播', true);
+    });
+  }
+
   function fmtSize(b){
     if(b>1073741824) return (b/1073741824).toFixed(2)+' GB';
     if(b>1048576) return (b/1048576).toFixed(1)+' MB';
@@ -730,7 +865,10 @@
 
   video.addEventListener('playing',function(){ clearStatus(); hidePh(); });
   video.addEventListener('waiting',function(){ setStatus('缓冲中…'); });
-  video.addEventListener('error',function(){ if(cur) setStatus('播放失败，该直播源可能已失效',true); });
+  video.addEventListener('error',function(){
+    if(curLocal!==null){ setStatus('该本地文件无法播放（浏览器不支持此编码或文件已损坏），可先用工具箱的"格式转换"转成 MP4 再播', true); return; }
+    if(cur) setStatus('播放失败，该直播源可能已失效', true);
+  });
 
   /* ---------- 自定义控制条：播放 / 进度 / 音量（上下）/ 全屏 ---------- */
   var playerBox=document.getElementById('playerBox'), pctrl=document.getElementById('pctrl');
