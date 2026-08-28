@@ -423,7 +423,6 @@
     <!-- 接收方视图 -->
     <div id="lanRecvView" style="display:none">
       <div class="recv-join-area">
-        <div class="hint" style="margin-bottom:12px;text-align:center">把对方发来的配对码粘贴到下方右侧框，或点框选二维码图片，接收码会自动生成；下载发给对方即可直连接收文件。</div>
       </div>
       <div class="prog-wrap" id="lanGenProg2" style="display:none">
         <div class="prog-bar"><div class="prog-fill" id="lanGenFill2"></div></div>
@@ -1481,10 +1480,8 @@
       return;
     }
     if (sdpState === 'offer-ready') {
-      guide.innerHTML = '配对码已生成，点「下载」把二维码发给对方；对方识别后会回发接收码，你拿到后点右侧空位选图/粘贴识别即可完成直连。';
-      act.innerHTML = '等待对方应答码…';
-      act.disabled = true;
-      act.style.display = '';
+      guide.innerHTML = '配对码已生成，下载二维码发给对方，等待对方应答码…';
+      act.style.display = 'none';
       if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = icon('link') + ' 等待对方应答码…'; }
       return;
     }
@@ -1504,10 +1501,8 @@
       return;
     }
     // answer-ready
-    guide.innerHTML = '接收码已生成，点「下载」把二维码发给对方（弹窗里也能下载）；等对方提交应答码后会自动开始传输，本页自动接收保存。';
-    act.innerHTML = '等待对方提交应答码…';
-    act.disabled = true;
-    act.style.display = '';
+    guide.innerHTML = '接收码已生成，下载二维码发回给对方（全程不走服务器），等待对方提交应答码…';
+    act.style.display = 'none';
   }
 
   window.lanSdpAct = function() {
