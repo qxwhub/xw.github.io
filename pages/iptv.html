@@ -240,6 +240,7 @@
 
   // 停止所有引擎，准备新播放
   function stopEngines(){
+    ipConvSeq++; // 使进行中的转码作废
     if(hls){ try{hls.destroy();}catch(e){} hls=null; }
     if(flvP){ try{flvP.destroy();}catch(e){} flvP=null; }
     if(dashP){ try{dashP.reset();}catch(e){} dashP=null; }
@@ -387,10 +388,16 @@
       });
       return;
     }
-    var url=URL.createObjectURL(f);
     curDownload={name:f.name, kind:'local', file:f};
-    video.src=url;
-    video.play().catch(function(){});
+    if(canNativePlay(rawExt)){
+      // 浏览器原生支持的格式：直接播，不下载引擎
+      var url=URL.createObjectURL(f);
+      video.src=url;
+      video.play().catch(function(){});
+    }else{
+      // 浏览器放不了的格式（mkv/avi/flv/wmv/rmvb/ts 等）：懒加载引擎转换后播放
+      ipPlayConvert(f, f.name, rawExt);
+    }
     renderTv(); renderLocal();
   };
 
@@ -487,13 +494,19 @@
     var played=false;
     function startPlay(blob){
       if(played) return; played=true;
-      video.src=URL.createObjectURL(blob);
-      var p=video.play();
-      if(p&&p.then){
-        p.then(function(){ setStatus('下载完成，开始播放：'+fname); })
-         .catch(function(){ setStatus('下载完成，点击播放按钮开始播放：'+fname); });
+      var ext=(pick.name.match(/\.([^.]+)$/)||[, 'mp4'])[1].toLowerCase();
+      if(canNativePlay(ext)){
+        video.src=URL.createObjectURL(blob);
+        var p=video.play();
+        if(p&&p.then){
+          p.then(function(){ setStatus('下载完成，开始播放：'+fname); })
+           .catch(function(){ setStatus('下载完成，点击播放按钮开始播放：'+fname); });
+        }else{
+          setStatus('下载完成，开始播放：'+fname);
+        }
       }else{
-        setStatus('下载完成，开始播放：'+fname);
+        setStatus('下载完成，正在转换格式后播放…');
+        ipPlayConvert(blob, pick.name, ext);
       }
     }
     pick.getBlob(function(err, blob){
