@@ -90,9 +90,6 @@
     .prog-wrap { margin-top:12px; }
     .prog-bar { height:8px; background:#f3f4f6; border-radius:99px; overflow:hidden; border:1px solid #e5e7eb; }
     .prog-fill { height:100%; width:0; background:linear-gradient(90deg,#34d399,#10b981); transition:width .15s; }
-    /* 不确定进度：源未提供总大小时，用左右往复滑动动画表示下载中 */
-    .prog-fill.indet { width:35%; animation:progIndet 1.4s ease-in-out infinite; }
-    @keyframes progIndet { 0% { transform:translateX(-120%); } 50% { transform:translateX(320%); } 100% { transform:translateX(-120%); } }
     .prog-txt { font-size:12.5px; color:#4b5563; margin-top:7px; font-variant-numeric:tabular-nums; }
     .done-box { margin-top:12px; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; padding:12px 14px; font-size:13px; color:#059669; display:none; }
     .done-box b { color:#1f2937; }
@@ -3249,10 +3246,10 @@
     el.style.display = '';
     if (hasTotal) {
       var pct = total ? Math.min(100, Math.round(loaded / total * 100)) : 0;
-      el.innerHTML = '<div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:' + pct + '%"></div></div><div class="prog-txt">' + label + '　<b>' + pct + '%</b>　' + ffmpegSize(loaded) + ' / ' + ffmpegSize(total) + '</div></div>';
+      el.innerHTML = '<div class="prog-txt">' + label + '　<b>' + pct + '%</b>　' + ffmpegSize(loaded) + ' / ' + ffmpegSize(total) + '</div>';
     } else {
-      // 源未提供总大小（分块传输）时：进度条用滑动动画，只显示实时已下载量
-      el.innerHTML = '<div class="prog-wrap"><div class="prog-bar"><div class="prog-fill indet"></div></div><div class="prog-txt">' + label + '　已下载 <b>' + ffmpegSize(loaded) + '</b>，请稍候…</div></div>';
+      // 源未提供总大小（分块传输）时：只显示实时已下载量
+      el.innerHTML = '<div class="prog-txt">' + label + '　已下载 <b>' + ffmpegSize(loaded) + '</b>，请稍候…</div>';
     }
   }
   // 下载核心文件（带实时进度条）并创建引擎实例（0.12 API：Worker 内转码，主线程不卡）
