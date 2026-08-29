@@ -24,19 +24,8 @@
   .ph { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; color:#64748b; pointer-events:none;
     background:linear-gradient(180deg, #fafbfc 0%, #f1f5f9 100%);
     overflow:hidden; }
-  .ph::before { content:''; position:absolute;
-    width:280px; height:280px; border-radius:50%;
-    background:radial-gradient(circle, rgba(16,185,129,.15) 0%, rgba(16,185,129,0) 65%);
-    top:50%; left:50%; transform:translate(-50%,-58%); animation:phPulse 3.5s ease-in-out infinite; }
-  @keyframes phPulse { 0%,100%{opacity:.7; transform:translate(-50%,-58%) scale(1)} 50%{opacity:1; transform:translate(-50%,-58%) scale(1.1)} }
-  .ph .ph-ico { position:relative; width:72px; height:72px; border-radius:50%;
-    background:linear-gradient(135deg, #10b981 0%, #059669 100%);
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 8px 24px rgba(16,185,129,.25), inset 0 1px 0 rgba(255,255,255,.3); }
-  .ph .ph-ico svg { width:32px; height:32px; color:#fff; filter:drop-shadow(0 1px 2px rgba(0,0,0,.15)); }
-  .ph .ph-txt { position:relative; font-size:14px; font-weight:600; color:#334155; }
-  .ph .ph-sub { position:relative; font-size:12px; color:#94a3b8; }
-  .ph .ph-badge { position:relative; font-size:11px; color:#0d9488; background:#ccfbf1; border:1px solid #99f6e4; padding:3px 12px; border-radius:999px; }
+  .ph svg { width:56px; height:56px; opacity:.4; }
+  .ph .ph-txt { font-size:13px; }
   .player-box.playing .ph { display:none; }
   .url-row { display:flex; gap:8px; margin-top:12px; }
   .url-row input { flex:1; min-width:0; border:1px solid #d1d5db; border-radius:10px; padding:10px 12px; font-size:14px; outline:none; background:#fff; color:#1d1d1f; }
@@ -79,10 +68,8 @@
     <div class="player-box" id="playerBox">
       <video id="video" controls playsinline preload="auto"></video>
       <div class="ph" id="ph">
-        <div class="ph-ico"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-play"></use></svg></div>
+        <svg class="icon" viewBox="0 0 24 24"><use href="#icon-play"></use></svg>
         <span class="ph-txt">粘贴视频链接，点击播放</span>
-        <span class="ph-sub">或在下方历史记录中选一个</span>
-        <span class="ph-badge">支持 MP4 · M3U8 · FLV · DASH</span>
       </div>
     </div>
     <div class="url-row">
