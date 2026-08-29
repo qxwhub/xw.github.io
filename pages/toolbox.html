@@ -396,7 +396,7 @@
       <!-- 左右双栏：一侧显示自己的配对码/接收码，另一侧是对方的码（空位，点击选择二维码图片识别） -->
       <div class="sdp-cols" id="lanSdpCols">
         <div class="sdp-col">
-          <div class="sdp-col-title" id="sdpMineTitle">我的配对码</div>
+          <div class="sdp-col-title" id="sdpMineTitle">我的发送码</div>
           <div class="sdp-slot" id="sdpMineSlot">
             <span class="sdp-slot-empty" id="sdpMineEmpty">点上方按钮生成后显示</span>
             <canvas id="lanSdpQr" style="display:none"></canvas>
@@ -1165,8 +1165,8 @@
     if (cols) cols.classList.toggle('rev', !isSender);
     var mineTitle = document.getElementById('sdpMineTitle');
     var theirsTitle = document.getElementById('sdpTheirsTitle');
-    if (mineTitle) { mineTitle.textContent = isSender ? '我的配对码' : '我的接收码'; mineTitle.style.color = '#2563eb'; }
-    if (theirsTitle) { theirsTitle.textContent = isSender ? '对方的接收码' : '对方的配对码'; theirsTitle.style.color = '#f59e0b'; }
+    if (mineTitle) { mineTitle.textContent = isSender ? '我的发送码' : '我的接收码'; mineTitle.style.color = '#2563eb'; }
+    if (theirsTitle) { theirsTitle.textContent = isSender ? '对方的接收码' : '对方的发送码'; theirsTitle.style.color = '#f59e0b'; }
     var theirsHint = document.getElementById('sdpTheirsHint');
     if (theirsHint) {
       theirsHint.innerHTML = '<svg class="icon" viewBox="0 0 24 24" style="width:22px;height:22px;margin-bottom:4px"><use href="#icon-scan"></use></svg><br>' + (isSender ? '把配对码发给对方生成接收码<br>点击选择或粘贴接收方的二维码' : '点击选择或粘贴发送方配对码的二维码');
