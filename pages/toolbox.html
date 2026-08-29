@@ -958,10 +958,14 @@
         if (conns.indexOf(c) < 0) conns.push(c);
         updateConnState();
         document.getElementById('lanSendProg').style.display = '';
-        // 已有已选文件且未在发送中 → 自动开始发送
-        tryStartSend();
+        // 不立即发送：等接收方发来 resume-req（含断点续传进度）后再统一触发，避免竞态
+        // 兜底：若对方一直未上报断点，3 秒后自动从头发送，防止卡死
+        clearTimeout(c._startTimer);
+        c._startTimer = setTimeout(function() {
+          if (c.open && !c._sentDone && !c._sending) tryStartSend();
+        }, 3000);
       } else {
-        onLanOpen();
+        onLanOpen(c);
       }
     });
     c.on('close', function() {
@@ -1008,15 +1012,39 @@
     sendLanFiles();
   }
 
-  function onLanOpen() {
+  function onLanOpen(c) {
     // 接收方专用：已连接发送方
     lanConnected = true;
-    lanState(icon('check-circle') + ' 已连接，可以开始传输了！', '#059669');
     document.getElementById('lanRecvProg').style.display = '';
-    lanRecvMeta = null; lanRecvParts = []; lanRecvBytes = 0;
-    document.getElementById('lanRecvFill').style.width = '0%';
-    document.getElementById('lanRecvTxt').textContent = '等待接收…';
+    // 断点续传：如果上一次接收未完成（内存中还有半成品），保留进度并告知发送方
+    var partial = lanRecvMeta && lanRecvBytes > 0 && lanRecvBytes < lanRecvMeta.size;
+    if (partial) {
+      var pct = Math.min(100, Math.round(lanRecvBytes / lanRecvMeta.size * 100));
+      document.getElementById('lanRecvFill').style.width = pct + '%';
+      var fn = (lanRecvMeta.path || lanRecvMeta.name).replace(/\//g, '_');
+      document.getElementById('lanRecvTxt').innerHTML = icon('signal') + ' 网络恢复，正在从断点 ' + fmtSize(lanRecvBytes) + '/' + fmtSize(lanRecvMeta.size) + '（' + pct + '%）继续接收：' + fn;
+      lanState(icon('check-circle') + ' 连接已恢复，正在续传上次未完成的文件…', '#059669');
+    } else {
+      lanRecvMeta = null; lanRecvParts = []; lanRecvBytes = 0;
+      document.getElementById('lanRecvFill').style.width = '0%';
+      document.getElementById('lanRecvTxt').textContent = '等待接收…';
+      lanState(icon('check-circle') + ' 已连接，可以开始传输了！', '#059669');
+    }
     document.getElementById('lanDoneBox').style.display = 'none';
+    // 告知发送方断点位置（或从头开始）；发送方收到后才开始发送，避免竞态
+    try {
+      if (c && c.open) {
+        c.send(JSON.stringify({
+          t: 'resume-req',
+          index: partial ? lanRecvMeta.index : -1,
+          path: partial ? lanRecvMeta.path : '',
+          name: partial ? lanRecvMeta.name : '',
+          size: partial ? lanRecvMeta.size : 0,
+          received: partial ? lanRecvBytes : 0,
+          hasPartial: !!partial
+        }));
+      }
+    } catch(e) {}
   }
 
   function onLanClose() {
@@ -1101,6 +1129,7 @@
       open: false,
       binaryType: 'arraybuffer',
       dataChannel: dc,
+      _lost: false,
       _handlers: {},
       on: function(ev, fn) {
         if (ev === 'open' && c.open) { fn(c); return c; }
@@ -1108,28 +1137,73 @@
         return c;
       },
       send: function(data) {
-        if (dc.readyState !== 'open') throw new Error('通道已断开');
-        if (data instanceof ArrayBuffer) dc.send(new Uint8Array(data));
-        else if (ArrayBuffer.isView(data)) dc.send(data);
-        else dc.send(data);
+        if (!c.dataChannel || c.dataChannel.readyState !== 'open') throw new Error('通道已断开');
+        if (data instanceof ArrayBuffer) c.dataChannel.send(new Uint8Array(data));
+        else if (ArrayBuffer.isView(data)) c.dataChannel.send(data);
+        else c.dataChannel.send(data);
       },
-      close: function() { try { dc.close(); } catch(e) {} }
+      close: function() { try { if (c.dataChannel) c.dataChannel.close(); } catch(e) {} }
     };
-    dc.binaryType = 'arraybuffer';
-    dc.onopen = function() {
-      c.open = true;
-      (c._handlers['open'] || []).slice().forEach(function(fn) { fn(c); });
-      document.getElementById('lanSdpBox').style.display = 'none';
-    };
-    dc.onmessage = function(ev) { (c._handlers['data'] || []).slice().forEach(function(fn) { fn(ev.data, c); }); };
-    dc.onerror = function(e) { (c._handlers['error'] || []).slice().forEach(function(fn) { fn(e); }); };
-    dc.onclose = function() {
-      c.open = false;
-      (c._handlers['close'] || []).slice().forEach(function(fn) { fn(); });
-      var i = sdpPcs.indexOf(pc);
-      if (i >= 0) { sdpPcs.splice(i, 1); try { pc.close(); } catch(e) {} }
-      if (sdpState !== 'idle') sdpState = 'idle';
-    };
+    function bind(dc) {
+      dc.binaryType = 'arraybuffer';
+      dc.onopen = function() {
+        c.open = true;
+        (c._handlers['open'] || []).slice().forEach(function(fn) { fn(c); });
+        var b = document.getElementById('lanSdpBox'); if (b) b.style.display = 'none';
+      };
+      dc.onmessage = function(ev) { (c._handlers['data'] || []).slice().forEach(function(fn) { fn(ev.data, c); }); };
+      dc.onerror = function(e) { (c._handlers['error'] || []).slice().forEach(function(fn) { fn(e); }); };
+      dc.onclose = function() {
+        c.open = false;
+        // 不销毁 pc：保留 ICE 层，网络恢复后可自动重建数据通道续传
+        (c._handlers['close'] || []).slice().forEach(function(fn) { fn(); });
+      };
+    }
+    bind(dc);
+    // ICE 连接状态监听：网络波动自动恢复 / 失败提示；恢复后自动重建通道续传
+    if (pc && !pc.__sdpMonitor) {
+      pc.__sdpMonitor = true;
+      pc.addEventListener('iceconnectionstatechange', function() {
+        var st = pc.iceConnectionState;
+        if (st === 'disconnected' || st === 'checking' || st === 'new') {
+          c._lost = true;
+          lanState(icon('alert') + ' 网络波动，正在尝试自动恢复连接…', '#d97706');
+        } else if (st === 'failed') {
+          c._lost = true;
+          // 该连接已不可恢复：关闭并移出配对列表，允许重新扫码配对（断点进度由接收方内存保留，重连后自动续传）
+          clearTimeout(c._startTimer);
+          var pi = sdpPcs.indexOf(pc);
+          if (pi >= 0) sdpPcs.splice(pi, 1);
+          var ci = conns.indexOf(c);
+          if (ci >= 0) conns.splice(ci, 1);
+          try { pc.close(); } catch(e) {}
+          if (lanRole === 'sender') {
+            updateConnState();
+            if (conns.length === 0) document.getElementById('lanSendProg').style.display = 'none';
+            lanState(icon('alert') + ' 连接中断：进度已保留，重新点「发送」生成新配对码即可自动续传（无需从头开始）', '#ef4444');
+          } else {
+            lanState(icon('alert') + ' 连接中断：进度已保留，重新扫码配对后自动续传（无需从头开始）', '#ef4444');
+          }
+        } else if (st === 'connected' || st === 'completed') {
+          if (c._lost) {
+            c._lost = false;
+            if (c.open) {
+              lanState(icon('check-circle') + ' 网络已恢复，继续传输…', '#059669');
+            } else if (lanRole === 'sender') {
+              lanState(icon('check-circle') + ' 网络已恢复，正在自动重连并续传…', '#059669');
+              try {
+                var dc2 = pc.createDataChannel('lime', { ordered: true });
+                c.dataChannel = dc2;
+                bind(dc2);
+              } catch(e) {}
+            } else {
+              // 接收方：等发送方重建通道（ondatachannel 会触发新连接）
+              lanState(icon('check-circle') + ' 网络已恢复，正在等待续传…', '#059669');
+            }
+          }
+        }
+      });
+    }
     return c;
   }
 
@@ -1268,6 +1342,8 @@
     var pc = new RTCPeerConnection(sdpIceConfig());
     sdpPcs.push(pc);
     pc.ondatachannel = function(e) {
+      // 发送方自动重连会新建数据通道：先关闭旧连接，避免新旧通道同时收数据造成重复累计
+      if (conn && conn.open) { try { conn.close(); } catch(err) {} }
       var wrapped = wrapRtcChannel(e.channel, pc);
       conn = wrapped; // 接收方回执（ACK）依赖全局 conn
       setupConn(wrapped);
@@ -1775,11 +1851,20 @@
         for (var i = 0; i < files.length; i++) {
           if (lanSendCancelled) return;
           var item = files[i];
-          c.send(JSON.stringify({ t: 'meta', index: i, total: files.length, name: item.file.name, path: item.path, size: item.size, hash: 'n/a' }));
-          await sendOneFile(item.file, c, d, targets.length);
+          // 断点续传：接收方内存中还留着一个未完成文件，且其索引未超出当前文件列表
+          var rs = c._resume && c._resume.hasPartial && c._resume.index < files.length;
+          if (rs && i < c._resume.index) continue; // 该文件接收方已完整收到，跳过不重发
+          if (rs && c._resume.index === i && c._resume.path === item.path && c._resume.name === item.name) {
+            // 同一文件：直接从断点续发数据（不重发 meta，避免接收端清空已收进度）
+            await sendOneFile(item.file, c, d, targets.length, c._resume.received || 0);
+          } else {
+            c.send(JSON.stringify({ t: 'meta', index: i, total: files.length, name: item.file.name, path: item.path, size: item.size, hash: 'n/a' }));
+            await sendOneFile(item.file, c, d, targets.length, 0);
+          }
           c.send(JSON.stringify({ t: 'done' }));
         }
         c._sentDone = true;
+        delete c._resume;
         okCount++;
       } catch(e) {
         failCount++;
@@ -1809,10 +1894,12 @@
   }
 
   // 流式发送单个文件给指定设备：边读边发，大文件不整体读入内存（否则 5GB+ 文件会卡死崩溃）
-  async function sendOneFile(file, c, devIdx, devCount) {
-    var reader = file.stream().getReader();
+  // startOffset > 0 时表示断点续传：从偏移处切片读取，只发剩余部分
+  async function sendOneFile(file, c, devIdx, devCount, startOffset) {
+    var base = startOffset || 0;
+    var reader = (base > 0 ? file.slice(base) : file).stream().getReader();
     var pending = null;      // 已读入但尚未发完的剩余数据
-    var sent = 0;
+    var sent = base;         // 已发送字节数（含断点前对方已收到的部分，进度按整文件计算）
     var fill = document.getElementById('lanSendFill'), txt = document.getElementById('lanSendTxt');
     while (true) {
       if (lanSendCancelled) return;
@@ -1828,8 +1915,9 @@
       c.send(part.buffer.slice(part.byteOffset, part.byteOffset + part.byteLength));
       sent += part.byteLength;
       var pct = Math.round(sent / file.size * 100);
+      if (pct > 100) pct = 100;
       fill.style.width = pct + '%';
-      txt.textContent = '发送给设备 ' + (devIdx + 1) + '/' + devCount + '：' + file.name + ' ' + fmtSize(sent) + ' / ' + fmtSize(file.size) + '（' + pct + '%）';
+      txt.textContent = '发送给设备 ' + (devIdx + 1) + '/' + devCount + '：' + file.name + ' ' + fmtSize(sent) + ' / ' + fmtSize(file.size) + '（' + pct + '%）' + (base > 0 ? '（续传）' : '');
     }
   }
 
@@ -1873,6 +1961,17 @@
         // 接收方：发送方已达最大连接数
         lanState(icon('alert') + ' 发送方已达最大连接数，本次无法接收', '#ef4444');
         document.getElementById('lanRecvTxt').innerHTML = icon('alert') + ' 发送方已达最大连接数（' + MAX_LAN_RECEIVERS + ' 台），暂时无法接收，请稍后再试';
+      } else if (m.t === 'resume-req') {
+        // 发送方：接收方上报断点位置，记录后按偏移续发（断点续传核心）
+        if (lanRole !== 'sender') return;
+        c._resume = {
+          index: m.index >= 0 ? m.index : 0,
+          received: m.received || 0,
+          hasPartial: !!m.hasPartial,
+          path: m.path || '',
+          name: m.name || ''
+        };
+        tryStartSend();
       }
       return;
     }
