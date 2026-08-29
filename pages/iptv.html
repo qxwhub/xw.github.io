@@ -48,13 +48,14 @@
   .card-title { flex-shrink:0; font-size:15px; font-weight:700; color:#1f2937; display:flex; align-items:center; gap:8px; margin-bottom:10px; }
   .card-title use[href="#icon-signal"]{color:#0ea5e9}
   .card-title .now { font-size:12px; font-weight:400; color:#6b7280; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  /* 在线 URL 输入条 */
-  .url-row { display:flex; gap:10px; margin-bottom:10px; flex-shrink:0; }
-  .url-row input { flex:1; min-width:0; border:1px solid #d1d5db; border-radius:10px; padding:10px 14px; font-size:14px; outline:none; }
-  .url-row input:focus { border-color:#10b981; }
-  .url-row button { flex-shrink:0; display:inline-flex; align-items:center; gap:5px; padding:10px 18px; border:0; border-radius:10px; background:#10b981; color:#fff; font-size:14px; font-weight:600; cursor:pointer; }
+  /* 在线 URL 输入条（默认在左下角侧栏里，宽 260px） */
+  .side-url { flex-shrink:0; padding:10px 12px 12px; border-top:1px solid rgba(29,29,31,.06); background:#fff; }
+  .url-row { display:flex; gap:8px; flex-shrink:0; }
+  .url-row input { flex:1; min-width:0; border:1px solid #d1d5db; border-radius:10px; padding:9px 12px; font-size:13px; outline:none; background:#f9fafb; }
+  .url-row input:focus { border-color:#10b981; background:#fff; }
+  .url-row button { flex-shrink:0; display:inline-flex; align-items:center; gap:4px; padding:9px 12px; border:0; border-radius:10px; background:#10b981; color:#fff; font-size:13px; font-weight:600; cursor:pointer; }
   .url-row button:hover { background:#059669; }
-  .url-row button svg { width:14px; height:14px; }
+  .url-row button svg { width:13px; height:13px; }
   .player-box { position:relative; width:100%; flex:1; min-height:0; background:#000; border-radius:12px; overflow:hidden; }
   .player-box video { display:block; width:100%; height:100%; min-height:0; background:#000; object-fit:contain; }
   .ph { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; color:#9ca3af; pointer-events:none; }
@@ -126,6 +127,9 @@
     .ch-list { max-height:240px; min-height:0; }
     .local-list { max-height:240px; }
     .player-box video { max-height:52vh; }
+    .side-url { padding:10px 14px 0; border-top:0; background:transparent; }
+    .side-url .url-row input { padding:10px 14px; font-size:14px; }
+    .side-url .url-row button { padding:10px 16px; font-size:14px; }
   }
 </style>
 </head>
@@ -150,14 +154,16 @@
         <div class="local-add" onclick="document.getElementById('localInput').click()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-plus"></use></svg> 添加本地文件（可多选）</div>
         <div class="local-list" id="localList"></div>
       </div>
+      <div class="side-url">
+        <div class="url-row">
+          <input id="urlInput" placeholder="粘贴网址：mp4 · mp3 · m3u8 · flv · dash · 磁力 · 种子" autocomplete="off" autocorrect="off" spellcheck="false">
+          <button onclick="playUrl()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-search"></use></svg> 解析</button>
+        </div>
+      </div>
     </div>
     <div class="player-col">
       <div class="card">
         <div class="card-title"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-signal"></use></svg> <span id="nowName" class="now">选择左侧频道或本地文件开始播放</span></div>
-        <div class="url-row">
-          <input id="urlInput" placeholder="粘贴在线视频 / 音频网址（mp4 · mp3 · m3u8 直播 · flv · dash），回车即播" autocomplete="off" autocorrect="off" spellcheck="false">
-          <button onclick="playUrl()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-search"></use></svg> 解析</button>
-        </div>
         <div class="player-box" id="playerBox">
           <video id="video" playsinline preload="auto"></video>
           <iframe id="biliFrame" style="display:none;width:100%;height:100%;border:none;border-radius:14px" allowfullscreen></iframe>
@@ -953,7 +959,10 @@
       '.player-col{flex:1;min-width:0;display:flex;flex-direction:column;height:100%;}' +
       '.card{flex:1;display:flex;flex-direction:column;min-height:0;padding:16px;border-radius:20px;}' +
       '.card-title{flex-shrink:0;font-size:15px;margin-bottom:10px;}' +
-      '.url-row{flex-shrink:0;margin-bottom:10px;gap:10px;}' +
+      '.side-url{flex-shrink:0;padding:8px 10px 10px;}' +
+      '.side-url .url-row{margin:0;gap:8px;}' +
+      '.side-url .url-row input{padding:8px 12px;font-size:13px;}' +
+      '.side-url .url-row button{padding:8px 12px;font-size:13px;}' +
       '.player-box{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;border-radius:14px;}' +
       '.player-box video{width:100%;height:100%;max-height:none !important;aspect-ratio:auto;object-fit:contain;border-radius:10px;}' +
       '.status{flex-shrink:0;}' +
@@ -964,10 +973,12 @@
       '.main{flex-direction:column !important;gap:10px;height:auto;}' +
       '.side{flex:0 0 auto;width:100%;max-height:220px;}' +
       '.ch-list,.local-list{max-height:150px !important;}' +
+      '.side-url{padding:10px 14px 0;border-top:0;background:transparent;}' +
+      '.side-url .url-row input{padding:10px 14px;font-size:14px;}' +
+      '.side-url .url-row button{padding:10px 16px;font-size:14px;}' +
       '.player-col{height:auto;}' +
       '.card{flex:none;min-height:0;padding:12px;}' +
       '.card-title{margin-bottom:8px;}' +
-      '.url-row{margin-bottom:8px;}' +
       '.player-box{min-height:0;aspect-ratio:16/9;}' +
       '.player-box video{max-height:none;}' +
       '.tip{display:none;}' +
