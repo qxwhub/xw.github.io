@@ -7,8 +7,13 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 2 24 20'%3E%3Cpath d='M12 3c-4.6 0-8 3.2-8 7.2 0 3.8 3.2 8.3 8 8.3s8-4.5 8-8.3C20 6.2 16.6 3 12 3z' fill='%23facc15' stroke='%23eab308' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12 3c-1-1.8-3.5-2.5-5.5-1.8 1 1.5 3.5 2 5.5 1.8z' fill='%2378350f'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="../assets/icons.css?v=64309f72">
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
     body { font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","HarmonyOS Sans SC","Microsoft YaHei","Segoe UI",sans-serif; background:#f5f5f7; color:#1d1d1f; min-height:100vh; }
+    /* 触屏设备禁用 hover 误触效果（触摸滑动会触发 :hover 并粘住） */
+    @media (hover:none) {
+      .sub-tab:hover, .btn:hover, .drop-zone:hover, .file-item:hover, .file-item.fgroup:hover,
+      .file-item .fremove:hover, .file-item .fdl:hover, .tips-home:hover { background:#f9fafb; border-color:#e5e7eb; transform:none; }
+    }
     .wrap { max-width:760px; margin:0 auto; padding:14px 12px 40px; }
     .panel { background:#ffffff; border:1px solid rgba(29,29,31,.06); border-radius:18px; padding:18px 20px; margin-bottom:16px; position:relative; box-shadow:0 4px 20px rgba(29,29,31,.05); }
     .panel p { font-size:12.5px; color:#4b5563; line-height:1.8; margin-bottom:6px; }
@@ -164,8 +169,8 @@
 
     /* 中间：工具网格（3 列） */
     .tool-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
-    .tool-card { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:16px 8px; background:#ffffff; border:1px solid rgba(29,29,31,.06); border-radius:16px; cursor:pointer; transition:all .15s; color:#374151; box-shadow:0 1px 4px rgba(29,29,31,.04); }
-    .tool-card:hover { border-color:#10b981; background:#f0fdf4; transform:translateY(-1px); }
+    .tool-card { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:16px 8px; background:#ffffff; border:1px solid rgba(29,29,31,.06); border-radius:16px; cursor:pointer; transition:all .15s; color:#374151; box-shadow:0 1px 4px rgba(29,29,31,.04); -webkit-tap-highlight-color:transparent; touch-action:manipulation; }
+    @media (hover:hover) { .tool-card:hover { border-color:#10b981; background:#f0fdf4; transform:translateY(-1px); } }
     .tool-card.active { border-color:#10b981; background:#10b981; color:#fff; box-shadow:0 4px 16px rgba(16,185,129,.25); }
     /* 彩色图标（苹果风）：工具箱工具卡片 */
     .tool-card svg use[href="#icon-transfer"]{color:#3b82f6}
