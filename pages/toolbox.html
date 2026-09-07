@@ -333,12 +333,21 @@
     .topbar a.home { color:#4b5563; text-decoration:none; font-size:13px; padding:5px 12px; border-radius:8px; border:1px solid #d1d5db; flex-shrink:0; white-space:nowrap; }
     .topbar a.home:hover { color:#1f2937; border-color:#10b981; }
     .topbar a.home.active, .topbar a.home.active:hover { background:#0ea5e9; border-color:#0ea5e9; color:#fff; cursor:default; pointer-events:none; }
+    .topbar .search-box { display:flex; align-items:stretch; margin-left:auto; }
+    .topbar .search-box input { min-width:0; flex:none; width:0; padding:0; height:26px; border:1px solid transparent; border-radius:8px 0 0 8px; font-size:13px; color:#1f2937; background:#fff; outline:none; font-family:inherit; opacity:0; transition:width .25s ease, padding .25s ease, opacity .15s ease; }
+    .topbar .search-box input.open { width:170px; padding:0 10px; border-color:#d1d5db; opacity:1; }
+    .topbar .search-box input.open:focus { border-color:#6366f1; }
+    .topbar .search-box .search-btn { width:26px; height:26px; flex:none; border:none; background:#6366f1; color:#fff; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:border-radius .25s ease; }
+    .topbar .search-box .search-btn.open { border-radius:0 8px 8px 0; }
+    .topbar .search-box .search-btn:hover { background:#4f46e5; }
+    .topbar .search-box .search-btn svg { width:14px; height:14px; }
     use[href="#icon-home"]{color:#3b82f6}
     .tips-box p { font-size:12px; color:#6b7280; line-height:1.9; margin-bottom:4px; }
     .tips-box p b { color:#059669; }
 
     /* 窄屏：工具网格 3 列保持，卡片内边距缩小 */
     @media (max-width:420px) {
+      .topbar .search-box input.open { width:110px; padding:0 8px; font-size:12px; }
       .tool-card { padding:12px 4px; }
       .tool-card .tc-ico { width:20px; height:20px; }
       .tool-card .tc-name { font-size:11px; }
@@ -359,6 +368,10 @@
   <a class="home" href="found.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-lightbulb"></use></svg> 发现</a>
   <a class="home active" href="toolbox.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-toolbox"></use></svg> 工具箱</a>
   <a class="home" href="guanyu.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-info"></use></svg> 关于</a>
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="搜索工具…" autocomplete="off">
+    <button class="search-btn" id="searchBtn" onclick="toggleSearch()" title="搜索"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-search"></use></svg></button>
+  </div>
 </div>
 
 <div class="wrap">
@@ -2176,6 +2189,68 @@
     }
     if (ok) flash();
   }
+
+  // ===================== 工具箱：搜索工具 =====================
+  var searchInput = document.getElementById('searchInput');
+  var searchBtn = document.getElementById('searchBtn');
+  var TOOL_KEYWORDS = [
+    { name:'file', words:['文件','传输','发送','接收','传文件','p2p','直连','免服务器'] },
+    { name:'img',  words:['图片','压缩','背景','换背景','水印','去除','抠图','图像'] },
+    { name:'media',words:['多媒体','视频','音频','提取','录音','录屏','转码','格式','b站','bilibili','播放中心','电视','直播','播放','频道'] },
+    { name:'pdf',  words:['pdf','合并','拆分','文档'] }
+  ];
+  // 命中词对应需要额外激活的子功能（如"播放中心"→多媒体→子功能c）
+  var TOOL_SUB = { '播放中心':'c', '电视':'c', '直播':'c', '播放':'c', '频道':'c', '提取':'a', '音频':'a', '录音':'b', '录屏':'b' };
+  window.toggleSearch = function(){
+    var isOpen = searchInput.classList.contains('open');
+    if (!isOpen) {
+      searchInput.classList.add('open');
+      searchBtn.classList.add('open');
+      searchInput.focus();
+    } else {
+      doSearch();
+    }
+  };
+  searchInput.addEventListener('blur', function(){
+    if (!this.value.trim()) {
+      searchInput.classList.remove('open');
+      searchBtn.classList.remove('open');
+    }
+  });
+  searchInput.addEventListener('keydown', function(e){
+    if (e.key === 'Enter') { e.preventDefault(); doSearch(); }
+  });
+  window.doSearch = function(){
+    var v = searchInput.value.trim().toLowerCase();
+    if (!v) return;
+    var hitName = null, hitWord = null;
+    for (var i = 0; i < TOOL_KEYWORDS.length; i++) {
+      var t = TOOL_KEYWORDS[i];
+      for (var j = 0; j < t.words.length; j++) {
+        var w = t.words[j].toLowerCase();
+        if (w.indexOf(v) >= 0 || v.indexOf(w) >= 0) { hitName = t.name; hitWord = t.words[j]; break; }
+      }
+      if (hitName) break;
+    }
+    if (!hitName) {
+      searchInput.style.borderColor = '#ef4444';
+      setTimeout(function(){ searchInput.style.borderColor = ''; }, 600);
+      return;
+    }
+    switchTool(hitName);
+    // 多媒体工具：命中子功能词时自动打开对应子功能（如"播放中心"→c）
+    if (hitName === 'media') {
+      var sub = TOOL_SUB[hitWord];
+      if (sub && typeof mediaTab === 'function') {
+        // 需先确保该子功能 tab 存在
+        var subTab = document.querySelector('#view-media .sub-tab[data-tab="' + sub + '"]');
+        if (subTab) { mediaTab(sub); }
+      }
+    }
+    var card = document.querySelector('.tool-card[onclick*="' + hitName + '"]');
+    if (card) card.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    searchInput.value = '';
+  };
 
   // ===================== 工具箱：工具切换 =====================
   window.switchTool = function(name) {

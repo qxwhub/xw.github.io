@@ -15,6 +15,16 @@
     .topbar a.home { color:#4b5563; text-decoration:none; font-size:13px; padding:5px 12px; border-radius:8px; border:1px solid #d1d5db; flex-shrink:0; white-space:nowrap; }
     .topbar a.home:hover { color:#1f2937; border-color:#10b981; }
     .topbar a.home.active, .topbar a.home.active:hover { background:#0ea5e9; border-color:#0ea5e9; color:#fff; cursor:default; pointer-events:none; }
+    .topbar .search-box { display:flex; align-items:stretch; margin-left:auto; }
+    .topbar .search-box input { min-width:0; flex:none; width:0; padding:0; height:26px; border:1px solid transparent; border-radius:8px 0 0 8px; font-size:13px; color:#1f2937; background:#fff; outline:none; font-family:inherit; opacity:0; transition:width .25s ease, padding .25s ease, opacity .15s ease; }
+    .topbar .search-box input.open { width:170px; padding:0 10px; border-color:#d1d5db; opacity:1; }
+    .topbar .search-box input.open:focus { border-color:#6366f1; }
+    .topbar .search-box .search-btn { width:26px; height:26px; flex:none; border:none; background:#6366f1; color:#fff; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:border-radius .25s ease; }
+    .topbar .search-box .search-btn.open { border-radius:0 8px 8px 0; }
+    .topbar .search-box .search-btn:hover { background:#4f46e5; }
+    .topbar .search-box .search-btn svg { width:14px; height:14px; }
+    @media (max-width:420px) { .topbar .search-box input.open { width:110px; padding:0 8px; font-size:12px; } }
+    .doc-wrap mark { background:#fef08a; color:inherit; padding:0 2px; border-radius:3px; }
     .doc-wrap { max-width:960px; margin:0 auto; padding:12px 8px; }
     .doc-box { background:#ffffff; border:1px solid rgba(29,29,31,.06); border-radius:18px; padding:22px 24px; margin-bottom:16px; box-shadow:0 4px 20px rgba(29,29,31,.05); }
     /* 彩色图标（苹果风） */
@@ -37,6 +47,10 @@
   <a class="home" href="found.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-lightbulb"></use></svg> 发现</a>
   <a class="home" href="toolbox.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-toolbox"></use></svg> 工具箱</a>
   <a class="home active" href="guanyu.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-info"></use></svg> 关于</a>
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="搜索本站内容…" autocomplete="off">
+    <button class="search-btn" id="searchBtn" onclick="toggleSearch()" title="搜索"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-search"></use></svg></button>
+  </div>
 </div>
 
 <div class="doc-wrap">
@@ -66,6 +80,79 @@
 
   <div class="about-footer">&copy; 2026 酸柠檬 | 个人导航页</div>
 </div>
+
+<script>
+  // 关于页搜索：高亮匹配文本
+  var searchInput = document.getElementById('searchInput');
+  var searchBtn = document.getElementById('searchBtn');
+  window.toggleSearch = function(){
+    var isOpen = searchInput.classList.contains('open');
+    if (!isOpen) {
+      searchInput.classList.add('open');
+      searchBtn.classList.add('open');
+      searchInput.focus();
+    } else {
+      doSearch();
+    }
+  };
+  searchInput.addEventListener('blur', function(){
+    if (!this.value.trim()) {
+      searchInput.classList.remove('open');
+      searchBtn.classList.remove('open');
+    }
+  });
+  searchInput.addEventListener('keydown', function(e){
+    if (e.key === 'Enter') { e.preventDefault(); doSearch(); }
+  });
+  function clearMarks(){
+    var marks = document.querySelectorAll('.doc-wrap mark');
+    for (var i = 0; i < marks.length; i++) {
+      var m = marks[i], p = m.parentNode;
+      p.replaceChild(document.createTextNode(m.textContent), m);
+      p.normalize();
+    }
+  }
+  window.doSearch = function(){
+    var v = searchInput.value.trim();
+    if (!v) return;
+    clearMarks();
+    var kw = v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    var re = new RegExp(kw, 'gi');
+    var boxes = document.querySelectorAll('.doc-wrap .doc-box');
+    var first = null;
+    for (var i = 0; i < boxes.length; i++) {
+      var box = boxes[i];
+      var walker = document.createTreeWalker(box, NodeFilter.SHOW_TEXT, {
+        acceptNode: function(n){ return (n.textContent || '').trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT; }
+      });
+      var nodes = [], n;
+      while (n = walker.nextNode()) nodes.push(n);
+      for (var j = 0; j < nodes.length; j++) {
+        var node = nodes[j];
+        if (!re.test(node.textContent)) { re.lastIndex = 0; continue; }
+        re.lastIndex = 0;
+        var frag = document.createDocumentFragment();
+        var m;
+        while (m = re.exec(node.textContent)) {
+          if (m.index > 0) frag.appendChild(document.createTextNode(node.textContent.slice(0, m.index)));
+          var mk = document.createElement('mark');
+          mk.textContent = m[0];
+          frag.appendChild(mk);
+          node.textContent = node.textContent.slice(m.index + m[0].length);
+          if (!first) first = mk;
+          re.lastIndex = 0;
+        }
+        node.parentNode.insertBefore(frag, node);
+      }
+    }
+    if (first) {
+      first.scrollIntoView({ behavior:'smooth', block:'center' });
+    } else {
+      searchInput.style.borderColor = '#ef4444';
+      setTimeout(function(){ searchInput.style.borderColor = ''; }, 600);
+    }
+  };
+</script>
 
 </body>
 </html>
