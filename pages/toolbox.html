@@ -326,10 +326,13 @@
     .tips-box { background:#ffffff; border:1px solid rgba(29,29,31,.06); border-radius:18px; padding:16px 20px; box-shadow:0 4px 20px rgba(29,29,31,.05); }
     .tips-box h3 { font-size:14px; color:#1f2937; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
     .tips-box h3 .icon { width:16px; height:16px; color:#10b981; }
-    /* 使用须知标题右侧：首页 */
-    .tips-box h3 .tips-home { margin-left:auto; display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; color:#059669; text-decoration:none; border:1px solid #e5e7eb; border-radius:8px; padding:5px 10px; transition:all .15s; }
-    .tips-box h3 .tips-home:hover { border-color:#10b981; background:#ecfdf5; }
-    .tips-box h3 .tips-home .icon { width:13px; height:13px; }
+    /* 顶部导航栏（与发现/关于页统一） */
+    .topbar { background:rgba(255,255,255,.82); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-bottom:1px solid rgba(29,29,31,.06); box-shadow:0 2px 12px rgba(29,29,31,.04); display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:8px 20px; min-height:52px; position:sticky; top:0; z-index:100; }
+    .topbar .logo { font-size:1.2rem; font-weight:700; color:#0ea5e9; flex-shrink:0; }
+    @supports (-webkit-background-clip: text) or (background-clip: text) { .topbar .logo { background:linear-gradient(135deg,#0ea5e9,#6366f1); background-clip:text; -webkit-background-clip:text; color:transparent; } }
+    .topbar a.home { color:#4b5563; text-decoration:none; font-size:13px; padding:5px 12px; border-radius:8px; border:1px solid #d1d5db; flex-shrink:0; white-space:nowrap; }
+    .topbar a.home:hover { color:#1f2937; border-color:#10b981; }
+    use[href="#icon-home"]{color:#3b82f6}
     .tips-box p { font-size:12px; color:#6b7280; line-height:1.9; margin-bottom:4px; }
     .tips-box p b { color:#059669; }
 
@@ -349,6 +352,13 @@
 </head>
 <body>
 <script src="../assets/icons.js?v=125a0bb4" defer></script>
+
+<div class="topbar">
+  <span class="logo">工具箱</span>
+  <a class="home" href="../index.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-home"></use></svg> 首页</a>
+  <a class="home" href="found.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-lightbulb"></use></svg> 发现</a>
+  <a class="home" href="guanyu.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-info"></use></svg> 关于</a>
+</div>
 
 <div class="wrap">
 
@@ -667,7 +677,6 @@
   <!-- ==================== 底部：使用须知 ==================== -->
   <div class="tips-box">
     <h3><svg class="icon" viewBox="0 0 24 24"><use href="#icon-info"></use></svg> 使用须知
-      <a class="tips-home" href="../index.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-home"></use></svg> 首页</a>
     </h3>
     <p><b>文件传输</b>：无需安装，浏览器直连（P2P）。点「发送」生成配对码二维码，对方识别后即可直连传文件，全程不走服务器。</p>
     <p><b>多媒体工具</b>：本地视频/B站/直链提取音频；网页录音录屏（任意网页正在播放的声音/画面）。</p>

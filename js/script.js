@@ -174,14 +174,7 @@ var DEF_SHORTS = [
 // ============================================================
 //  5. 底部 Dock
 // ============================================================
-var DOCK_ITEMS = [
-  { n: '主页', u: 'index.html', i: '<svg class="dock-icon" viewBox="0 0 24 24"><use href="#icon-home"></use></svg>', fn: 'goHome' },
-  { n: '网站', u: 'javascript:void(0)', i: '<svg class="dock-icon" viewBox="0 0 24 24"><use href="#icon-grid"></use></svg>', fn: 'toggleShortPanel' },
-  { n: '关于', u: 'pages/guanyu.html', i: '<svg class="dock-icon" viewBox="0 0 24 24"><use href="#icon-info"></use></svg>', fn: 'goPage' },
-  { n: '发现', u: 'pages/found.html', i: '<svg class="dock-icon" viewBox="0 0 24 24"><use href="#icon-lightbulb"></use></svg>', fn: 'goPage' },
-  { n: '工具箱', u: 'pages/toolbox.html', i: '<svg class="dock-icon" viewBox="0 0 24 24"><use href="#icon-toolbox"></use></svg>', fn: 'goPage' },
-  { n: '设置', u: 'javascript:void(0)', i: '<svg class="dock-icon" viewBox="0 0 24 24"><use href="#icon-gear"></use></svg>', fn: 'toggleSettings' }
-];
+// 右下角悬浮按钮由 renderDock() 渲染（网站/发现/设置）
 
 // ============================================================
 //  6. 恢复默认设置
@@ -328,7 +321,7 @@ function init() {
     if (!e.target.closest('#ctxMenu'))    document.getElementById('ctxMenu').classList.remove('show');
   });
   document.addEventListener('contextmenu', function(e) {
-    if (!e.target.closest('.short-item') && !e.target.closest('.dock-item')) {
+    if (!e.target.closest('.short-item') && !e.target.closest('.corner-dock')) {
       document.getElementById('ctxMenu').classList.remove('show');
     }
   });
@@ -750,23 +743,16 @@ window.goPage = function() {
 };
 
 function renderDock() {
-  var dock = document.getElementById('bottomDock');
+  var dock = document.getElementById('cornerDock');
   if (!dock) return;
-  var h = '';
-  for (var i = 0; i < DOCK_ITEMS.length; i++) {
-    var d = DOCK_ITEMS[i];
-    var iconHtml = d.i === 'auto' ? renderIcon({n: d.n, u: d.u, i: 'auto'}, 20) : d.i;
-    if (d.fn) {
-      // fn: 'goPage' 时传 data-u 用于当前页导航；其他 fn 直接调用
-      var attr = '';
-      if (d.fn === 'goPage') attr = ' data-u="' + d.u + '"';
-      else if (d.fn === 'goHome') attr = '';
-      h += '<button class="dock-item" onclick="' + (d.fn === 'goPage' ? 'goPage.call(this)' : d.fn + '()') + '"' + attr + '>' + iconHtml + '<span class="dock-lbl">' + d.n + '</span></button>';
-    } else {
-      h += '<a class="dock-item" href="' + d.u + '" target="_blank">' + iconHtml + '<span class="dock-lbl">' + d.n + '</span></a>';
-    }
-  }
-  dock.innerHTML = h;
+  var btn = function(title, fn, attr, icon) {
+    return '<button title="' + title + '" onclick="' + fn + '"' + attr + '>'
+      + '<svg class="dock-icon" viewBox="0 0 24 24"><use href="' + icon + '"></use></svg></button>';
+  };
+  dock.innerHTML =
+    btn('网站', 'toggleShortPanel()', '', '#icon-grid')
+    + btn('发现', 'goPage.call(this)', ' data-u="pages/found.html"', '#icon-lightbulb')
+    + btn('设置', 'toggleSettings()', '', '#icon-gear');
 }
 
 // ============================================================
