@@ -332,6 +332,7 @@
     @supports (-webkit-background-clip: text) or (background-clip: text) { .topbar .logo { background:linear-gradient(135deg,#0ea5e9,#6366f1); background-clip:text; -webkit-background-clip:text; color:transparent; } }
     .topbar a.home { color:#4b5563; text-decoration:none; font-size:13px; padding:5px 12px; border-radius:8px; border:1px solid #d1d5db; flex-shrink:0; white-space:nowrap; }
     .topbar a.home:hover { color:#1f2937; border-color:#10b981; }
+    .topbar a.home.active, .topbar a.home.active:hover { background:#0ea5e9; border-color:#0ea5e9; color:#fff; cursor:default; pointer-events:none; }
     use[href="#icon-home"]{color:#3b82f6}
     .tips-box p { font-size:12px; color:#6b7280; line-height:1.9; margin-bottom:4px; }
     .tips-box p b { color:#059669; }
@@ -354,9 +355,9 @@
 <script src="../assets/icons.js?v=125a0bb4" defer></script>
 
 <div class="topbar">
-  <span class="logo">工具箱</span>
   <a class="home" href="../index.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-home"></use></svg> 首页</a>
   <a class="home" href="found.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-lightbulb"></use></svg> 发现</a>
+  <a class="home active" href="toolbox.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-toolbox"></use></svg> 工具箱</a>
   <a class="home" href="guanyu.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-info"></use></svg> 关于</a>
 </div>
 
