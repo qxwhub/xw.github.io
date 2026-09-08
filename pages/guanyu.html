@@ -23,7 +23,11 @@
     .topbar .search-box .search-btn.open { border-radius:0 8px 8px 0; }
     .topbar .search-box .search-btn:hover { background:#4f46e5; }
     .topbar .search-box .search-btn svg { width:14px; height:14px; }
-    @media (max-width:420px) { .topbar .search-box input.open { width:110px; padding:0 8px; font-size:12px; } }
+    @media (max-width:420px) {
+      .topbar { gap:6px; padding:6px 10px; min-height:44px; }
+      .topbar a.home { font-size:12px; padding:4px 8px; }
+      .topbar .search-box input.open { width:110px; padding:0 8px; font-size:12px; }
+    }
     .doc-wrap mark { background:#fef08a; color:inherit; padding:0 2px; border-radius:3px; }
     .doc-wrap { max-width:960px; margin:0 auto; padding:12px 8px; }
     .doc-box { background:#ffffff; border:1px solid rgba(29,29,31,.06); border-radius:18px; padding:22px 24px; margin-bottom:16px; box-shadow:0 4px 20px rgba(29,29,31,.05); }
