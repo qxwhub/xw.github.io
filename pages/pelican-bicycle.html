@@ -195,35 +195,34 @@
               fill="url(#pouch)" stroke="#e2641a" stroke-width="1.5"/>
         <path d="M480 162 Q518 172 556 167" stroke="#ffd9a8" stroke-width="4" opacity=".45" fill="none"/>
         <g id="fish">
-          <!-- 嘴里装满鱼：几只小鱼在喉囊里，两三只从嘴角探出 -->
-          <g class="mf" transform="translate(540,182) rotate(18) scale(0.70)">
+          <!-- 鱼在嘴里：囊里装满，鱼头/鱼尾从嘴角缝里探出 -->
+          <g class="mf" transform="translate(508,184) rotate(-10) scale(0.62)">
             <ellipse cx="0" cy="0" rx="14" ry="7" fill="#cfd8dc" stroke="#90a4ae" stroke-width="1.5"/>
             <path d="M14 0 L26 -7 L26 7 Z" fill="#b0bec5" stroke="#90a4ae" stroke-width="1.5" stroke-linejoin="round"/>
             <circle cx="-8" cy="-2" r="1.6" fill="#455a64"/>
           </g>
-          <g class="mf" transform="translate(508,188) rotate(-12) scale(0.66)">
+          <g class="mf" transform="translate(538,190) rotate(6) scale(0.58)">
             <ellipse cx="0" cy="0" rx="14" ry="7" fill="#cfd8dc" stroke="#90a4ae" stroke-width="1.5"/>
             <path d="M14 0 L26 -7 L26 7 Z" fill="#b0bec5" stroke="#90a4ae" stroke-width="1.5" stroke-linejoin="round"/>
             <circle cx="-8" cy="-2" r="1.6" fill="#455a64"/>
           </g>
-          <g class="mf" transform="translate(566,176) rotate(28) scale(0.60)">
+          <g class="mf" transform="translate(556,174) rotate(-18) scale(0.52)">
             <ellipse cx="0" cy="0" rx="14" ry="7" fill="#cfd8dc" stroke="#90a4ae" stroke-width="1.5"/>
             <path d="M14 0 L26 -7 L26 7 Z" fill="#b0bec5" stroke="#90a4ae" stroke-width="1.5" stroke-linejoin="round"/>
             <circle cx="-8" cy="-2" r="1.6" fill="#455a64"/>
           </g>
-          <g class="mf" transform="translate(590,158) rotate(20) scale(0.62)">
+          <g class="mf" transform="translate(574,162) rotate(-6) scale(0.46)">
             <ellipse cx="0" cy="0" rx="14" ry="7" fill="#cfd8dc" stroke="#90a4ae" stroke-width="1.5"/>
             <path d="M14 0 L26 -7 L26 7 Z" fill="#b0bec5" stroke="#90a4ae" stroke-width="1.5" stroke-linejoin="round"/>
             <circle cx="-8" cy="-2" r="1.6" fill="#455a64"/>
           </g>
-          <g class="mf" transform="translate(602,150) rotate(8) scale(0.50)">
+          <g class="mf" transform="translate(590,152) rotate(180) scale(0.40)">
             <ellipse cx="0" cy="0" rx="14" ry="7" fill="#cfd8dc" stroke="#90a4ae" stroke-width="1.5"/>
             <path d="M14 0 L26 -7 L26 7 Z" fill="#b0bec5" stroke="#90a4ae" stroke-width="1.5" stroke-linejoin="round"/>
             <circle cx="-8" cy="-2" r="1.6" fill="#455a64"/>
           </g>
         </g>
-        <circle cx="458" cy="140" r="5.2" fill="#37474f"/>
-        <circle cx="459.8" cy="138" r="1.9" fill="#ffffff"/>
+        <path d="M451 142 Q458 132 465 142" stroke="#37474f" stroke-width="3.4" fill="none" stroke-linecap="round"/>
 
         <g id="legR">
           <line id="thighR" stroke="#fb8c00" stroke-width="12" stroke-linecap="round"/>
@@ -375,9 +374,9 @@
 
   var actx = null, master = null, musicOn = false, sched = null;
   var step = 0, nextTime = 0, noiseBuf = null;
-  var BPM = 128;
-  var MEL = [72,76,79,76, 72,76,79,83, 74,77,81,77, 74,77,81,84,
-             79,76,72,76, 79,76,72,69, 72,76,79,76, 74,72,69,0];
+  var BPM = 132;
+  var MEL = [72,76,79,84, 79,76,72,0, 74,77,81,84, 81,77,74,0,
+             72,76,79,84, 83,79,76,72, 74,76,77,79, 81,79,76,72];
   var BAS = [48,48,48,48, 43,43,43,43, 45,45,45,45, 41,41,41,41,
              48,48,48,48, 43,43,43,43, 45,45,45,45, 41,41,41,41];
   var mf = function(m){ return 440 * Math.pow(2, (m - 69) / 12); };
