@@ -130,6 +130,23 @@
 
 <div class="blog-wrap">
   <!-- 文章列表：由 body 末尾同步加载的 blog-data.js 快照填充，首次绘制前列表已就绪，整页一次出现 -->
+  <!-- 趣味页面（折叠下拉卡）：点标题展开，点链接进入页面 -->
+  <div class="post-card" id="funCard">
+    <div class="post-head" onclick="toggleFunCard()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFunCard()}">
+      <div class="post-ico" style="background:#0ea5e91a"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-feather"></use></svg></div>
+      <div class="post-txt">
+        <div class="post-title">趣味页面 <span class="tag tag-t1">互动</span></div>
+        <div class="post-summary">点这里展开，进入「鹈鹕骑自行车」互动小页面。</div>
+        <div class="post-meta"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-clock"></use></svg> 2026-09-10</div>
+      </div>
+      <svg class="caret" viewBox="0 0 24 24"><use href="#icon-arrow-right"></use></svg>
+    </div>
+    <div class="detail-wrap"><div class="detail-inner"><div class="detail-body">
+      <p>一个可交互的小页面：鹈鹕骑自行车，页面内可拖动滑杆调整参数、切换姿势与音乐。</p>
+      <a class="dl-btn" href="pelican-bicycle.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-arrow-right"></use></svg> 打开页面</a>
+    </div></div></div>
+  </div>
+
   <div id="postList"></div>
 </div>
 
@@ -192,6 +209,10 @@
     });
     list.innerHTML = h || '<p style="color:#9ca3af;font-size:13px;padding:20px;text-align:center">' + (keyword ? '没有匹配的文章' : '暂无文章') + '</p>';
   }
+  window.toggleFunCard = function(){
+    var c = document.getElementById('funCard');
+    if (c) c.classList.toggle('open');
+  };
   window.togglePost = function(i){
     var c = document.getElementById('post-' + i);
     if (c) c.classList.toggle('open');
