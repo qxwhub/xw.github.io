@@ -187,18 +187,41 @@
           <path d="M446 120 Q447 105 459 102"/>
           <path d="M427 127 Q419 114 424 105"/>
         </g>
-        <g id="fish">
-          <ellipse cx="614" cy="160" rx="24" ry="11" fill="#cfd8dc" stroke="#90a4ae" stroke-width="1.5"/>
-          <path d="M636 160 L652 149 L652 171 Z" fill="#b0bec5" stroke="#90a4ae" stroke-width="1.5" stroke-linejoin="round"/>
-          <circle cx="605" cy="156" r="2.6" fill="#455a64"/>
-          <path d="M600 165 Q617 171 634 163" stroke="#90a4ae" stroke-width="1.5" fill="none"/>
-        </g>
+
         <path d="M462 131 Q532 131 596 149 Q593 158 578 154 Q510 151 462 147 Z"
               fill="url(#beak)" stroke="#e6a23c" stroke-width="1.5"/>
         <path d="M596 149 Q605 152 599 158" fill="none" stroke="#e6a23c" stroke-width="2.5" stroke-linecap="round"/>
         <path id="pouch" d="M462 147 Q520 152 580 154 Q572 208 512 203 Q470 190 459 158 Z"
               fill="url(#pouch)" stroke="#e2641a" stroke-width="1.5"/>
         <path d="M480 162 Q518 172 556 167" stroke="#ffd9a8" stroke-width="4" opacity=".45" fill="none"/>
+        <g id="fish">
+          <!-- 嘴里装满鱼：几只小鱼在喉囊里，两三只从嘴角探出 -->
+          <g class="mf" transform="translate(540,182) rotate(18) scale(0.70)">
+            <ellipse cx="0" cy="0" rx="14" ry="7" fill="#cfd8dc" stroke="#90a4ae" stroke-width="1.5"/>
+            <path d="M14 0 L26 -7 L26 7 Z" fill="#b0bec5" stroke="#90a4ae" stroke-width="1.5" stroke-linejoin="round"/>
+            <circle cx="-8" cy="-2" r="1.6" fill="#455a64"/>
+          </g>
+          <g class="mf" transform="translate(508,188) rotate(-12) scale(0.66)">
+            <ellipse cx="0" cy="0" rx="14" ry="7" fill="#cfd8dc" stroke="#90a4ae" stroke-width="1.5"/>
+            <path d="M14 0 L26 -7 L26 7 Z" fill="#b0bec5" stroke="#90a4ae" stroke-width="1.5" stroke-linejoin="round"/>
+            <circle cx="-8" cy="-2" r="1.6" fill="#455a64"/>
+          </g>
+          <g class="mf" transform="translate(566,176) rotate(28) scale(0.60)">
+            <ellipse cx="0" cy="0" rx="14" ry="7" fill="#cfd8dc" stroke="#90a4ae" stroke-width="1.5"/>
+            <path d="M14 0 L26 -7 L26 7 Z" fill="#b0bec5" stroke="#90a4ae" stroke-width="1.5" stroke-linejoin="round"/>
+            <circle cx="-8" cy="-2" r="1.6" fill="#455a64"/>
+          </g>
+          <g class="mf" transform="translate(590,158) rotate(20) scale(0.62)">
+            <ellipse cx="0" cy="0" rx="14" ry="7" fill="#cfd8dc" stroke="#90a4ae" stroke-width="1.5"/>
+            <path d="M14 0 L26 -7 L26 7 Z" fill="#b0bec5" stroke="#90a4ae" stroke-width="1.5" stroke-linejoin="round"/>
+            <circle cx="-8" cy="-2" r="1.6" fill="#455a64"/>
+          </g>
+          <g class="mf" transform="translate(602,150) rotate(8) scale(0.50)">
+            <ellipse cx="0" cy="0" rx="14" ry="7" fill="#cfd8dc" stroke="#90a4ae" stroke-width="1.5"/>
+            <path d="M14 0 L26 -7 L26 7 Z" fill="#b0bec5" stroke="#90a4ae" stroke-width="1.5" stroke-linejoin="round"/>
+            <circle cx="-8" cy="-2" r="1.6" fill="#455a64"/>
+          </g>
+        </g>
         <circle cx="458" cy="140" r="5.2" fill="#37474f"/>
         <circle cx="459.8" cy="138" r="1.9" fill="#ffffff"/>
 
@@ -352,11 +375,11 @@
 
   var actx = null, master = null, musicOn = false, sched = null;
   var step = 0, nextTime = 0, noiseBuf = null;
-  var BPM = 116;
-  var MEL = [72,74,76,79,76,74,72,74, 76,79,81,79,76,74,72,0,
-             69,72,74,76,74,72,69,72, 74,76,79,76,74,72,69,0];
-  var BAS = [48,48,48,48, 45,45,45,45, 41,41,41,41, 43,43,43,43,
-             48,48,48,48, 45,45,45,45, 41,41,41,41, 43,43,43,43];
+  var BPM = 128;
+  var MEL = [72,76,79,76, 72,76,79,83, 74,77,81,77, 74,77,81,84,
+             79,76,72,76, 79,76,72,69, 72,76,79,76, 74,72,69,0];
+  var BAS = [48,48,48,48, 43,43,43,43, 45,45,45,45, 41,41,41,41,
+             48,48,48,48, 43,43,43,43, 45,45,45,45, 41,41,41,41];
   var mf = function(m){ return 440 * Math.pow(2, (m - 69) / 12); };
 
   function tone(fr, t0, dur, type, vol){
@@ -482,7 +505,7 @@
     var bounce = Math.sin(crank * 2) * 2.2;
     S('rig').setAttribute('transform', 'translate(0,' + bounce.toFixed(2) + ')');
     S('wing').setAttribute('transform', 'rotate(' + (Math.sin(crank*2)*3.2).toFixed(2) + ' 300 226)');
-    S('fish').setAttribute('transform', 'rotate(' + (Math.sin(t*4)*5).toFixed(2) + ' 600 158)');
+    S('fish').setAttribute('transform', 'rotate(' + (Math.sin(t*3)*3).toFixed(2) + ' 530 175)');
     S('pouch').setAttribute('transform', 'translate(0,' + (Math.sin(crank*2+1)*1.8).toFixed(2) + ')');
 
     var off = t * ROAD_V;
