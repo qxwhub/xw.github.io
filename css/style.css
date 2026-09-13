@@ -177,11 +177,10 @@ body {
   .short-item .s-lbl{font-size:9px; max-width:50px}
 }
 .dock-icon{width:20px;height:20px;display:block;color:rgba(29,29,31,.72)}
-.modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:100; display:none; overflow-y:auto; box-sizing:border-box; padding:32px 0; text-align:center}
-.modal-overlay.show{display:block}
-.modal-overlay::before{content:""; display:inline-block; vertical-align:middle; height:100%; width:0}
+.modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:100; display:none; overflow-y:auto; box-sizing:border-box; padding:32px 16px}
+.modal-overlay.show{display:flex}
 .modal {
-  display:inline-block; vertical-align:middle; text-align:left;
+  display:block; margin:auto; text-align:left;
   background:#ffffff; backdrop-filter:blur(40px);
   border:1px solid rgba(29,29,31,.06); border-radius:10px;
   width:540px; max-width:92vw; max-height:84vh; padding:19px;
@@ -244,11 +243,10 @@ body {
 .ctx-item:hover{background:#f3f4f6; color:#1f2937}
 .ctx-item.danger{color:#ef4444}
 .ctx-item.danger:hover{background:#fee2e2}
-.add-overlay{position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:150; display:none; overflow-y:auto; box-sizing:border-box; padding:32px 0; text-align:center}
-.add-overlay.show{display:block}
-.add-overlay::before{content:""; display:inline-block; vertical-align:middle; height:100%; width:0}
+.add-overlay{position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:150; display:none; overflow-y:auto; box-sizing:border-box; padding:32px 16px}
+.add-overlay.show{display:flex}
 .add-dialog{
-  display:inline-block; vertical-align:middle; text-align:left;
+  display:block; margin:auto; text-align:left;
   background:#ffffff; color:#1d1d1f;
   border:1px solid rgba(29,29,31,.06); border-radius:10px;
   padding:18px; width:450px; max-width:94vw; max-height:85vh; overflow-y:auto; box-shadow:0 16px 48px rgba(29,29,31,.16);
