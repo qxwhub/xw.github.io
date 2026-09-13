@@ -1,4 +1,4 @@
-/* 由 GitHub Actions 自动同步，请勿手动修改 */
+/* 发现页文章数据（手动维护） */
 window.BLOG = {
   "posts": [
     {
