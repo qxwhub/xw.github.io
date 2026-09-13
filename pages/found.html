@@ -130,6 +130,8 @@
 
 <div class="blog-wrap">
   <!-- 文章列表：由 body 末尾同步加载的 blog-data.js 快照填充，首次绘制前列表已就绪，整页一次出现 -->
+  <div id="postList"></div>
+
   <!-- 趣味页面（折叠下拉卡）：点标题展开，点链接进入页面 -->
   <div class="post-card" id="funCard">
     <div class="post-head" onclick="toggleFunCard()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFunCard()}">
@@ -146,8 +148,6 @@
       <a class="dl-btn" href="pelican-bicycle.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-arrow-right"></use></svg> 打开页面</a>
     </div></div></div>
   </div>
-
-  <div id="postList"></div>
 </div>
 
 <script src="blog-data.js?v=5"></script>
