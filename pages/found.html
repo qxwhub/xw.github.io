@@ -208,6 +208,9 @@
       '</div>';
     });
     list.innerHTML = h || '<p style="color:#9ca3af;font-size:13px;padding:20px;text-align:center">' + (keyword ? '没有匹配的文章' : '暂无文章') + '</p>';
+    // 趣味页面卡固定插在列表第二位（置顶文章之后）
+    var fun = document.getElementById('funCard');
+    if (fun) list.insertBefore(fun, list.children[1] || null);
   }
   window.toggleFunCard = function(){
     var c = document.getElementById('funCard');
