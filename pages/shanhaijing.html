@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>山海经 · 异兽图鉴（试作）</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l3 7h7l-5.5 4 2 7L12 17l-6.5 4 2-7L2 9h7z' fill='%23e23b2b'/%3E%3C/svg%3E">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { width:100%; height:100%; overflow:hidden; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif; background:#0b1020; color:#1d1d1f; }
+    #scene { position:fixed; inset:0; }
+    canvas { display:block; }
+
+    /* 顶部 HUD */
+    #hud { position:fixed; top:0; left:0; right:0; z-index:20; display:flex; align-items:center; gap:12px;
+      padding:10px 16px; background:linear-gradient(180deg, rgba(8,12,24,.78), rgba(8,12,24,0));
+      pointer-events:none; color:#fff; }
+    #hud .title { font-size:16px; font-weight:700; text-shadow:0 1px 4px rgba(0,0,0,.5); white-space:nowrap; }
+    #hud .title small { font-size:11px; font-weight:400; opacity:.7; display:block; margin-top:1px; }
+    #hud .prog { font-size:12px; background:rgba(255,255,255,.14); padding:4px 10px; border-radius:999px; white-space:nowrap; }
+    #hud .spacer { flex:1; }
+    #hud .chips { display:flex; gap:6px; flex-wrap:wrap; pointer-events:auto; }
+    #hud .chip { font-size:12px; color:#fff; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
+      padding:4px 10px; border-radius:999px; cursor:pointer; transition:all .15s; white-space:nowrap; }
+    #hud .chip:hover { background:rgba(255,255,255,.28); }
+    #hud .chip.done { background:rgba(34,197,94,.32); border-color:rgba(34,197,94,.6); }
+
+    /* 底部提示 */
+    #hint { position:fixed; bottom:14px; left:0; right:0; z-index:20; text-align:center; color:#fff;
+      font-size:12px; opacity:.72; text-shadow:0 1px 4px rgba(0,0,0,.6); pointer-events:none; }
+
+    /* 返回总览按钮 */
+    #overviewBtn { position:fixed; top:64px; left:16px; z-index:20; display:none; align-items:center; gap:6px;
+      font-size:12px; color:#fff; background:rgba(8,12,24,.6); border:1px solid rgba(255,255,255,.22);
+      padding:6px 12px; border-radius:999px; cursor:pointer; }
+    #overviewBtn:hover { background:rgba(8,12,24,.85); }
+
+    /* 异兽卡（右侧滑入） */
+    #card { position:fixed; top:0; right:0; height:100%; width:380px; max-width:88vw; z-index:30;
+      background:#fff; box-shadow:-8px 0 40px rgba(0,0,0,.35); transform:translateX(105%);
+      transition:transform .35s cubic-bezier(.22,.61,.36,1); display:flex; flex-direction:column; }
+    #card.open { transform:translateX(0); }
+    #card .c-head { display:flex; align-items:flex-start; gap:12px; padding:18px 18px 10px; border-bottom:1px solid #eee; }
+    #card .c-svg { width:84px; height:84px; flex-shrink:0; background:#faf7f2; border-radius:14px; border:1px solid #eee; padding:6px; }
+    #card .c-svg svg { width:100%; height:100%; }
+    #card .c-name { flex:1; min-width:0; }
+    #card .c-name h2 { font-size:19px; color:#1f2937; }
+    #card .c-name .py { font-size:12px; color:#9ca3af; margin-top:2px; }
+    #card .c-name .tag { display:inline-block; margin-top:6px; font-size:11px; color:#0d9488; background:#ccfbf1;
+      border:1px solid #99f6e4; padding:1px 8px; border-radius:999px; }
+    #card .c-close { width:30px; height:30px; flex-shrink:0; border:none; background:#f3f4f6; border-radius:8px;
+      color:#6b7280; font-size:16px; cursor:pointer; }
+    #card .c-close:hover { background:#e5e7eb; }
+    #card .c-body { padding:14px 18px 24px; overflow-y:auto; flex:1; }
+    #card .c-body h3 { font-size:13px; color:#e11d48; margin:16px 0 6px; }
+    #card .c-body h3:first-child { margin-top:0; }
+    #card .c-body p { font-size:13px; color:#4b5563; line-height:1.9; }
+    #card .c-body .orig { background:#faf7f2; border-left:3px solid #e23b2b; padding:10px 12px; border-radius:0 8px 8px 0;
+      font-size:13px; color:#7c2d12; line-height:1.9; }
+    #card .c-foot { padding:10px 18px 16px; border-top:1px solid #eee; font-size:11px; color:#9ca3af; }
+
+    /* 加载/错误 */
+    #loading { position:fixed; inset:0; z-index:40; display:flex; align-items:center; justify-content:center;
+      background:#0b1020; color:#cbd5e1; font-size:14px; }
+    #loading.hide { display:none; }
+
+    @media (max-width:560px) {
+      #hud .title { font-size:14px; }
+      #hud .chips { display:none; }
+      #card { width:100%; max-width:100%; }
+    }
+  </style>
+</head>
+<body>
+  <div id="scene"></div>
+
+  <div id="hud">
+    <div class="title">山海经 · 异兽图鉴<small>试作 Demo · 点发光图腾查看异兽</small></div>
+    <div class="prog" id="prog">已解锁 0 / 0</div>
+    <div class="spacer"></div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <button id="overviewBtn" onclick="backToOverview()">← 返回总览</button>
+
+  <div id="hint">拖拽旋转 · 滚轮缩放 · 点击发光的图腾柱查看异兽</div>
+
+  <div id="card">
+    <div class="c-head">
+      <div class="c-svg" id="cSvg"></div>
+      <div class="c-name">
+        <h2 id="cName">—</h2>
+        <div class="py" id="cPy"></div>
+        <span class="tag" id="cTag"></span>
+      </div>
+      <button class="c-close" onclick="closeCard()">✕</button>
+    </div>
+    <div class="c-body" id="cBody"></div>
+    <div class="c-foot">原文取自权威本；白话/解读为整理说明，非逐字译文。</div>
+  </div>
+
+  <div id="loading">正在加载山海舆图…（需联网加载 3D 库）</div>
+
+  <script src="shanhaijing-data.js?v=1"></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+    const DATA = window.SHANHAIJING;
+    if (!DATA || !DATA.creatures) {
+      document.getElementById('loading').textContent = '数据加载失败';
+      throw new Error('no data');
+    }
+
+    let renderer, scene, camera, controls;
+    const beacons = [];           // 可点击的图腾球 mesh
+    const beaconGroups = [];      // 含标签的组
+    let actx = null;
+
+    // 解锁进度
+    const STORE = 'shj_unlocked_v1';
+    function getUnlocked() {
+      try { return JSON.parse(localStorage.getItem(STORE) || '[]'); } catch (e) { return []; }
+    }
+    function saveUnlocked(arr) { try { localStorage.setItem(STORE, JSON.stringify(arr)); } catch (e) {} }
+    let unlocked = getUnlocked();
+
+    // ---------- 场景 ----------
+    function init() {
+      const host = document.getElementById('scene');
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      host.appendChild(renderer.domElement);
+
+      scene = new THREE.Scene();
+      scene.fog = new THREE.Fog(0x9fc6e8, 60, 200);
+
+      camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 38, 72);
+
+      controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.minDistance = 18;
+      controls.maxDistance = 130;
+      controls.maxPolarAngle = Math.PI * 0.49;   // 不穿到地面以下
+      controls.target.set(0, 4, 0);
+
+      // 天空渐变（大球内侧）
+      const sky = new THREE.Mesh(
+        new THREE.SphereGeometry(500, 32, 16),
+        new THREE.ShaderMaterial({
+          side: THREE.BackSide,
+          uniforms: {
+            top: { value: new THREE.Color(0x1d4e89) },
+            bottom: { value: new THREE.Color(0xbfe3ff) }
+          },
+          vertexShader: 'varying vec3 vP; void main(){ vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+          fragmentShader: 'varying vec3 vP; uniform vec3 top; uniform vec3 bottom; void main(){ float h = normalize(vP).y * 0.5 + 0.5; gl_FragColor = vec4(mix(bottom, top, pow(h, 0.7)), 1.0); }'
+        })
+      );
+      scene.add(sky);
+
+      // 光照
+      scene.add(new THREE.HemisphereLight(0xcfe6ff, 0x4a5a3a, 0.9));
+      const sun = new THREE.DirectionalLight(0xfff2d8, 1.1);
+      sun.position.set(40, 60, 30);
+      scene.add(sun);
+
+      buildTerrain();
+      buildWater();
+      buildMountains();
+      buildBeacons();
+
+      // 交互
+      let downX = 0, downY = 0;
+      renderer.domElement.addEventListener('pointerdown', e => { downX = e.clientX; downY = e.clientY; });
+      renderer.domElement.addEventListener('pointerup', e => {
+        if (Math.abs(e.clientX - downX) < 6 && Math.abs(e.clientY - downY) < 6) handleClick(e);
+      });
+      window.addEventListener('resize', onResize);
+
+      buildChips();
+      updateProgress();
+      document.getElementById('loading').classList.add('hide');
+      animate();
+    }
+
+    // 程序化起伏地形
+    function buildTerrain() {
+      const SIZE = 220, SEG = 90;
+      const geo = new THREE.PlaneGeometry(SIZE, SIZE, SEG, SEG);
+      geo.rotateX(-Math.PI / 2);
+      const pos = geo.attributes.position;
+      const colors = [];
+      const cLow = new THREE.Color(0x4f7a3a);   // 草地绿
+      const cMid = new THREE.Color(0x7a6a44);   // 土黄
+      const cHigh = new THREE.Color(0xeef2f5);  // 雪白
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i), z = pos.getZ(i);
+        let h = Math.sin(x * 0.06) * 1.6 + Math.cos(z * 0.05) * 1.6
+              + Math.sin((x + z) * 0.03) * 2.2 + Math.sin(x * 0.13 + z * 0.09) * 0.8;
+        // 中心略平，边缘抬高成山势
+        const d = Math.sqrt(x * x + z * z);
+        h += Math.max(0, (d - 70) * 0.07);
+        pos.setY(i, h);
+        const t = Math.max(0, Math.min(1, (h + 2) / 9));
+        const col = new THREE.Color();
+        if (t < 0.5) col.copy(cLow).lerp(cMid, t / 0.5);
+        else col.copy(cMid).lerp(cHigh, (t - 0.5) / 0.5);
+        colors.push(col.r, col.g, col.b);
+      }
+      geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+      geo.computeVertexNormals();
+      const mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 0, flatShading: false });
+      scene.add(new THREE.Mesh(geo, mat));
+    }
+
+    function buildWater() {
+      const water = new THREE.Mesh(
+        new THREE.PlaneGeometry(70, 50),
+        new THREE.MeshStandardMaterial({ color: 0x2f7fb5, transparent: true, opacity: 0.72, roughness: 0.25, metalness: 0.1 })
+      );
+      water.rotation.x = -Math.PI / 2;
+      water.position.set(-50, 0.4, 40);
+      scene.add(water);
+    }
+
+    function buildMountains() {
+      const mat = new THREE.MeshStandardMaterial({ color: 0x8a8f98, roughness: 1, flatShading: true });
+      const spots = [[-70, -60, 26], [78, -40, 32], [-60, 70, 22], [70, 64, 28], [10, -82, 30]];
+      spots.forEach(s => {
+        const m = new THREE.Mesh(new THREE.ConeGeometry(s[2] * 0.7, s[2], 6), mat);
+        m.position.set(s[0], s[2] / 2, s[1]);
+        scene.add(m);
+      });
+    }
+
+    // 异兽图腾：柱子 + 发光球 + 名称标签
+    function buildBeacons() {
+      DATA.creatures.forEach(c => {
+        const g = new THREE.Group();
+        g.position.set(c.pos[0], 0, c.pos[2]);
+
+        const pillar = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.35, 0.5, 7, 8),
+          new THREE.MeshStandardMaterial({ color: 0x2a2f3a, emissive: 0x123, roughness: 0.6 })
+        );
+        pillar.position.y = 3.5;
+        g.add(pillar);
+
+        const orb = new THREE.Mesh(
+          new THREE.SphereGeometry(1.1, 24, 24),
+          new THREE.MeshStandardMaterial({ color: 0x9be7ff, emissive: 0x35c6ff, emissiveIntensity: 1.4, roughness: 0.3 })
+        );
+        orb.position.y = 8;
+        orb.userData.creature = c;
+        g.add(orb);
+        beacons.push(orb);
+
+        // 光环
+        const ring = new THREE.Mesh(
+          new THREE.TorusGeometry(1.7, 0.08, 8, 32),
+          new THREE.MeshBasicMaterial({ color: 0x35c6ff })
+        );
+        ring.position.y = 8; ring.rotation.x = Math.PI / 2;
+        g.add(ring);
+
+        // 名称标签（canvas 贴图）
+        const label = makeLabel(c.name);
+        label.position.y = 10.4;
+        g.add(label);
+
+        scene.add(g);
+        c._orb = orb;
+        c._base = orb.position.y;
+      });
+    }
+
+    function makeLabel(text) {
+      const cv = document.createElement('canvas');
+      cv.width = 256; cv.height = 64;
+      const ctx = cv.getContext('2d');
+      ctx.fillStyle = 'rgba(8,12,24,0.72)';
+      roundRect(ctx, 4, 10, 248, 44, 12); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = '600 30px "PingFang SC","Microsoft YaHei",sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(text, 128, 33);
+      const tex = new THREE.CanvasTexture(cv);
+      tex.anisotropy = 4;
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }));
+      sp.scale.set(7, 1.75, 1);
+      return sp;
+    }
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    // ---------- 交互 ----------
+    const ray = new THREE.Raycaster();
+    const ndc = new THREE.Vector2();
+    function handleClick(e) {
+      const r = renderer.domElement.getBoundingClientRect();
+      ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+      ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+      ray.setFromCamera(ndc, camera);
+      const hit = ray.intersectObjects(beacons, false)[0];
+      if (hit) selectCreature(hit.object.userData.creature);
+    }
+
+    let flying = false;
+    const camPos = new THREE.Vector3();
+    const camTar = new THREE.Vector3();
+    function flyTo(px, py, pz, tx, ty, tz) {
+      camPos.set(px, py, pz); camTar.set(tx, ty, tz); flying = true; controls.enabled = false;
+      document.getElementById('overviewBtn').style.display = 'inline-flex';
+    }
+    function backToOverview() {
+      closeCard();
+      flyTo(0, 38, 72, 0, 4, 0);
+      document.getElementById('overviewBtn').style.display = 'none';
+    }
+    window.backToOverview = backToOverview;
+
+    function selectCreature(c) {
+      const p = c._orb.getWorldPosition(new THREE.Vector3());
+      flyTo(p.x + 12, p.y + 7, p.z + 18, p.x, p.y, p.z);
+      openCard(c);
+      // 解锁
+      if (unlocked.indexOf(c.id) < 0) {
+        unlocked.push(c.id);
+        saveUnlocked(unlocked);
+        updateProgress();
+        buildChips();
+        chime();
+      }
+    }
+
+    // ---------- 卡片 ----------
+    function openCard(c) {
+      document.getElementById('cSvg').innerHTML = c.svg;
+      document.getElementById('cName').textContent = c.name;
+      document.getElementById('cPy').textContent = c.pinyin;
+      document.getElementById('cTag').textContent = c.region;
+      document.getElementById('cBody').innerHTML =
+        '<h3>原文</h3><p class="orig">' + esc(c.original) + '</p>' +
+        '<h3>白话</h3><p>' + esc(c.baihua) + '</p>' +
+        '<h3>形象解读</h3><p>' + esc(c.note) + '</p>';
+      document.getElementById('card').classList.add('open');
+    }
+    function closeCard() { document.getElementById('card').classList.remove('open'); }
+    window.closeCard = closeCard;
+    function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+    // ---------- HUD ----------
+    function updateProgress() {
+      const total = DATA.creatures.length;
+      document.getElementById('prog').textContent = '已解锁 ' + unlocked.length + ' / ' + total;
+    }
+    function buildChips() {
+      const box = document.getElementById('chips');
+      box.innerHTML = '';
+      DATA.creatures.forEach(c => {
+        const b = document.createElement('button');
+        b.className = 'chip' + (unlocked.indexOf(c.id) >= 0 ? ' done' : '');
+        b.textContent = c.name;
+        b.onclick = () => selectCreature(c);
+        box.appendChild(b);
+      });
+    }
+
+    // ---------- 音效（Web Audio 合成古风五声音阶） ----------
+    function ensureAudio() {
+      if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+      if (actx && actx.state === 'suspended') actx.resume();
+    }
+    function chime() {
+      ensureAudio();
+      if (!actx) return;
+      const notes = [523.25, 587.33, 659.25, 783.99, 880.0];
+      const t0 = actx.currentTime;
+      notes.forEach((f, i) => {
+        const o = actx.createOscillator(), g = actx.createGain();
+        o.type = 'triangle'; o.frequency.value = f;
+        const s = t0 + i * 0.09;
+        g.gain.setValueAtTime(0, s);
+        g.gain.linearRampToValueAtTime(0.16, s + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, s + 0.5);
+        o.connect(g).connect(actx.destination);
+        o.start(s); o.stop(s + 0.55);
+      });
+    }
+
+    // ---------- 循环 ----------
+    let t = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      t += 0.016;
+      // 图腾球呼吸
+      beacons.forEach(b => {
+        b.material.emissiveIntensity = 1.2 + Math.sin(t * 2 + b.position.x) * 0.4;
+        b.position.y = b.userData.creature._base + Math.sin(t * 1.5 + b.position.x) * 0.25;
+      });
+      if (flying) {
+        camera.position.lerp(camPos, 0.09);
+        controls.target.lerp(camTar, 0.09);
+        camera.lookAt(controls.target);
+        if (camera.position.distanceTo(camPos) < 0.5) { flying = false; controls.enabled = true; }
+      } else {
+        controls.update();
+      }
+      renderer.render(scene, camera);
+    }
+
+    function onResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // 启动
+    try { init(); }
+    catch (err) {
+      document.getElementById('loading').textContent = '3D 初始化失败：' + (err && err.message ? err.message : err);
+    }
+    // 超时保护：若 3D 库未加载，提示联网
+    setTimeout(() => {
+      const el = document.getElementById('loading');
+      if (!el.classList.contains('hide')) el.textContent = '3D 库加载较慢，请确认网络后刷新。';
+    }, 9000);
+  </script>
+</body>
+</html>
