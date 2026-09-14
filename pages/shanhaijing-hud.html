@@ -17,13 +17,13 @@ html,body{margin:0;height:100%;background:#05080f;color:#cfe9f5;
   font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;overflow:hidden}
 #app{position:fixed;inset:0;background:radial-gradient(1200px 800px at 40% 45%, #0d1726 0%, #05080f 72%)}
 .topbar{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;
-  justify-content:space-between;padding:10px 14px;z-index:8;
+  justify-content:space-between;padding:10px 14px;z-index:12;
   background:linear-gradient(180deg,rgba(5,8,15,0.92),rgba(5,8,15,0))}
 .topbar .title{font-size:15px;letter-spacing:3px;color:#9fe9ff;text-shadow:0 0 8px rgba(56,225,255,0.5)}
 .topbar .progress{font-size:13px;color:#ffce54}
-/* 主画布：当前地点场景（不摊开全图） */
-.stage{position:absolute;inset:0;transition:opacity .2s}
-.stage.fade{opacity:0}
+/* 主画布：当前地点场景（可缩放/平移） */
+.stage{position:absolute;inset:0}
+.world{position:absolute;inset:0;transform-origin:0 0}
 .scene-bg{position:absolute;left:0;right:0;bottom:0;height:58%;
   background:linear-gradient(180deg,transparent,rgba(56,225,255,0.05) 45%,rgba(56,225,255,0.12))}
 .scene-bg .mtn{position:absolute;left:0;right:0;bottom:0;width:100%;height:100%}
@@ -37,10 +37,11 @@ html,body{margin:0;height:100%;background:#05080f;color:#cfe9f5;
 .find.found .fdot{filter:saturate(1.2)}
 @keyframes fpulse{0%{transform:scale(.65);opacity:.7}100%{transform:scale(1.7);opacity:0}}
 .find .flbl{position:absolute;left:24px;top:-3px;white-space:nowrap;font-size:12px;color:#eaf7ff;text-shadow:0 0 5px #000}
-/* 右上角小地图：全局导航 */
-.minimap{position:absolute;top:52px;right:14px;width:min(46vw,300px);height:min(46vw,300px);
+/* 右上角小地图：点一下放大到屏幕右侧 */
+.minimap{position:absolute;top:52px;right:14px;width:min(40vw,220px);height:min(40vw,220px);
   border-radius:18px;background:var(--hud-bg);border:1px solid rgba(56,225,255,0.5);
-  box-shadow:0 0 24px rgba(56,225,255,0.25),inset 0 0 30px rgba(0,0,0,0.6);overflow:hidden;z-index:7}
+  box-shadow:0 0 24px rgba(56,225,255,0.25),inset 0 0 30px rgba(0,0,0,0.6);overflow:hidden;z-index:11;cursor:pointer}
+.minimap:hover{border-color:var(--hud-line)}
 .mm-grid{position:absolute;inset:0;
   background-image:linear-gradient(rgba(56,225,255,0.08) 1px,transparent 1px),
     linear-gradient(90deg,rgba(56,225,255,0.08) 1px,transparent 1px);
@@ -48,16 +49,37 @@ html,body{margin:0;height:100%;background:#05080f;color:#cfe9f5;
 .mm-ring{position:absolute;inset:10px;border:1px dashed rgba(56,225,255,0.25);border-radius:50%}
 .mm-compass{position:absolute;top:6px;left:0;right:0;text-align:center;font-size:11px;color:var(--hud-dim);z-index:2}
 .mm-compass b{color:var(--hud-line)}
-.pl{position:absolute;width:14px;height:14px;margin:-7px 0 0 -7px;cursor:pointer;z-index:5}
-.pl .pldot{position:absolute;inset:0;border-radius:50%;background:rgba(120,200,230,0.5);box-shadow:0 0 6px rgba(56,225,255,0.4)}
-.pl.active .pldot{background:var(--hud-line);box-shadow:0 0 12px var(--hud-line)}
-.pl.active{outline:2px solid rgba(56,225,255,0.7);outline-offset:3px;border-radius:50%}
-.pl .plname{position:absolute;left:16px;top:-3px;white-space:nowrap;font-size:10px;color:var(--hud-dim);text-shadow:0 0 4px #000}
-.pl.active .plname{color:#dff4ff}
+.mm-pl{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px}
+.mm-pl .pdot{position:absolute;inset:0;border-radius:50%;background:rgba(120,200,230,0.5);box-shadow:0 0 6px rgba(56,225,255,0.4)}
+.mm-pl.active .pdot{background:var(--hud-line);box-shadow:0 0 12px var(--hud-line)}
+.mm-tip{position:absolute;bottom:6px;right:8px;font-size:10px;color:var(--hud-line);opacity:.7}
+/* 右侧放大地图面板 */
+#mapPanel{position:absolute;top:56px;right:10px;width:min(86vw,380px);bottom:14px;
+  background:var(--hud-bg);border:1px solid rgba(56,225,255,0.5);border-radius:16px;
+  box-shadow:0 0 30px rgba(56,225,255,0.25);z-index:13;transform:translateX(118%);
+  transition:transform .35s;display:flex;flex-direction:column;overflow:hidden}
+#mapPanel.show{transform:none}
+.mp-head{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid rgba(56,225,255,0.2)}
+.mp-title{font-size:13px;letter-spacing:2px;color:#9fe9ff;flex:1}
+.mp-btn{background:rgba(56,225,255,0.12);border:1px solid rgba(56,225,255,0.4);color:#cfe9f5;
+  border-radius:8px;width:26px;height:26px;font-size:15px;cursor:pointer;line-height:1}
+.mp-btn:active{background:rgba(56,225,255,0.3)}
+.mp-reset{font-size:11px;width:auto;padding:0 8px}
+.mp-close{background:none;border:none;color:#9fe9ff;font-size:18px;cursor:pointer;line-height:1}
+.map-scroll{position:relative;flex:1;overflow:hidden;touch-action:none;cursor:grab}
+.map-scroll.grabbing{cursor:grabbing}
+.map-zoom{position:absolute;left:0;top:0;width:100%;height:100%;transform-origin:0 0}
+.mnode{position:absolute;transform:translate(-50%,-50%);cursor:pointer}
+.mnode .mdot{width:16px;height:16px;border-radius:50%;background:rgba(120,200,230,0.6);
+  box-shadow:0 0 8px rgba(56,225,255,0.5);border:2px solid rgba(255,255,255,0.4)}
+.mnode.active .mdot{background:var(--hud-line);box-shadow:0 0 14px var(--hud-line)}
+.mnode .mlbl{position:absolute;left:20px;top:-4px;white-space:nowrap;font-size:12px;color:#dff4ff;text-shadow:0 0 5px #000}
+.mnode .msub{position:absolute;left:20px;top:14px;white-space:nowrap;font-size:10px;color:var(--hud-dim);text-shadow:0 0 4px #000}
+.mp-foot{font-size:10px;color:var(--hud-dim);text-align:center;padding:6px;border-top:1px solid rgba(56,225,255,0.12)}
 /* 异兽卡片 */
 .card{position:absolute;top:52px;left:14px;width:min(54vw,360px);max-height:74vh;overflow:auto;
   background:var(--hud-bg);border:1px solid rgba(56,225,255,0.45);border-radius:14px;
-  padding:14px;transform:translateX(-120%);opacity:0;transition:.35s;z-index:9;
+  padding:14px;transform:translateX(-120%);opacity:0;transition:.35s;z-index:14;
   box-shadow:0 0 30px rgba(0,0,0,0.6)}
 .card.show{transform:none;opacity:1}
 .card .close{position:absolute;top:8px;right:10px;background:none;border:none;color:#9fe9ff;font-size:20px;cursor:pointer;line-height:1}
@@ -68,7 +90,7 @@ html,body{margin:0;height:100%;background:#05080f;color:#cfe9f5;
 .card .art svg{max-width:150px;height:auto}
 .card .sec{font-size:13px;line-height:1.6;margin-top:8px}
 .card .sec b{color:#9fe9ff}
-.hint{position:absolute;bottom:14px;left:0;right:0;text-align:center;font-size:12px;color:var(--hud-dim);z-index:3}
+.hint{position:absolute;bottom:14px;left:0;right:0;text-align:center;font-size:12px;color:var(--hud-dim);z-index:3;pointer-events:none}
 </style>
 </head>
 <body>
@@ -77,14 +99,38 @@ html,body{margin:0;height:100%;background:#05080f;color:#cfe9f5;
     <div class="title">山海经 · 地图探索</div>
     <div class="progress" id="prog">已发现 0/0</div>
   </div>
-  <div class="stage" id="stage"></div>
-  <div class="minimap" id="mini">
+
+  <!-- 主画布：当前所在地点场景 -->
+  <div class="stage" id="stage"><div class="world" id="world"></div></div>
+
+  <!-- 右上角小地图：点一下放大到屏幕右侧 -->
+  <div class="minimap" id="mini" title="点击放大地图">
     <div class="mm-grid"></div>
     <div class="mm-ring"></div>
     <div class="mm-compass"><b>N</b> 北 ↑ · 山海舆图</div>
+    <div class="mm-tip">点击放大 ↗</div>
   </div>
+
+  <!-- 右侧放大地图面板 -->
+  <div id="mapPanel">
+    <div class="mp-head">
+      <span class="mp-title">山海舆图 · 全览</span>
+      <button class="mp-btn mp-reset" id="mpReset" title="复位">复位</button>
+      <button class="mp-btn" id="mpZoomIn" title="放大">＋</button>
+      <button class="mp-btn" id="mpZoomOut" title="缩小">－</button>
+      <button class="mp-close" id="mpClose" title="关闭">×</button>
+    </div>
+    <div class="map-scroll" id="mapScroll">
+      <div class="mm-grid"></div>
+      <div class="mm-ring"></div>
+      <div class="mm-compass" style="z-index:2"><b>N</b> 北 ↑</div>
+      <div class="map-zoom" id="mapZoom"></div>
+    </div>
+    <div class="mp-foot">滚轮 / 双指缩放 · 拖拽平移 · 点地点进入</div>
+  </div>
+
   <div class="card" id="card"></div>
-  <div class="hint">点右上角小地图的地点进入该处；在场景里点发光点，发现异兽 / 异草</div>
+  <div class="hint">主画布：滚轮缩放、拖拽平移；右上角小地图点开右侧大地图，点地点进入该处探索</div>
 </div>
 <script src="shanhaijing-map.js"></script>
 <script>
@@ -95,13 +141,82 @@ html,body{margin:0;height:100%;background:#05080f;color:#cfe9f5;
   var found = [];
   try { found = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e){}
   if (!Array.isArray(found)) found = [];
-  var current = M[0].id;
-  var total = M.reduce(function(s,p){ return s + p.finds.length; }, 0);
-  var miniEl = document.getElementById('mini');
-  var stageEl = document.getElementById('stage');
-  var cardEl = document.getElementById('card');
-  var progEl = document.getElementById('prog');
 
+  var total = M.reduce(function(s,p){ return s + p.finds.length; }, 0);
+  var current = M[0].id;
+
+  var stageEl = document.getElementById('stage');
+  var worldEl = document.getElementById('world');
+  var miniEl  = document.getElementById('mini');
+  var panelEl = document.getElementById('mapPanel');
+  var mapScroll = document.getElementById('mapScroll');
+  var mapZoom  = document.getElementById('mapZoom');
+  var cardEl  = document.getElementById('card');
+  var progEl  = document.getElementById('prog');
+
+  /* ===== 通用：缩放/平移（滚轮、拖拽、双指），两处复用 ===== */
+  function makeZoomPan(el, transformEl, opts){
+    opts = opts || {};
+    var st = {scale:1, x:0, y:0};
+    var pointers = {};
+    var lastDist = 0, lastMid = null, _moved = 0;
+    function apply(){ transformEl.style.transform = 'translate('+st.x+'px,'+st.y+'px) scale('+st.scale+')'; }
+    function zoomAt(cx, cy, factor){
+      var ns = Math.min(opts.max||3, Math.max(opts.min||0.5, st.scale*factor));
+      var wx=(cx-st.x)/st.scale, wy=(cy-st.y)/st.scale;
+      st.x = cx - wx*ns; st.y = cy - wy*ns; st.scale=ns; apply();
+    }
+    el.addEventListener('wheel', function(e){
+      e.preventDefault();
+      var r = el.getBoundingClientRect();
+      zoomAt(e.clientX-r.left, e.clientY-r.top, e.deltaY<0 ? 1.12 : 1/1.12);
+    }, {passive:false});
+    el.addEventListener('pointerdown', function(e){
+      pointers[e.pointerId] = {x:e.clientX, y:e.clientY};
+      _moved = 0;
+      if (Object.keys(pointers).length === 1){ el.classList.add('grabbing'); }
+    });
+    window.addEventListener('pointermove', function(e){
+      if (!pointers[e.pointerId]) return;
+      var p = pointers[e.pointerId];
+      var dx = e.clientX - p.x, dy = e.clientY - p.y;
+      pointers[e.pointerId] = {x:e.clientX, y:e.clientY};
+      var ids = Object.keys(pointers);
+      if (ids.length >= 2){
+        var a = pointers[ids[0]], b = pointers[ids[1]];
+        var dist = Math.hypot(b.x-a.x, b.y-a.y);
+        var r = el.getBoundingClientRect();
+        var mx = (a.x+b.x)/2 - r.left, my = (a.y+b.y)/2 - r.top;
+        if (lastDist > 0){
+          zoomAt(mx, my, dist/lastDist);
+          if (lastMid){ st.x += mx-lastMid.x; st.y += my-lastMid.y; apply(); }
+        }
+        lastDist = dist; lastMid = {x:mx, y:my};
+        _moved += 30;
+      } else {
+        st.x += dx; st.y += dy; apply();
+        _moved += Math.abs(dx)+Math.abs(dy);
+      }
+    });
+    function up(e){
+      if (!pointers[e.pointerId]) return;
+      delete pointers[e.pointerId];
+      lastDist = 0; lastMid = null;
+      if (Object.keys(pointers).length === 0){ el.classList.remove('grabbing'); }
+    }
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+    return {
+      reset:function(){ st={scale:1,x:0,y:0}; apply(); },
+      zoomBy:function(f){ var r=el.getBoundingClientRect(); zoomAt(r.width/2, r.height/2, f); },
+      moved:function(){ return _moved; }
+    };
+  }
+
+  var stageZP = makeZoomPan(stageEl, worldEl, {min:0.5, max:3});
+  var mapZP   = makeZoomPan(mapScroll, mapZoom, {min:0.6, max:3});
+
+  /* ===== 数据工具 ===== */
   function allFinds(){
     var a = [];
     M.forEach(function(p){ p.finds.forEach(function(f){
@@ -109,24 +224,50 @@ html,body{margin:0;height:100%;background:#05080f;color:#cfe9f5;
     return a;
   }
 
+  /* ===== 右上角小地图（仅指示当前位置，点击放大到右侧） ===== */
   function renderMini(){
-    miniEl.querySelectorAll('.pl').forEach(function(e){ e.remove(); });
+    miniEl.querySelectorAll('.mm-pl').forEach(function(e){ e.remove(); });
     M.forEach(function(p){
       var d = document.createElement('div');
-      d.className = 'pl' + (p.id === current ? ' active' : '');
+      d.className = 'mm-pl' + (p.id === current ? ' active' : '');
       d.style.left = p.mini[0] + '%';
-      d.style.top = p.mini[1] + '%';
-      d.innerHTML = '<span class="pldot"></span><span class="plname">'+p.name+'</span>';
-      d.addEventListener('click', function(){ setPlace(p.id); });
+      d.style.top  = p.mini[1] + '%';
+      d.innerHTML = '<span class="pdot"></span>';
       miniEl.appendChild(d);
     });
   }
 
+  /* ===== 右侧放大地图面板 ===== */
+  function renderMapPanel(){
+    mapZoom.querySelectorAll('.mnode').forEach(function(e){ e.remove(); });
+    M.forEach(function(p){
+      var d = document.createElement('div');
+      d.className = 'mnode' + (p.id === current ? ' active' : '');
+      d.style.left = p.mini[0] + '%';
+      d.style.top  = p.mini[1] + '%';
+      d.innerHTML = '<span class="mdot"></span><span class="mlbl">'+p.name
+                  + '</span><span class="msub">'+p.sceneName+'</span>';
+      d.addEventListener('click', function(ev){
+        ev.stopPropagation();
+        if (mapZP.moved() > 8) return; // 拖拽误触不触发
+        setPlace(p.id);
+      });
+      mapZoom.appendChild(d);
+    });
+  }
+
+  function togglePanel(force){
+    var show = (typeof force === 'boolean') ? force : !panelEl.classList.contains('show');
+    panelEl.classList.toggle('show', show);
+  }
+
+  /* ===== 主画布场景 ===== */
   function setPlace(id){
-    if (id === current) return;
+    if (id === current){ return; }
     current = id;
-    stageEl.classList.add('fade');
-    setTimeout(function(){ renderStage(); renderMini(); stageEl.classList.remove('fade'); }, 200);
+    worldEl.style.opacity = '0';
+    setTimeout(function(){ renderStage(); renderMini(); renderMapPanel(); worldEl.style.opacity = '1'; }, 180);
+    stageZP.reset(); // 进入新地点复位视角
   }
 
   function renderStage(){
@@ -144,12 +285,16 @@ html,body{margin:0;height:100%;background:#05080f;color:#cfe9f5;
             + '<span class="fdot" style="background:'+COL[f.type]+';box-shadow:0 0 10px '+COL[f.type]+'"></span>'
             + '<span class="flbl">'+f.name+'</span></div>';
     });
-    stageEl.innerHTML = html;
-    stageEl.querySelectorAll('.find').forEach(function(el){
-      el.addEventListener('click', function(){ openCard(el.getAttribute('data-id')); });
+    worldEl.innerHTML = html;
+    worldEl.querySelectorAll('.find').forEach(function(el){
+      el.addEventListener('click', function(){
+        if (stageZP.moved() > 8) return; // 拖拽平移时不误开卡片
+        openCard(el.getAttribute('data-id'));
+      });
     });
   }
 
+  /* ===== 异兽卡片 ===== */
   function closeCard(){ cardEl.classList.remove('show'); }
   window.closeCard = closeCard;
 
@@ -193,7 +338,16 @@ html,body{margin:0;height:100%;background:#05080f;color:#cfe9f5;
     } catch(e){}
   }
 
+  /* ===== 交互绑定 ===== */
+  miniEl.addEventListener('click', function(){ togglePanel(); });
+  document.getElementById('mpClose').addEventListener('click', function(){ togglePanel(false); });
+  document.getElementById('mpReset').addEventListener('click', function(){ mapZP.reset(); });
+  document.getElementById('mpZoomIn').addEventListener('click', function(){ mapZP.zoomBy(1.25); });
+  document.getElementById('mpZoomOut').addEventListener('click', function(){ mapZP.zoomBy(1/1.25); });
+
+  /* ===== 初始化 ===== */
   renderMini();
+  renderMapPanel();
   renderStage();
   updateProg();
 })();
