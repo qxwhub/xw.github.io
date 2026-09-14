@@ -345,10 +345,10 @@
       sunLight = new THREE.DirectionalLight(0xfff4e0, 1.3);
       sunLight.position.copy(SUN_DIR).multiplyScalar(180);
       sunLight.castShadow = true;
-      sun.shadow.mapSize.set(2048, 2048);
-      sun.shadow.camera.near = 10; sun.shadow.camera.far = 480;
-      sun.shadow.camera.left = -190; sun.shadow.camera.right = 190;
-      sun.shadow.camera.top = 190; sun.shadow.camera.bottom = -190;
+      sunLight.shadow.mapSize.set(2048, 2048);
+      sunLight.shadow.camera.near = 10; sunLight.shadow.camera.far = 480;
+      sunLight.shadow.camera.left = -190; sunLight.shadow.camera.right = 190;
+      sunLight.shadow.camera.top = 190; sunLight.shadow.camera.bottom = -190;
       sunLight.shadow.bias = -0.0004;
       scene.add(sunLight);
 
