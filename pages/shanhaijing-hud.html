@@ -13,46 +13,83 @@
     #scene { position:fixed; inset:0; }
     canvas { display:block; }
 
-    #hud { position:fixed; top:0; left:0; right:0; z-index:20; display:flex; align-items:center; gap:12px;
-      padding:10px 16px; background:rgba(255,255,255,.82); backdrop-filter:blur(8px);
-      box-shadow:0 2px 14px rgba(31,41,55,.12); color:#1f2937; }
-    #hud .title { font-size:16px; font-weight:800; white-space:nowrap; }
-    #hud .title small { font-size:11px; font-weight:500; color:#6b7280; display:block; margin-top:1px; }
-    #hud .prog { font-size:12px; background:#eef6ef; color:#15803d; border:1px solid #bbf0c8;
-      padding:4px 10px; border-radius:999px; white-space:nowrap; font-weight:600; }
+    #hud { position:fixed; top:0; left:0; right:0; z-index:20; display:flex; align-items:center; gap:10px;
+      padding:8px 12px; background:rgba(255,255,255,.66); backdrop-filter:blur(8px);
+      box-shadow:0 1px 10px rgba(31,41,55,.08); color:#1f2937; pointer-events:none; }
+    #hud > * { pointer-events:auto; }
+    #hud .hud-left { display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+    #hud .hud-right { display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+    #hud .title { font-size:14px; font-weight:800; white-space:nowrap; }
+    #hud .title small { font-size:10px; font-weight:500; color:#6b7280; display:block; margin-top:1px; }
+    #hud .prog { font-size:11px; background:#eef6ef; color:#15803d; border:1px solid #bbf0c8;
+      padding:3px 9px; border-radius:999px; white-space:nowrap; font-weight:600; }
     #hud .spacer { flex:1; }
-    #hud .chips { display:flex; gap:6px; flex-wrap:wrap; }
-    #hud .chip { font-size:12px; color:#374151; background:rgba(31,41,55,.06); border:1px solid rgba(31,41,55,.12);
-      padding:4px 10px; border-radius:999px; cursor:pointer; transition:all .15s; white-space:nowrap; }
+    #hud .chips { display:flex; gap:5px; flex-wrap:wrap; }
+    #hud .chip { font-size:11px; color:#374151; background:rgba(31,41,55,.06); border:1px solid rgba(31,41,55,.12);
+      padding:3px 8px; border-radius:999px; cursor:pointer; transition:all .15s; white-space:nowrap; }
     #hud .chip:hover { background:rgba(31,41,55,.12); }
     #hud .chip.done { background:#dcfce7; border-color:#86efac; color:#15803d; }
 
-    #overviewBtn { position:fixed; top:64px; left:16px; z-index:20; display:none; align-items:center; gap:6px;
-      font-size:12px; color:#1f2937; background:rgba(255,255,255,.9); border:1px solid rgba(31,41,55,.15);
-      padding:6px 12px; border-radius:999px; cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.08); }
-    #overviewBtn:hover { background:#fff; }
+    .iconBtn { display:inline-flex; align-items:center; gap:4px; border:1px solid rgba(31,41,55,.14);
+      background:rgba(255,255,255,.88); border-radius:999px; padding:4px 10px; font-size:11px; color:#374151;
+      cursor:pointer; transition:all .15s; }
+    .iconBtn:hover { background:#fff; }
+    .iconBtn svg { width:14px; height:14px; }
+
+    .modeBar { display:flex; align-items:center; gap:4px; background:rgba(31,41,55,.06); border:1px solid rgba(31,41,55,.1);
+      border-radius:999px; padding:3px; }
+    .modeBar .modeBtn { border:none; background:transparent; border-radius:999px; padding:3px 10px; font-size:11px;
+      color:#4b5563; cursor:pointer; transition:all .15s; white-space:nowrap; }
+    .modeBar .modeBtn.on { background:#fff; color:#0f766e; box-shadow:0 1px 4px rgba(0,0,0,.1); font-weight:700; }
+    .modeBar .modeBtn:disabled { opacity:.45; cursor:not-allowed; }
+
+    .envBtn { width:30px; height:30px; border-radius:50%; border:1px solid rgba(31,41,55,.14);
+      background:rgba(255,255,255,.88); display:flex; align-items:center; justify-content:center;
+      cursor:pointer; transition:all .15s; }
+    .envBtn:hover { background:#fff; }
+    .envBtn svg { width:16px; height:16px; }
+    .envBtn.on { background:#ccfbf1; border-color:#99f6e4; color:#0f766e; }
+
+    #envPanel { position:fixed; top:48px; right:10px; width:220px; z-index:31;
+      background:rgba(255,255,255,.96); border:1px solid rgba(31,41,55,.12); border-radius:14px;
+      box-shadow:0 10px 40px rgba(31,41,55,.2); padding:12px 14px; transform:translateX(120%);
+      transition:transform .3s cubic-bezier(.22,.61,.36,1); }
+    #envPanel.show { transform:translateX(0); }
+    #envPanel .env-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    #envPanel .env-row:last-child { margin-bottom:0; }
+    #envPanel label { font-size:11px; color:#4b5563; }
+    #envPanel input[type=range] { width:100%; margin:6px 0; }
+    #envPanel .timeVal { font-size:12px; font-weight:700; color:#1f2937; min-width:44px; text-align:right; }
+    #envPanel .weatherGroup { display:flex; gap:5px; }
+    #envPanel .weatherGroup button { flex:1; border:1px solid rgba(31,41,55,.12); background:#f8fafc;
+      border-radius:8px; padding:4px 0; font-size:11px; color:#4b5563; cursor:pointer; }
+    #envPanel .weatherGroup button.on { background:#e0f2fe; border-color:#7dd3fc; color:#0369a1; font-weight:700; }
+    #envPanel .toggle { position:relative; width:36px; height:20px; border-radius:999px; background:#d1d5db; cursor:pointer; transition:background .2s; }
+    #envPanel .toggle.on { background:#2fae6a; }
+    #envPanel .toggle::after { content:''; position:absolute; left:2px; top:2px; width:16px; height:16px; border-radius:50%;
+      background:#fff; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+    #envPanel .toggle.on::after { transform:translateX(16px); }
 
     #hint { position:fixed; bottom:14px; left:0; right:0; z-index:20; text-align:center; color:#374151;
       font-size:12px; opacity:.85; pointer-events:none;
       background:rgba(255,255,255,.72); backdrop-filter:blur(4px); max-width:max-content; margin:0 auto;
       padding:5px 14px; border-radius:999px; box-shadow:0 2px 10px rgba(0,0,0,.08); }
 
-    #miniMap { position:fixed; top:64px; right:14px; z-index:22; width:132px; height:132px; border-radius:14px;
+    #miniMap { position:fixed; top:50px; right:10px; z-index:22; width:132px; height:132px; border-radius:14px;
       background:rgba(255,255,255,.94); border:1px solid rgba(31,41,55,.15); box-shadow:0 4px 18px rgba(0,0,0,.12);
       cursor:pointer; overflow:hidden; padding:8px; transition:transform .12s; }
     #miniMap:hover { transform:scale(1.03); }
     #miniMap .mm-title { font-size:11px; font-weight:700; color:#374151; margin-bottom:3px; display:flex; justify-content:space-between; }
     #miniMap svg { width:100%; height:calc(100% - 19px); display:block; }
 
-    #mapPanel { position:fixed; top:80px; right:14px; width:min(88vw,420px); bottom:14px; z-index:30;
+    #mapPanel { position:fixed; top:50px; right:10px; width:min(88vw,420px); bottom:10px; z-index:30;
       background:rgba(255,255,255,.97); border:1px solid rgba(31,41,55,.15); border-radius:16px;
       box-shadow:0 10px 40px rgba(31,41,55,.22); transform:translateX(115%); transition:transform .32s cubic-bezier(.22,.61,.36,1);
       display:flex; flex-direction:column; overflow:hidden; }
     #mapPanel.show { transform:translateX(0); }
-    #mapPanel .mp-head { display:flex; align-items:center; justify-content:space-between; padding:12px 14px;
+    #mapPanel .mp-head { display:flex; align-items:center; justify-content:flex-end; padding:8px 10px;
       border-bottom:1px solid #eef0f2; }
-    #mapPanel .mp-head b { font-size:14px; color:#1f2937; }
-    #mapPanel .mp-tools { display:flex; gap:6px; align-items:center; }
+    #mapPanel .mp-tools { display:flex; gap:5px; align-items:center; }
     #mapPanel .mp-tools .zoomLv { font-size:11px; color:#6b7280; min-width:34px; text-align:center; font-variant-numeric:tabular-nums; }
     #mapPanel .mp-tools button { width:30px; height:30px; border:1px solid rgba(31,41,55,.15); background:#f8fafc;
       border-radius:8px; font-size:16px; color:#374151; cursor:pointer; }
@@ -85,11 +122,6 @@
     #card .c-body .orig { background:#f6faf6; border-left:3px solid #2fae6a; padding:10px 12px; border-radius:0 8px 8px 0;
       font-size:13px; color:#14532d; line-height:1.9; }
     #card .c-foot { padding:10px 18px 16px; border-top:1px solid #eef0f2; font-size:11px; color:#9ca3af; }
-
-    #walkBtn { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:#0f766e;
-      background:#ccfbf1; border:1px solid #99f6e4; padding:5px 12px; border-radius:999px; cursor:pointer; white-space:nowrap; }
-    #walkBtn:hover { background:#b6f2e4; }
-    #walkBtn.on { background:#14b8a6; border-color:#0d9488; color:#fff; }
 
     #joystick { position:fixed; left:24px; bottom:26px; z-index:25; width:120px; height:120px; border-radius:50%;
       background:rgba(255,255,255,.55); border:2px solid rgba(31,41,55,.18); box-shadow:0 4px 16px rgba(0,0,0,.12);
@@ -124,14 +156,26 @@
   <div id="scene"></div>
 
   <div id="hud">
-    <div class="title">山海经 · 山海世界<small>试作 Demo · 3 个地点 · 进入探索发现异兽草木</small></div>
-    <div class="prog" id="prog">已发现 0 / 0</div>
-    <button id="walkBtn" onclick="toggleWalk()">进入探索（人物视角）</button>
+    <div class="hud-left">
+      <button class="iconBtn" id="backBtn" onclick="backToOverview()" title="返回总览">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        总览
+      </button>
+      <div class="title">山海世界<small>山海经 · 试作 Demo</small></div>
+      <div class="prog" id="prog">已发现 0 / 0</div>
+    </div>
     <div class="spacer"></div>
+    <div class="hud-right">
+      <div class="modeBar">
+        <button class="modeBtn" id="exploreBtn" onclick="toggleWalk()">探索</button>
+        <button class="modeBtn" id="viewBtn" onclick="toggleView()" disabled>视角</button>
+      </div>
+      <button class="envBtn" id="envBtn" onclick="toggleEnvPanel()" title="环境">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      </button>
+    </div>
     <div class="chips" id="chips"></div>
   </div>
-
-  <button id="overviewBtn" onclick="backToOverview()">← 返回总览</button>
 
   <div id="hint">拖拽旋转 · 滚轮缩放 · 右上角地图点开放大 · 点击发光点发现异兽草木</div>
 
@@ -146,7 +190,6 @@
 
   <div id="mapPanel">
     <div class="mp-head">
-      <b>山海舆图</b>
       <div class="mp-tools">
         <button onclick="zoomMap(1.25)" title="放大">＋</button>
         <span class="zoomLv" id="zoomLv">1.0×</span>
@@ -159,6 +202,26 @@
       <svg id="mapSvg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
     </div>
     <div class="mp-foot">滚轮 / 双指缩放（以光标为中心）· 拖拽平移 · 点击地点飞入该处</div>
+  </div>
+
+  <div id="envPanel">
+    <div class="env-row">
+      <label>时间 <span id="timeVal" class="timeVal">12:00</span></label>
+      <div class="toggle" id="autoTimeToggle" onclick="toggleAutoTime()"></div>
+    </div>
+    <input type="range" id="timeSlider" min="0" max="24" step="0.05" value="12" oninput="setTimeOfDay(this.value)">
+    <div class="env-row" style="margin-top:8px">
+      <label>天气</label>
+      <div class="weatherGroup">
+        <button id="wClear" class="on" onclick="setWeather('clear')">晴</button>
+        <button id="wRain" onclick="setWeather('rain')">雨</button>
+        <button id="wSnow" onclick="setWeather('snow')">雪</button>
+      </div>
+    </div>
+    <div class="env-row" style="margin-top:8px">
+      <label>自然音效</label>
+      <div class="toggle" id="soundToggle" onclick="toggleSound()"></div>
+    </div>
   </div>
 
   <div id="card">
@@ -205,6 +268,7 @@
     const SUN_DIR = new THREE.Vector3(0.55, 0.72, 0.42).normalize();
 
     let renderer, scene, camera, controls, clock;
+    let sunLight, hemiLight, ambientLight, skyMat, sunSprite, sunGlowMat;
     const markers = [];
     const spinners = [];
     const clouds = [];
@@ -212,6 +276,10 @@
     const creatures = [];   // 三维活物（异兽/异鸟/异草/异木 + 环境动物），带 update()
     let waterGeo = null, waterBase = null, water = null;
     let actx = null;
+    let weatherSystem = null, weatherType = 'clear';
+    let timeOfDay = 12, autoTime = false;
+    let soundOn = false;
+    let audioNodes = { master: null, wind: null, rain: null, water: null, birdInt: null, windGain: null, rainGain: null, waterGain: null };
 
     const STORE = 'shj_shanhai_unlocked_v2';
     function getUnlocked() { try { return JSON.parse(localStorage.getItem(STORE) || '[]'); } catch (e) { return []; } }
@@ -270,17 +338,19 @@
       controls.maxPolarAngle = Math.PI * 0.495;
       controls.target.set(0, 4, 0);
 
-      scene.add(new THREE.HemisphereLight(0xdcefff, 0x6b8f4e, 1.0));
-      scene.add(new THREE.AmbientLight(0xffffff, 0.18));
-      const sun = new THREE.DirectionalLight(0xfff4e0, 1.3);
-      sun.position.copy(SUN_DIR).multiplyScalar(180);
-      sun.castShadow = true;
+      hemiLight = new THREE.HemisphereLight(0xdcefff, 0x6b8f4e, 1.0);
+      scene.add(hemiLight);
+      ambientLight = new THREE.AmbientLight(0xffffff, 0.18);
+      scene.add(ambientLight);
+      sunLight = new THREE.DirectionalLight(0xfff4e0, 1.3);
+      sunLight.position.copy(SUN_DIR).multiplyScalar(180);
+      sunLight.castShadow = true;
       sun.shadow.mapSize.set(2048, 2048);
       sun.shadow.camera.near = 10; sun.shadow.camera.far = 480;
       sun.shadow.camera.left = -190; sun.shadow.camera.right = 190;
       sun.shadow.camera.top = 190; sun.shadow.camera.bottom = -190;
-      sun.shadow.bias = -0.0004;
-      scene.add(sun);
+      sunLight.shadow.bias = -0.0004;
+      scene.add(sunLight);
 
       buildSky();
       buildSunGlow();
@@ -294,6 +364,7 @@
       buildPlaceMarkers();
       buildAmbientLife();
       buildPlayer();
+      applyTime();
 
       clock = new THREE.Clock();
 
@@ -313,7 +384,7 @@
 
     // ---------- 天空 / 太阳 / 云 ----------
     function buildSky() {
-      const mat = new THREE.ShaderMaterial({
+      skyMat = new THREE.ShaderMaterial({
         side: THREE.BackSide,
         uniforms: {
           top: { value: new THREE.Color(0x3f7fc4) },
@@ -330,7 +401,7 @@
           '}'
         ].join('\n')
       });
-      scene.add(new THREE.Mesh(new THREE.SphereGeometry(1100, 40, 24), mat));
+      scene.add(new THREE.Mesh(new THREE.SphereGeometry(1100, 40, 24), skyMat));
     }
     function radialTex(stops) {
       const cv = document.createElement('canvas'); cv.width = cv.height = 256;
@@ -342,10 +413,11 @@
     }
     function buildSunGlow() {
       const tex = radialTex([[0, 'rgba(255,250,225,1)'], [0.25, 'rgba(255,238,180,0.85)'], [1, 'rgba(255,236,170,0)']]);
-      const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
-      sp.position.copy(SUN_DIR).multiplyScalar(720);
-      sp.scale.set(220, 220, 1);
-      scene.add(sp);
+      sunGlowMat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false });
+      sunSprite = new THREE.Sprite(sunGlowMat);
+      sunSprite.position.copy(SUN_DIR).multiplyScalar(720);
+      sunSprite.scale.set(220, 220, 1);
+      scene.add(sunSprite);
     }
     function cloudTex() {
       const cv = document.createElement('canvas'); cv.width = 256; cv.height = 128;
@@ -905,6 +977,7 @@
 
     // ---------- 人物视角探索（自由走动） ----------
     let walkMode = false;
+    let firstPerson = false;
     let player = null;
     let yaw = 0, pitch = -0.22;
     let nearFind = null;
@@ -974,17 +1047,24 @@
       scene.add(player.root);
     }
 
-    window.toggleWalk = function () {
-      walkMode = !walkMode;
-      const btn = document.getElementById('walkBtn');
-      btn.classList.toggle('on', walkMode);
-      btn.textContent = walkMode ? '退出探索' : '进入探索（人物视角）';
+    function updateModeUI() {
+      const ex = document.getElementById('exploreBtn');
+      const vi = document.getElementById('viewBtn');
+      ex.classList.toggle('on', walkMode);
+      ex.textContent = walkMode ? '退出' : '探索';
+      vi.disabled = !walkMode;
+      vi.textContent = firstPerson ? '第一人称' : '第三人称';
       document.getElementById('joystick').classList.toggle('show', walkMode);
       document.getElementById('walkTip').classList.toggle('show', walkMode);
       document.getElementById('hint').style.display = walkMode ? 'none' : '';
       document.getElementById('miniMap').style.display = walkMode ? 'none' : '';
+    }
+    function setWalk(on) {
+      if (walkMode === on) return;
+      walkMode = on;
       if (walkMode) {
         if (document.getElementById('mapPanel').classList.contains('show')) togglePanel(false);
+        if (document.getElementById('envPanel').classList.contains('show')) toggleEnvPanel();
         player.root.visible = true;
         const tgt = controls.target;
         const px = tgt.x, pz = tgt.z + 8;
@@ -993,6 +1073,7 @@
         pitch = -0.22;
         controls.enabled = false;
       } else {
+        firstPerson = false;
         player.root.visible = false;
         controls.enabled = true;
         controls.target.set(0, 4, 0);
@@ -1000,6 +1081,13 @@
         nearFind = null;
         document.getElementById('nearTip').classList.remove('show');
       }
+      updateModeUI();
+    }
+    window.toggleWalk = function () { setWalk(!walkMode); };
+    window.toggleView = function () {
+      if (!walkMode) return;
+      firstPerson = !firstPerson;
+      updateModeUI();
     };
 
     function lerpAngle(a, b, k) {
@@ -1033,16 +1121,28 @@
       player.root.position.y = terrainHeight(player.root.position.x, player.root.position.z);
       player.update(t, dt, walking, running);
 
-      // 第三人称跟随
+      // 角色视角跟随
       const tx = player.root.position.x, ty = player.root.position.y + 4.6, tz = player.root.position.z;
-      const cd = 17, cp = Math.cos(pitch);
-      const want = new THREE.Vector3(
-        tx - Math.sin(yaw) * cp * cd,
-        Math.max(terrainHeight(tx, tz) + 1.6, ty - Math.sin(pitch) * cd),
-        tz - Math.cos(yaw) * cp * cd
-      );
-      camera.position.lerp(want, Math.min(1, dt * 7));
-      camera.lookAt(tx, ty, tz);
+      if (firstPerson) {
+        const headH = 0.55;
+        const eye = new THREE.Vector3(tx, player.root.position.y + headH, tz);
+        const look = new THREE.Vector3(
+          tx + Math.sin(yaw) * Math.cos(pitch),
+          eye.y + Math.sin(pitch),
+          tz + Math.cos(yaw) * Math.cos(pitch)
+        );
+        camera.position.lerp(eye, Math.min(1, dt * 12));
+        camera.lookAt(look);
+      } else {
+        const cd = 17, cp = Math.cos(pitch);
+        const want = new THREE.Vector3(
+          tx - Math.sin(yaw) * cp * cd,
+          Math.max(terrainHeight(tx, tz) + 1.6, ty - Math.sin(pitch) * cd),
+          tz - Math.cos(yaw) * cp * cd
+        );
+        camera.position.lerp(want, Math.min(1, dt * 7));
+        camera.lookAt(tx, ty, tz);
+      }
 
       // 邻近提示
       let nd = 1e9, nf = null;
@@ -1105,7 +1205,7 @@
       window.addEventListener('pointerdown', e => {
         if (!walkMode) return;
         const el = e.target;
-        if (el && el.closest && el.closest('#joystick,#card,#walkBtn,#miniMap,#mapPanel,#nearTip,#hud')) return;
+        if (el && el.closest && el.closest('#joystick,#card,#exploreBtn,#viewBtn,#envBtn,#envPanel,#backBtn,#miniMap,#mapPanel,#nearTip,#hud')) return;
         drag = true; lx = e.clientX; ly = e.clientY;
       });
       window.addEventListener('pointerup', () => { drag = false; });
@@ -1225,12 +1325,11 @@
     const camPos = new THREE.Vector3(), camTar = new THREE.Vector3();
     function flyTo(px, py, pz, tx, ty, tz) {
       camPos.set(px, py, pz); camTar.set(tx, ty, tz); flying = true; controls.enabled = false;
-      document.getElementById('overviewBtn').style.display = 'inline-flex';
     }
     function backToOverview() {
       closeCard();
+      if (walkMode) setWalk(false);
       flyTo(0, 95, 185, 0, 4, 0);
-      document.getElementById('overviewBtn').style.display = 'none';
     }
     window.backToOverview = backToOverview;
 
@@ -1497,6 +1596,210 @@
       body.addEventListener('pointercancel', endPointer);
     })();
 
+    // ---------- 时间 / 天气 / 环境音效 ----------
+    const TIME_PRESETS = {
+      0:  { top: 0x0b1220, mid: 0x1a2740, bot: 0x2c3a5a, bg: 0x0b1220, fog: 0x1a2740, hemi: 0.18, amb: 0.06, sun: 0.0,  sunCol: 0xaabbd8 },
+      6:  { top: 0x4a6fa5, mid: 0xf5c49a, bot: 0xffe8d1, bg: 0x6a8dc5, fog: 0xd9bfa0, hemi: 0.55, amb: 0.12, sun: 0.45, sunCol: 0xffd6a5 },
+      12: { top: 0x3f7fc4, mid: 0x9cc9ec, bot: 0xdfeefb, bg: 0xbfe3ff, fog: 0xcfe8fb, hemi: 1.0,  amb: 0.18, sun: 1.3,  sunCol: 0xfff4e0 },
+      18: { top: 0x4a5e8a, mid: 0xf2a86c, bot: 0xffd6c1, bg: 0x8fa8cf, fog: 0xeecbb0, hemi: 0.6,  amb: 0.13, sun: 0.55, sunCol: 0xffc080 },
+      24: { top: 0x0b1220, mid: 0x1a2740, bot: 0x2c3a5a, bg: 0x0b1220, fog: 0x1a2740, hemi: 0.18, amb: 0.06, sun: 0.0,  sunCol: 0xaabbd8 }
+    };
+    function lerpColor(a, b, t) {
+      const c1 = new THREE.Color(a), c2 = new THREE.Color(b);
+      return c1.lerp(c2, t).getHex();
+    }
+    function getTimeState(h) {
+      const keys = [0, 6, 12, 18, 24];
+      let i = 0;
+      while (i < keys.length - 1 && h > keys[i + 1]) i++;
+      const k0 = keys[i], k1 = keys[i + 1];
+      const t = (h - k0) / (k1 - k0);
+      const a = TIME_PRESETS[k0], b = TIME_PRESETS[k1];
+      const r = {};
+      for (const k in a) r[k] = k === 'hemi' || k === 'amb' || k === 'sun' ? a[k] + (b[k] - a[k]) * t : lerpColor(a[k], b[k], t);
+      return r;
+    }
+    function formatTime(h) {
+      const hr = Math.floor(h) % 24;
+      const mn = Math.floor((h % 1) * 60);
+      return (hr < 10 ? '0' : '') + hr + ':' + (mn < 10 ? '0' : '') + mn;
+    }
+    function applyTime() {
+      if (!sunLight) return;
+      const s = getTimeState(timeOfDay);
+      // 太阳方位：6点东地平，12点南天顶，18点西地平，夜间低于地平线
+      const sunAngle = (timeOfDay - 6) / 12 * Math.PI;
+      const r = 720;
+      sunLight.position.set(Math.cos(sunAngle) * r, Math.sin(sunAngle) * r, 80);
+      if (sunSprite) { sunSprite.position.copy(sunLight.position); sunSprite.visible = timeOfDay > 5 && timeOfDay < 19; }
+      sunLight.color.setHex(s.sunCol); sunLight.intensity = s.sun;
+      hemiLight.intensity = s.hemi;
+      ambientLight.intensity = s.amb;
+      scene.background.setHex(s.bg);
+      scene.fog.color.setHex(s.fog);
+      if (skyMat) {
+        skyMat.uniforms.top.value.setHex(s.top);
+        skyMat.uniforms.mid.value.setHex(s.mid);
+        skyMat.uniforms.bot.value.setHex(s.bot);
+      }
+    }
+    window.setTimeOfDay = function (v) {
+      timeOfDay = parseFloat(v);
+      if (timeOfDay >= 24) timeOfDay = 0;
+      document.getElementById('timeSlider').value = timeOfDay;
+      document.getElementById('timeVal').textContent = formatTime(timeOfDay);
+      applyTime();
+    };
+    window.toggleAutoTime = function () {
+      autoTime = !autoTime;
+      const el = document.getElementById('autoTimeToggle');
+      el.classList.toggle('on', autoTime);
+      document.getElementById('timeSlider').disabled = autoTime;
+    };
+
+    function buildWeather(type) {
+      if (weatherSystem) { scene.remove(weatherSystem); weatherSystem.geometry.dispose(); weatherSystem.material.dispose(); weatherSystem = null; }
+      if (type === 'clear') return;
+      const count = type === 'rain' ? 5000 : 3500;
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(count * 3);
+      const vel = new Float32Array(count * 3);
+      for (let i = 0; i < count; i++) {
+        const ang = Math.random() * Math.PI * 2;
+        const rad = Math.sqrt(Math.random()) * 170;
+        pos[i * 3] = Math.cos(ang) * rad;
+        pos[i * 3 + 1] = Math.random() * 100 + 8;
+        pos[i * 3 + 2] = Math.sin(ang) * rad;
+        if (type === 'rain') {
+          vel[i * 3] = (Math.random() - 0.5) * 3;
+          vel[i * 3 + 1] = -35 - Math.random() * 18;
+          vel[i * 3 + 2] = (Math.random() - 0.5) * 3;
+        } else {
+          vel[i * 3] = (Math.random() - 0.5) * 2;
+          vel[i * 3 + 1] = -3 - Math.random() * 4;
+          vel[i * 3 + 2] = (Math.random() - 0.5) * 2;
+        }
+      }
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute('velocity', new THREE.BufferAttribute(vel, 3));
+      const mat = new THREE.PointsMaterial({
+        color: type === 'rain' ? 0xcce4f7 : 0xffffff,
+        size: type === 'rain' ? 0.55 : 0.65,
+        transparent: true,
+        opacity: type === 'rain' ? 0.72 : 0.85,
+        depthWrite: false,
+        sizeAttenuation: true
+      });
+      weatherSystem = new THREE.Points(geo, mat);
+      weatherSystem.frustumCulled = false;
+      scene.add(weatherSystem);
+    }
+    function updateWeather(dt) {
+      if (!weatherSystem || weatherType === 'clear') return;
+      const pos = weatherSystem.geometry.attributes.position.array;
+      const vel = weatherSystem.geometry.attributes.velocity.array;
+      const count = pos.length / 3;
+      for (let i = 0; i < count; i++) {
+        pos[i * 3] += vel[i * 3] * dt;
+        pos[i * 3 + 1] += vel[i * 3 + 1] * dt;
+        pos[i * 3 + 2] += vel[i * 3 + 2] * dt;
+        if (pos[i * 3 + 1] < 0) {
+          const ang = Math.random() * Math.PI * 2;
+          const rad = Math.sqrt(Math.random()) * 170;
+          pos[i * 3] = Math.cos(ang) * rad;
+          pos[i * 3 + 1] = 90 + Math.random() * 25;
+          pos[i * 3 + 2] = Math.sin(ang) * rad;
+        }
+      }
+      weatherSystem.geometry.attributes.position.needsUpdate = true;
+    }
+    window.setWeather = function (type) {
+      weatherType = type;
+      buildWeather(type);
+      ['clear','rain','snow'].forEach(k => document.getElementById('w' + k.charAt(0).toUpperCase() + k.slice(1)).classList.toggle('on', k === type));
+      updateAmbientGains();
+    };
+
+    function buildNoiseBuffer(sec) {
+      const len = actx.sampleRate * sec;
+      const buf = actx.createBuffer(1, len, actx.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+      return buf;
+    }
+    function startLoop(buf, gain, filterType, freq) {
+      const src = actx.createBufferSource();
+      src.buffer = buf;
+      src.loop = true;
+      const filt = actx.createBiquadFilter();
+      filt.type = filterType;
+      filt.frequency.value = freq;
+      src.connect(filt).connect(gain).connect(audioNodes.master);
+      src.start();
+      return { src, filt };
+    }
+    function chirp() {
+      if (!actx || !soundOn) return;
+      const g = actx.createGain();
+      const o = actx.createOscillator();
+      const f = 1800 + Math.random() * 1600;
+      o.frequency.setValueAtTime(f, actx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(f * 1.4, actx.currentTime + 0.08);
+      g.gain.setValueAtTime(0, actx.currentTime);
+      g.gain.linearRampToValueAtTime(0.018, actx.currentTime + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.22);
+      o.connect(g).connect(audioNodes.master);
+      o.start(); o.stop(actx.currentTime + 0.25);
+    }
+    function scheduleBirds() {
+      if (audioNodes.birdInt) return;
+      audioNodes.birdInt = setInterval(() => {
+        if (!soundOn || weatherType !== 'clear' || (timeOfDay >= 19 || timeOfDay <= 5)) return;
+        if (Math.random() < 0.55) chirp();
+      }, 1200 + Math.random() * 1800);
+    }
+    function updateAmbientGains() {
+      if (!audioNodes.master) return;
+      const day = timeOfDay > 6 && timeOfDay < 18 ? 1 : 0.35;
+      const wind = weatherType === 'clear' ? 0.08 : weatherType === 'rain' ? 0.22 : 0.15;
+      const rain = weatherType === 'rain' ? 0.28 : 0;
+      const water = 0.05;
+      if (audioNodes.windGain) audioNodes.windGain.gain.setTargetAtTime(wind * day, actx.currentTime, 0.4);
+      if (audioNodes.rainGain) audioNodes.rainGain.gain.setTargetAtTime(rain * day, actx.currentTime, 0.4);
+      if (audioNodes.waterGain) audioNodes.waterGain.gain.setTargetAtTime(water * day, actx.currentTime, 0.4);
+    }
+    function initAudio() {
+      if (actx) return;
+      try {
+        actx = new (window.AudioContext || window.webkitAudioContext)();
+      } catch (e) { return; }
+      const master = actx.createGain();
+      master.gain.value = 0.55;
+      master.connect(actx.destination);
+      audioNodes.master = master;
+      audioNodes.windGain = actx.createGain(); audioNodes.windGain.gain.value = 0;
+      audioNodes.rainGain = actx.createGain(); audioNodes.rainGain.gain.value = 0;
+      audioNodes.waterGain = actx.createGain(); audioNodes.waterGain.gain.value = 0;
+      const wBuf = buildNoiseBuffer(2.0), rBuf = buildNoiseBuffer(2.0), waBuf = buildNoiseBuffer(2.0);
+      audioNodes.wind = startLoop(wBuf, audioNodes.windGain, 'lowpass', 350);
+      audioNodes.rain = startLoop(rBuf, audioNodes.rainGain, 'highpass', 800);
+      audioNodes.water = startLoop(waBuf, audioNodes.waterGain, 'lowpass', 180);
+      scheduleBirds();
+      updateAmbientGains();
+    }
+    window.toggleSound = function () {
+      soundOn = !soundOn;
+      document.getElementById('soundToggle').classList.toggle('on', soundOn);
+      if (soundOn) { ensureAudio(); initAudio(); updateAmbientGains(); }
+      else if (actx && actx.state === 'running') actx.suspend();
+    };
+    window.toggleEnvPanel = function () {
+      const p = document.getElementById('envPanel');
+      const show = !p.classList.contains('show');
+      p.classList.toggle('show', show);
+      if (show && document.getElementById('mapPanel').classList.contains('show')) togglePanel(false);
+    };
+
     // ---------- 音效 ----------
     function ensureAudio() {
       if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
@@ -1555,6 +1858,8 @@
         pos.needsUpdate = true;
         waterGeo.computeVertexNormals();
       }
+      if (autoTime) setTimeOfDay(timeOfDay + dt * 0.05);
+      updateWeather(dt);
       if (walkMode) {
         updateWalk(dt);
       } else if (flying) {
