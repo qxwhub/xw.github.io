@@ -34,7 +34,9 @@
 
     /* mapPanel 底部环境条（时间/天气/音效） */
     #mapPanel .mp-env { padding:6px 10px; border-top:1px solid #eef0f2; background:#fafbfc; }
-    #mapPanel .mp-env .env-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:11px; color:#4b5563; }
+    #mapPanel .mp-env .env-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:11px; color:#4b5563; }
+    #mapPanel .mp-env #timeSlider { flex:1 1 120px; min-width:100px; height:18px; accent-color:#2fae6a; cursor:pointer; }
+    #mapPanel .mp-env #timeSlider:disabled { opacity:.5; cursor:not-allowed; }
     #mapPanel .mp-env label { font-size:11px; color:#6b7280; white-space:nowrap; }
     #mapPanel .mp-env .timeVal { font-size:12px; font-weight:700; color:#1f2937; min-width:44px; font-variant-numeric:tabular-nums; }
     #mapPanel .mp-env .weatherGroup { display:flex; gap:4px; }
@@ -138,6 +140,9 @@
     <div class="mp-env">
       <div class="env-row">
         <label>时间 <span id="timeVal" class="timeVal">—:—</span></label>
+        <input type="range" id="timeSlider" min="0" max="24" step="0.05" value="12" oninput="onTimeSlide(this.value)">
+        <label>跟随</label>
+        <div class="toggle on" id="realTimeToggle" onclick="toggleRealTime()"></div>
         <label>天气</label>
         <div class="weatherGroup">
           <button id="wClear" class="on" onclick="setWeather('clear')">晴</button>
@@ -206,6 +211,7 @@
     let weatherSystem = null, weatherType = 'clear';
     const _now = new Date();
     let timeOfDay = _now.getHours() + _now.getMinutes() / 60;
+    let realTime = true; // true=跟随真实时间，false=手动
     let soundOn = false;
     let audioNodes = { master: null, wind: null, rain: null, water: null, birdInt: null, windGain: null, rainGain: null, waterGain: null };
 
@@ -309,14 +315,18 @@
       // 直接进入探索模式（和平精英式）
       setWalk(true);
 
-      // 时间跟随真实系统时间
+      // 时间跟随真实系统时间（可切换手动）
       applyTime();
-      document.getElementById('timeVal').textContent = formatTime(timeOfDay);
+      const tv = document.getElementById('timeVal');
+      const slider = document.getElementById('timeSlider');
+      tv.textContent = formatTime(timeOfDay);
+      slider.value = timeOfDay;
+      slider.disabled = realTime;
       setInterval(() => {
+        if (!realTime) return;
         const d = new Date();
         const real = d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600;
         let diff = real - timeOfDay;
-        // 处理跨天
         if (diff > 12) diff -= 24;
         if (diff < -12) diff += 24;
         if (Math.abs(diff) > 0.003) setTimeOfDay(real);
@@ -1567,7 +1577,28 @@
       if (timeOfDay < 0) timeOfDay += 24;
       const tv = document.getElementById('timeVal');
       if (tv) tv.textContent = formatTime(timeOfDay);
+      const sl = document.getElementById('timeSlider');
+      if (sl && !sl.matches(':active')) sl.value = timeOfDay;
       applyTime();
+    };
+    // 手动拖滑条
+    window.onTimeSlide = function (v) {
+      if (realTime) return; // 跟随模式下不响应
+      setTimeOfDay(v);
+    };
+    // 切换跟随真实时间 / 手动
+    window.toggleRealTime = function () {
+      realTime = !realTime;
+      const el = document.getElementById('realTimeToggle');
+      if (el) el.classList.toggle('on', realTime);
+      const sl = document.getElementById('timeSlider');
+      if (sl) sl.disabled = realTime;
+      if (realTime) {
+        // 切回跟随 → 立刻对齐真实时间
+        const d = new Date();
+        const real = d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600;
+        setTimeOfDay(real);
+      }
     };
 
     function buildWeather(type) {
