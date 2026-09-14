@@ -17,12 +17,6 @@
       padding:8px 12px; background:rgba(255,255,255,.66); backdrop-filter:blur(8px);
       box-shadow:0 1px 10px rgba(31,41,55,.08); color:#1f2937; pointer-events:none; }
     #hud > * { pointer-events:auto; }
-    #hud .hud-left { display:flex; align-items:center; gap:8px; flex:0 0 auto; }
-    #hud .hud-right { display:flex; align-items:center; gap:8px; flex:0 0 auto; }
-    #hud .title { font-size:14px; font-weight:800; white-space:nowrap; }
-    #hud .title small { font-size:10px; font-weight:500; color:#6b7280; display:block; margin-top:1px; }
-    #hud .prog { font-size:11px; background:#eef6ef; color:#15803d; border:1px solid #bbf0c8;
-      padding:3px 9px; border-radius:999px; white-space:nowrap; font-weight:600; }
     #hud .spacer { flex:1; }
     /* D-Pad 方向按钮（右下） */
     #dpad { position:fixed; right:24px; bottom:26px; z-index:25; width:160px; height:160px;
@@ -41,13 +35,6 @@
     #dpad .center{ grid-column:2; grid-row:2; font-size:18px; background:rgba(47,174,106,.75); color:#fff; }
     #dpad .center:active, #dpad .center.hold { background:rgba(22,163,74,.95); transform:scale(0.92); }
 
-    /* 摇杆 —— 默认显示（直接进探索模式） */
-    #joystick { position:fixed; left:24px; bottom:26px; z-index:25; width:120px; height:120px; border-radius:50%;
-      background:rgba(255,255,255,.55); border:2px solid rgba(31,41,55,.18); box-shadow:0 4px 16px rgba(0,0,0,.12);
-      touch-action:none; display:block; }
-    #joystick .knob { position:absolute; left:50%; top:50%; width:54px; height:54px; margin:-27px 0 0 -27px; border-radius:50%;
-      background:rgba(20,184,166,.85); border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,.22); }
-
     /* mapPanel 底部环境条（时间/天气/音效） */
     #mapPanel .mp-env { padding:6px 10px; border-top:1px solid #eef0f2; background:#fafbfc; }
     #mapPanel .mp-env .env-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:11px; color:#4b5563; }
@@ -62,11 +49,6 @@
     #mapPanel .mp-env .toggle::after { content:''; position:absolute; left:2px; top:2px; width:14px; height:14px; border-radius:50%;
       background:#fff; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
     #mapPanel .mp-env .toggle.on::after { transform:translateX(14px); }
-
-    #hint { position:fixed; bottom:14px; left:0; right:0; z-index:20; text-align:center; color:#374151;
-      font-size:12px; opacity:.85; pointer-events:none;
-      background:rgba(255,255,255,.72); backdrop-filter:blur(4px); max-width:max-content; margin:0 auto;
-      padding:5px 14px; border-radius:999px; box-shadow:0 2px 10px rgba(0,0,0,.08); }
 
     #miniMap { position:fixed; top:50px; right:10px; z-index:22; width:132px; height:132px; border-radius:14px;
       background:rgba(255,255,255,.94); border:1px solid rgba(31,41,55,.15); box-shadow:0 4px 18px rgba(0,0,0,.12);
@@ -116,10 +98,6 @@
       font-size:13px; color:#14532d; line-height:1.9; }
     #card .c-foot { padding:10px 18px 16px; border-top:1px solid #eef0f2; font-size:11px; color:#9ca3af; }
 
-    #walkTip { position:fixed; left:50%; bottom:16px; transform:translateX(-50%); z-index:26;
-      background:rgba(255,255,255,.93); border:1px solid rgba(31,41,55,.14); border-radius:999px; padding:7px 18px;
-      font-size:12px; color:#374151; box-shadow:0 4px 16px rgba(0,0,0,.12); white-space:nowrap; max-width:94vw; }
-
     #nearTip { position:fixed; left:50%; bottom:86px; transform:translateX(-50%); z-index:26;
       background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; border-radius:999px; padding:8px 18px; font-size:13px;
       box-shadow:0 6px 20px rgba(0,0,0,.14); cursor:pointer; font-weight:700; white-space:nowrap; }
@@ -129,7 +107,6 @@
     #loading.hide { display:none; }
 
     @media (max-width:560px) {
-      #hud .title { font-size:14px; }
       #card { width:100%; max-width:100%; }
       #miniMap { width:106px; height:106px; }
     }
@@ -139,17 +116,9 @@
   <div id="scene"></div>
 
   <div id="hud">
-    <div class="hud-left">
-      <div class="title">山海世界<small>山海经 · 试作 Demo</small></div>
-      <div class="prog" id="prog">已发现 0 / 0</div>
-    </div>
     <div class="spacer"></div>
     <div class="hud-right"></div>
   </div>
-
-  <div id="hint">D-Pad / WASD 走路 · 鼠标按住画面拖动转视角 · Shift 奔跑 · 点击地点传送过去 · 靠近异兽按 E 或点它</div>
-
-  <div id="joystick"><div class="knob"></div></div>
 
   <!-- D-Pad 方向按钮 -->
   <div id="dpad">
@@ -160,7 +129,6 @@
     <button class="dpad-btn down" data-key="s">▼</button>
   </div>
 
-  <div id="walkTip">W A S D / 方向键 走路 · 按住空白处拖动转视角 · Shift 加速 · 靠近活物点它或按 E 查看</div>
   <div id="nearTip" onclick="viewNear()"></div>
 
   <div id="miniMap" onclick="togglePanel(true)" title="点击放大地图">
@@ -1071,11 +1039,8 @@
         nearFind = null;
         document.getElementById('nearTip').classList.remove('show');
       }
-      // UI 同步（直接探索模式：摇杆/D-Pad/迷你地图/walkTip 全部显示）
-      document.getElementById('joystick').style.display = walkMode ? 'block' : 'none';
+      // UI 同步
       document.getElementById('dpad').style.display = walkMode ? 'grid' : 'none';
-      document.getElementById('walkTip').classList.toggle('show', walkMode);
-      document.getElementById('hint').style.display = walkMode ? 'none' : '';
       document.getElementById('miniMap').style.display = walkMode ? '' : 'none';
     }
 
@@ -1147,34 +1112,6 @@
 
     window.viewNear = function () { if (walkMode && nearFind) selectFind(nearFind); };
 
-    (function bindJoystick() {
-      const el = document.getElementById('joystick');
-      const knob = el.querySelector('.knob');
-      const R = 42;
-      function setKnob(x, y) {
-        knob.style.transform = 'translate(' + x + 'px,' + y + 'px)';
-        joy.x = x / R; joy.y = y / R;
-      }
-      function move(e) {
-        if (!joy.active) return;
-        let dx = e.clientX - joy.cx, dy = e.clientY - joy.cy;
-        const d = Math.hypot(dx, dy);
-        if (d > R) { dx = dx / d * R; dy = dy / d * R; }
-        setKnob(dx, dy);
-      }
-      el.addEventListener('pointerdown', e => {
-        e.preventDefault();
-        try { el.setPointerCapture(e.pointerId); } catch (err) {}
-        joy.active = true;
-        const r = el.getBoundingClientRect();
-        joy.cx = r.left + r.width / 2; joy.cy = r.top + r.height / 2;
-        move(e);
-      });
-      el.addEventListener('pointermove', move);
-      el.addEventListener('pointerup', () => { joy.active = false; setKnob(0, 0); });
-      el.addEventListener('pointercancel', () => { joy.active = false; setKnob(0, 0); });
-    })();
-
     // D-Pad 按钮 → keys 状态（鼠标/触屏按下持续移动，松开停止）
     (function bindDPad() {
       document.querySelectorAll('#dpad .dpad-btn').forEach(btn => {
@@ -1221,7 +1158,7 @@
       window.addEventListener('pointerdown', e => {
         if (!walkMode) return;
         const el = e.target;
-        if (el && el.closest && el.closest('#joystick,#dpad,#card,#miniMap,#mapPanel,#nearTip,#hud')) return;
+        if (el && el.closest && el.closest('#dpad,#card,#miniMap,#mapPanel,#nearTip,#hud')) return;
         drag = true; lx = e.clientX; ly = e.clientY;
       });
       window.addEventListener('pointerup', () => { drag = false; });
@@ -1372,10 +1309,7 @@
     function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
     // ---------- HUD ----------
-    function updateProgress() {
-      const total = DATA.places.reduce((n, p) => n + p.finds.length, 0);
-      document.getElementById('prog').textContent = '已发现 ' + unlocked.length + ' / ' + total;
-    }
+    function updateProgress() { /* 顶栏进度条已移除，保留函数兼容调用 */ }
     // ---------- 舆图 ----------
     const typeColorHex = { '兽': '#ff8a3c', '鸟': '#3aa0ff', '草': '#36c46a', '木': '#b07a3a' };
     function svgEl(tag, attrs) {
@@ -1571,7 +1505,7 @@
           mapView.tx += (b.x - a.x);
           mapView.ty += (b.y - a.y);
           applyMapView();
-          if (Math.abs(e.clientX - prev.x) + Math.abs(e.clientY - prev.y) > 2) mapDragMoved = true;
+          if (Math.abs(e.clientX - prev.x) + Math.abs(e.clientY - prev.y) > 10) mapDragMoved = true;
         } else if (pointers.size === 2) {
           const d = dist(), m = mid();
           if (lastDist > 0 && d > 0) {
