@@ -86,6 +86,28 @@
       font-size:13px; color:#14532d; line-height:1.9; }
     #card .c-foot { padding:10px 18px 16px; border-top:1px solid #eef0f2; font-size:11px; color:#9ca3af; }
 
+    #walkBtn { display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:#0f766e;
+      background:#ccfbf1; border:1px solid #99f6e4; padding:5px 12px; border-radius:999px; cursor:pointer; white-space:nowrap; }
+    #walkBtn:hover { background:#b6f2e4; }
+    #walkBtn.on { background:#14b8a6; border-color:#0d9488; color:#fff; }
+
+    #joystick { position:fixed; left:24px; bottom:26px; z-index:25; width:120px; height:120px; border-radius:50%;
+      background:rgba(255,255,255,.55); border:2px solid rgba(31,41,55,.18); box-shadow:0 4px 16px rgba(0,0,0,.12);
+      display:none; touch-action:none; }
+    #joystick.show { display:block; }
+    #joystick .knob { position:absolute; left:50%; top:50%; width:54px; height:54px; margin:-27px 0 0 -27px; border-radius:50%;
+      background:rgba(20,184,166,.85); border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,.22); }
+
+    #walkTip { position:fixed; left:50%; bottom:16px; transform:translateX(-50%); z-index:26; display:none;
+      background:rgba(255,255,255,.93); border:1px solid rgba(31,41,55,.14); border-radius:999px; padding:7px 18px;
+      font-size:12px; color:#374151; box-shadow:0 4px 16px rgba(0,0,0,.12); white-space:nowrap; max-width:94vw; }
+    #walkTip.show { display:block; }
+
+    #nearTip { position:fixed; left:50%; bottom:86px; transform:translateX(-50%); z-index:26; display:none;
+      background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; border-radius:999px; padding:8px 18px; font-size:13px;
+      box-shadow:0 6px 20px rgba(0,0,0,.14); cursor:pointer; font-weight:700; white-space:nowrap; }
+    #nearTip.show { display:block; }
+
     #loading { position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center;
       background:#dfeef7; color:#475569; font-size:14px; }
     #loading.hide { display:none; }
@@ -104,6 +126,7 @@
   <div id="hud">
     <div class="title">山海经 · 山海世界<small>试作 Demo · 3 个地点 · 进入探索发现异兽草木</small></div>
     <div class="prog" id="prog">已发现 0 / 0</div>
+    <button id="walkBtn" onclick="toggleWalk()">进入探索（人物视角）</button>
     <div class="spacer"></div>
     <div class="chips" id="chips"></div>
   </div>
@@ -111,6 +134,10 @@
   <button id="overviewBtn" onclick="backToOverview()">← 返回总览</button>
 
   <div id="hint">拖拽旋转 · 滚轮缩放 · 右上角地图点开放大 · 点击发光点发现异兽草木</div>
+
+  <div id="joystick"><div class="knob"></div></div>
+  <div id="walkTip">W A S D / 方向键 走路 · 按住空白处拖动转视角 · Shift 加速 · 靠近活物点它或按 E 查看</div>
+  <div id="nearTip" onclick="viewNear()"></div>
 
   <div id="miniMap" onclick="togglePanel(true)" title="点击放大地图">
     <div class="mm-title"><span>山海舆图</span><span>⤢</span></div>
@@ -182,6 +209,7 @@
     const spinners = [];
     const clouds = [];
     const birds = [];
+    const creatures = [];   // 三维活物（异兽/异鸟/异草/异木 + 环境动物），带 update()
     let waterGeo = null, waterBase = null, water = null;
     let actx = null;
 
@@ -264,6 +292,8 @@
       buildUndergrowth();
       buildBirds();
       buildPlaceMarkers();
+      buildAmbientLife();
+      buildPlayer();
 
       clock = new THREE.Clock();
 
@@ -577,6 +607,517 @@
       }
     }
 
+    // ---------- 三维活物建模（程序化组合 + 关节动画，不是几何块替代） ----------
+    function M(color, opts) {
+      return new THREE.MeshStandardMaterial(Object.assign(
+        { color: color, roughness: 0.78, metalness: 0.02 }, opts || {}));
+    }
+    function ell(rx, ry, rz, seg) {
+      const g = new THREE.SphereGeometry(1, seg || 20, Math.max(8, (seg || 20) - 6));
+      g.scale(rx, ry, rz);
+      return g;
+    }
+    function addMesh(parent, geo, mat, x, y, z, rx, ry, rz) {
+      const m = new THREE.Mesh(geo, mat);
+      m.position.set(x || 0, y || 0, z || 0);
+      m.rotation.set(rx || 0, ry || 0, rz || 0);
+      m.castShadow = true;
+      parent.add(m);
+      return m;
+    }
+
+    // 四足动物：狐狸(九尾)/鹿/兔 通用骨架（躯干+颈+头+双耳+四腿关节+尾）
+    function buildQuadruped(o) {
+      o = Object.assign({
+        body: 0xe8703a, belly: 0xf7ead6, paw: 0x5b2f18, earIn: 0xe9a0a8,
+        tails: 9, tailLen: 1.0, antler: false, earH: 0.72, earW: 0.30,
+        bodyScale: [1.15, 1.0, 2.0], legH: 1.2, scale: 1.75, hop: false, speed: 2.0
+      }, o || {});
+      const root = new THREE.Group();
+      const fur = M(o.body), bellyM = M(o.belly), pawM = M(o.paw);
+      const lift = new THREE.Group(); lift.position.y = o.legH * 1.95 - 1.45; root.add(lift);
+      const core = new THREE.Group(); lift.add(core);
+
+      addMesh(core, ell(o.bodyScale[0], o.bodyScale[1], o.bodyScale[2]), fur, 0, 1.55, 0);
+      addMesh(core, ell(o.bodyScale[0] * 0.72, o.bodyScale[1] * 0.7, o.bodyScale[2] * 0.78), bellyM, 0, 1.12, 0.22);
+      addMesh(core, ell(0.6, 0.6, 0.68), fur, 0, 2.25, 1.5);
+
+      const head = new THREE.Group(); head.position.set(0, 2.72, 1.98); core.add(head);
+      addMesh(head, ell(0.7, 0.64, 0.76), fur, 0, 0, 0);
+      addMesh(head, new THREE.ConeGeometry(0.33, 0.92, 14), fur, 0, -0.12, 0.82, Math.PI / 2, 0, 0);
+      addMesh(head, ell(0.15, 0.12, 0.1), M(0x241a14, { roughness: 0.3 }), 0, -0.1, 1.26);
+      [-1, 1].forEach(s => {
+        addMesh(head, new THREE.ConeGeometry(o.earW, o.earH, 4), fur, s * 0.4, 0.62 + o.earH * 0.3, -0.05, -0.16, s * 0.34, 0);
+        addMesh(head, new THREE.ConeGeometry(o.earW * 0.55, o.earH * 0.62, 4), M(o.earIn), s * 0.42, 0.6 + o.earH * 0.3, 0.07, -0.16, s * 0.34, 0);
+        addMesh(head, ell(0.1, 0.12, 0.08), M(0x14141a, { roughness: 0.22 }), s * 0.31, 0.1, 0.64);
+      });
+      if (o.antler) {
+        const am = M(0xd9c9a6, { flatShading: true });
+        [-1, 1].forEach(s => {
+          addMesh(head, new THREE.CylinderGeometry(0.05, 0.08, 0.9, 6), am, s * 0.3, 0.8, -0.12, -0.25, 0, s * 0.5);
+          addMesh(head, new THREE.CylinderGeometry(0.04, 0.06, 0.55, 6), am, s * 0.55, 1.25, -0.12, -0.25, 0, s * 1.1);
+          addMesh(head, new THREE.CylinderGeometry(0.035, 0.05, 0.45, 6), am, s * 0.72, 1.5, -0.12, -0.25, 0, s * 1.5);
+        });
+      }
+
+      const legs = [];
+      [[-0.52, 1.1], [0.52, 1.1], [-0.56, -1.0], [0.56, -1.0]].forEach((p, i) => {
+        const hip = new THREE.Group(); hip.position.set(p[0], 1.45, p[1]); core.add(hip);
+        addMesh(hip, new THREE.CylinderGeometry(0.28, 0.2, o.legH, 10), fur, 0, -o.legH / 2, 0);
+        const knee = new THREE.Group(); knee.position.set(0, -o.legH, 0); hip.add(knee);
+        addMesh(knee, new THREE.CylinderGeometry(0.2, 0.15, o.legH * 0.92, 10), fur, 0, -o.legH * 0.46, 0);
+        addMesh(knee, ell(0.24, 0.14, 0.32), pawM, 0, -o.legH * 0.95, 0.06);
+        legs.push({ hip: hip, knee: knee, phase: (i === 0 || i === 3) ? 0 : Math.PI, s: (p[0] > 0 ? 1 : -1) });
+      });
+
+      const tails = [];
+      const n = Math.max(1, o.tails | 0);
+      for (let i = 0; i < n; i++) {
+        const a = n === 1 ? 0 : (i / (n - 1) - 0.5) * 1.6;
+        const tg = new THREE.Group(); tg.position.set(0, 1.9, -1.8); tg.rotation.y = a; core.add(tg);
+        const t1 = new THREE.Group(); t1.rotation.x = -0.55; tg.add(t1);
+        addMesh(t1, new THREE.CylinderGeometry(0.19, 0.25, 1.25 * o.tailLen, 9), fur, 0, 0.62 * o.tailLen, 0);
+        const t2 = new THREE.Group(); t2.position.set(0, 1.25 * o.tailLen, 0); t2.rotation.x = -0.5; t1.add(t2);
+        addMesh(t2, new THREE.CylinderGeometry(0.14, 0.2, 0.95 * o.tailLen, 9), fur, 0, 0.47 * o.tailLen, 0);
+        addMesh(t2, ell(0.28, 0.32, 0.28), n > 1 ? bellyM : fur, 0, 0.95 * o.tailLen, 0);
+        tails.push({ g: tg, t1: t1, t2: t2, phase: i * 0.75 });
+      }
+
+      root.scale.setScalar(o.scale);
+      const spd = o.speed;
+      return {
+        root: root,
+        update: function (t) {
+          const w = Math.sin(t * spd);
+          core.position.y = o.hop ? Math.abs(Math.sin(t * spd)) * 0.5 : Math.abs(w) * 0.11;
+          core.rotation.x = w * 0.02;
+          core.rotation.y = Math.sin(t * 0.42) * 0.2;
+          legs.forEach(L => {
+            L.hip.rotation.x = w * (o.hop ? 0.85 : 0.5);
+            L.knee.rotation.x = Math.max(0, -w) * (o.hop ? 1.0 : 0.6);
+            L.hip.rotation.z = L.s * 0.06;
+          });
+          tails.forEach(T => {
+            T.t1.rotation.x = -0.55 + Math.sin(t * 1.6 + T.phase) * (o.hop ? 0.05 : 0.16);
+            T.t2.rotation.x = -0.5 + Math.sin(t * 1.9 + T.phase + 0.6) * 0.2;
+            T.g.rotation.z = Math.sin(t * 1.5 + T.phase) * 0.26;
+          });
+        }
+      };
+    }
+
+    // 鸟类：凤凰/精卫（躯干+头+喙+凤冠+双翼两段关节+尾羽扇+双腿）
+    function buildBird(o) {
+      o = Object.assign({
+        body: 0xe23b2b, belly: 0xf7e2b8, wing: 0xf2a01c, tail: 0xf7d64a,
+        beak: 0xf5c542, crest: true, scale: 1.25, flap: 4.2, speed: 2.0
+      }, o || {});
+      const root = new THREE.Group();
+      const bodyM = M(o.body), wingM = M(o.wing, { flatShading: true }), tailM = M(o.tail);
+      const lift = new THREE.Group(); lift.position.y = -1.0; root.add(lift);
+      const core = new THREE.Group(); lift.add(core);
+
+      addMesh(core, ell(0.92, 0.88, 1.65), bodyM, 0, 2.6, 0);
+      addMesh(core, ell(0.68, 0.6, 1.0), M(o.belly), 0, 2.3, 0.45);
+
+      const head = new THREE.Group(); head.position.set(0, 3.5, 1.3); core.add(head);
+      addMesh(head, ell(0.58, 0.56, 0.6), bodyM, 0, 0, 0);
+      addMesh(head, new THREE.ConeGeometry(0.21, 0.68, 12), M(o.beak), 0, -0.06, 0.6, Math.PI / 2, 0, 0);
+      [-1, 1].forEach(s => addMesh(head, ell(0.1, 0.12, 0.09), M(0x14141a, { roughness: 0.2 }), s * 0.26, 0.12, 0.48));
+      if (o.crest) {
+        for (let i = 0; i < 3; i++) {
+          const hh = 0.95 - i * 0.2;
+          addMesh(head, new THREE.ConeGeometry(0.085, hh, 6), tailM, (i - 1) * 0.17, 0.5 + hh / 2 - 0.35, -0.18, 0.55, 0, (i - 1) * 0.28);
+        }
+      }
+
+      const wings = [];
+      [-1, 1].forEach(s => {
+        const w = new THREE.Group(); w.position.set(s * 0.72, 3.0, 0.1); core.add(w);
+        addMesh(w, ell(1.45, 0.12, 0.82), wingM, s * 1.35, 0, 0);
+        const outer = new THREE.Group(); outer.position.set(s * 2.6, 0, 0); w.add(outer);
+        addMesh(outer, ell(1.4, 0.09, 0.58), wingM, s * 1.25, 0, -0.04);
+        for (let i = 0; i < 4; i++) addMesh(outer, ell(0.85, 0.055, 0.14), tailM, s * 2.1, 0, -0.26 - i * 0.15);
+        wings.push({ w: w, outer: outer, s: s });
+      });
+
+      const tail = new THREE.Group(); tail.position.set(0, 2.45, -1.55); core.add(tail);
+      for (let i = -2; i <= 2; i++) {
+        const f = new THREE.Group(); f.rotation.y = i * 0.26; tail.add(f);
+        addMesh(f, ell(0.2, 0.055, 1.85), (i === 0 ? tailM : wingM), 0, 0, -1.45, -0.08, 0, 0);
+      }
+
+      const legM = M(0xe8a83c);
+      [-1, 1].forEach(s => {
+        addMesh(core, new THREE.CylinderGeometry(0.06, 0.05, 0.95, 7), legM, s * 0.28, 1.55, 0.1);
+        addMesh(core, ell(0.15, 0.05, 0.28), legM, s * 0.28, 1.02, 0.24);
+      });
+
+      root.scale.setScalar(o.scale);
+      return {
+        root: root,
+        update: function (t) {
+          const fl = Math.sin(t * o.flap);
+          wings.forEach(W => {
+            W.w.rotation.z = W.s * (0.3 + fl * 0.5);
+            W.outer.rotation.z = W.s * (0.22 + fl * 0.45);
+            W.w.rotation.x = fl * 0.1;
+          });
+          core.position.y = 0.35 + Math.sin(t * o.speed) * 0.3;
+          core.rotation.z = fl * 0.05;
+          tail.rotation.x = -0.05 + Math.sin(t * 2.3) * 0.12;
+          head.rotation.y = Math.sin(t * 0.6) * 0.28;
+        }
+      };
+    }
+
+    // 灵草：祝余/茇（多片弯曲叶 + 发光花穗，随风摇曳）
+    function buildGrassClump(o) {
+      o = Object.assign({ leaf: 0x36a85a, leaf2: 0x7ccf6a, flower: 0xfff3c4, count: 8, h: 2.2, glow: true, scale: 1.6 }, o || {});
+      const root = new THREE.Group();
+      const lm1 = M(o.leaf, { side: THREE.DoubleSide, flatShading: true });
+      const lm2 = M(o.leaf2, { side: THREE.DoubleSide, flatShading: true });
+      const blades = [];
+      for (let i = 0; i < o.count; i++) {
+        const g = new THREE.Group();
+        g.rotation.y = i * (Math.PI * 2 / o.count) + 0.3;
+        g.rotation.z = 0.34 + (i % 3) * 0.09;
+        root.add(g);
+        const geo = new THREE.PlaneGeometry(0.34, o.h, 2, 7);
+        const pos = geo.attributes.position;
+        for (let k = 0; k < pos.count; k++) {
+          const u = (pos.getY(k) + o.h / 2) / o.h;
+          pos.setZ(k, -Math.pow(u, 2) * o.h * 0.42);
+          pos.setX(k, pos.getX(k) * (1 - u * 0.8));
+        }
+        geo.computeVertexNormals();
+        const leaf = new THREE.Mesh(geo, (i % 2) ? lm2 : lm1);
+        leaf.position.y = o.h / 2;
+        leaf.castShadow = true;
+        g.add(leaf);
+        blades.push({ g: g, phase: i * 0.55, base: g.rotation.z });
+      }
+      if (o.flower) {
+        const fm = M(o.flower, { emissive: o.flower, emissiveIntensity: o.glow ? 0.5 : 0 });
+        for (let i = 0; i < 4; i++) {
+          const a = i * Math.PI / 2 + 0.5;
+          addMesh(root, new THREE.CylinderGeometry(0.025, 0.035, o.h * 0.5, 6), M(0x4e9a4a),
+            Math.sin(a) * 0.32, o.h * 0.6, Math.cos(a) * 0.32, 0, 0, -Math.sin(a) * 0.3);
+          addMesh(root, new THREE.IcosahedronGeometry(0.19, 0), fm, Math.sin(a) * 0.5, o.h * 0.86, Math.cos(a) * 0.5);
+        }
+      }
+      root.scale.setScalar(o.scale);
+      return {
+        root: root,
+        update: function (t) {
+          blades.forEach(B => {
+            B.g.rotation.z = B.base + Math.sin(t * 1.5 + B.phase) * 0.16;
+            B.g.rotation.x = Math.cos(t * 1.2 + B.phase) * 0.1;
+          });
+          root.rotation.z = Math.sin(t * 0.9) * 0.03;
+        }
+      };
+    }
+
+    // 灵木：帝休（树干+分叉+盘根+层叠树冠+果实，树冠随风轻摆）
+    function buildTreeCreature(o) {
+      o = Object.assign({ trunk: 0x8a5a34, leaf: 0x3f9c4a, leaf2: 0x67c06a, fruit: 0xef6b4a, h: 8.4, scale: 1.0 }, o || {});
+      const root = new THREE.Group();
+      const trunkM = M(o.trunk, { flatShading: true });
+      addMesh(root, new THREE.CylinderGeometry(0.34, 0.62, o.h * 0.62, 9), trunkM, 0, o.h * 0.31, 0);
+      [-1, 1].forEach(s => addMesh(root, new THREE.CylinderGeometry(0.13, 0.2, o.h * 0.3, 7), trunkM, s * 0.55, o.h * 0.6, 0, 0, 0, s * 0.6));
+      for (let i = 0; i < 4; i++) {
+        const a = i * Math.PI / 2 + 0.4;
+        addMesh(root, new THREE.CylinderGeometry(0.1, 0.2, 0.9, 6), trunkM, Math.sin(a) * 0.5, 0.3, Math.cos(a) * 0.5, Math.sin(a) * 0.7, 0, -Math.cos(a) * 0.7);
+      }
+      const crown = new THREE.Group(); crown.position.y = o.h * 0.72; root.add(crown);
+      const cm = M(o.leaf, { flatShading: true }), cm2 = M(o.leaf2, { flatShading: true });
+      const blobs = [[0, 0.7, 0, 2.0], [-1.3, 0.2, 0.5, 1.5], [1.3, 0.1, -0.4, 1.55], [0.2, -0.5, -1.2, 1.35], [-0.4, -0.4, 1.25, 1.3]];
+      blobs.forEach((b, i) => {
+        addMesh(crown, new THREE.IcosahedronGeometry(b[3], 1), (i % 2 ? cm2 : cm), b[0], b[1], b[2]).scale.set(1, 0.82, 1);
+      });
+      const fruitM = M(o.fruit, { emissive: o.fruit, emissiveIntensity: 0.25 });
+      for (let i = 0; i < 6; i++) {
+        const a = i * 1.9, r = 1.5 + (i % 3) * 0.45;
+        addMesh(crown, new THREE.SphereGeometry(0.16, 10, 10), fruitM, Math.sin(a) * r, -0.15 + (i % 4) * 0.35, Math.cos(a) * r);
+      }
+      root.scale.setScalar(o.scale);
+      return {
+        root: root,
+        update: function (t) {
+          crown.rotation.z = Math.sin(t * 0.8) * 0.05;
+          crown.rotation.x = Math.cos(t * 0.65) * 0.04;
+          crown.position.y = o.h * 0.72 + Math.sin(t * 0.9) * 0.06;
+        }
+      };
+    }
+
+    // 按数据条目选模型
+    function buildCreature(f) {
+      if (f.type === '兽') return buildQuadruped({ tails: 9, tailLen: 1.0, scale: 1.75, speed: 2.0 });
+      if (f.type === '鸟') {
+        if (f.id === 'jingwei') {
+          return buildBird({ body: 0x333a45, belly: 0xf1f5fa, wing: 0x4d5664, tail: 0xdfe7f0, beak: 0xf1c04a, crest: false, scale: 1.15 });
+        }
+        return buildBird({ scale: 1.25 });
+      }
+      if (f.type === '草') {
+        if (f.id === 'ba') return buildGrassClump({ leaf: 0x5aa83c, leaf2: 0x8ed166, flower: 0xf3e18a, h: 2.0, scale: 1.5 });
+        return buildGrassClump({ leaf: 0x2fa75a, leaf2: 0x79d07c, flower: 0xfff0b8, h: 2.3, scale: 1.6 });
+      }
+      if (f.type === '木') return buildTreeCreature({ scale: 1.0 });
+      return buildQuadruped({ tails: 1, scale: 1.2 });
+    }
+
+    // 环境活物：各地点周边散布鹿群、野兔，地面有活物走动
+    function buildAmbientLife() {
+      DATA.places.forEach(p => {
+        const pc = PLACE_POS[p.id];
+        for (let i = 0; i < 3; i++) {
+          const a = (i / 3) * Math.PI * 2 + 0.7;
+          const d = 15 + i * 5;
+          const x = pc.x + Math.cos(a) * d, z = pc.z + Math.sin(a) * d;
+          const deer = buildQuadruped({
+            body: 0xb27b46, belly: 0xf2e6d3, paw: 0x4a3222, earIn: 0xd7b38c,
+            tails: 1, tailLen: 0.55, antler: true, earH: 0.65, earW: 0.24,
+            legH: 1.7, scale: 1.3, speed: 1.5
+          });
+          deer.root.position.set(x, terrainHeight(x, z), z);
+          deer.root.rotation.y = a + Math.PI / 2;
+          scene.add(deer.root);
+          creatures.push(deer);
+        }
+        for (let i = 0; i < 4; i++) {
+          const a = Math.random() * Math.PI * 2, d = 8 + Math.random() * 15;
+          const x = pc.x + Math.cos(a) * d, z = pc.z + Math.sin(a) * d;
+          const rab = buildQuadruped({
+            body: 0xcfc3ae, belly: 0xfbf7ef, paw: 0x9a8f7c, earIn: 0xe7a9a9,
+            tails: 1, tailLen: 0.32, earH: 1.15, earW: 0.16,
+            bodyScale: [0.85, 0.8, 1.25], legH: 0.7, scale: 1.0, hop: true, speed: 5.0
+          });
+          rab.root.position.set(x, terrainHeight(x, z), z);
+          rab.root.rotation.y = Math.random() * Math.PI * 2;
+          scene.add(rab.root);
+          creatures.push(rab);
+        }
+      });
+    }
+
+    // ---------- 人物视角探索（自由走动） ----------
+    let walkMode = false;
+    let player = null;
+    let yaw = 0, pitch = -0.22;
+    let nearFind = null;
+    let walking = false, running = false;
+    const keys = Object.create(null);
+    const joy = { active: false, x: 0, y: 0, cx: 0, cy: 0 };
+
+    function buildHuman() {
+      const root = new THREE.Group();
+      const skin = M(0xf2cba3), cloth = M(0x2f9e78), cloth2 = M(0x216b52), hair = M(0x2a2119);
+      const lift = new THREE.Group(); lift.position.y = 0.92; root.add(lift);
+      const core = new THREE.Group(); lift.add(core);
+
+      addMesh(core, ell(0.5, 0.62, 0.34), cloth, 0, 2.05, 0);
+      addMesh(core, ell(0.46, 0.42, 0.32), cloth2, 0, 1.42, 0);
+      addMesh(core, ell(0.52, 0.2, 0.36), M(0xdcae6a), 0, 1.72, 0);      // 腰束
+
+      const head = new THREE.Group(); head.position.set(0, 2.92, 0); core.add(head);
+      addMesh(head, ell(0.33, 0.37, 0.33), skin, 0, 0, 0);
+      addMesh(head, ell(0.36, 0.3, 0.36), hair, 0, 0.14, -0.02);
+      addMesh(head, new THREE.CylinderGeometry(0.2, 0.24, 0.26, 10), hair, 0, 0.02, -0.3);
+      [-1, 1].forEach(s => addMesh(head, ell(0.052, 0.062, 0.04), M(0x241f1a, { roughness: 0.25 }), s * 0.13, 0.01, 0.3));
+
+      const arms = [];
+      [-1, 1].forEach(s => {
+        const sh = new THREE.Group(); sh.position.set(s * 0.54, 2.48, 0); core.add(sh);
+        addMesh(sh, new THREE.CylinderGeometry(0.12, 0.1, 0.95, 8), cloth, 0, -0.48, 0);
+        const el = new THREE.Group(); el.position.set(0, -0.96, 0); sh.add(el);
+        addMesh(el, new THREE.CylinderGeometry(0.1, 0.088, 0.85, 8), skin, 0, -0.42, 0);
+        arms.push({ sh: sh, el: el, s: s });
+      });
+
+      const legs = [];
+      [-1, 1].forEach(s => {
+        const hip = new THREE.Group(); hip.position.set(s * 0.24, 1.08, 0); core.add(hip);
+        addMesh(hip, new THREE.CylinderGeometry(0.17, 0.14, 1.0, 8), cloth2, 0, -0.5, 0);
+        const kn = new THREE.Group(); kn.position.set(0, -1.02, 0); hip.add(kn);
+        addMesh(kn, new THREE.CylinderGeometry(0.14, 0.12, 0.95, 8), cloth2, 0, -0.46, 0);
+        addMesh(kn, ell(0.16, 0.1, 0.26), M(0x3a2f26), 0, -0.96, 0.09);
+        legs.push({ hip: hip, kn: kn, s: s });
+      });
+
+      root.scale.setScalar(1.6);
+      return {
+        root: root,
+        update: function (t, dt, moving, isRun) {
+          const sp = isRun ? 11 : 7.4;
+          const w = moving ? Math.sin(t * sp) : 0;
+          legs.forEach(L => {
+            L.hip.rotation.x = w * 0.7;
+            L.kn.rotation.x = Math.max(0, -w) * 0.85;
+          });
+          arms.forEach(A => {
+            A.sh.rotation.x = -w * 0.55;
+            A.el.rotation.x = moving ? (-0.2 - Math.max(0, w) * 0.4) : -0.18;
+          });
+          core.position.y = moving ? Math.abs(Math.sin(t * sp)) * 0.12 : Math.sin(t * 2) * 0.035;
+          if (moving) head.rotation.y = Math.sin(t * 0.5) * 0.1;
+        }
+      };
+    }
+
+    function buildPlayer() {
+      player = buildHuman();
+      player.root.position.set(0, terrainHeight(0, 12), 12);
+      player.root.visible = false;
+      scene.add(player.root);
+    }
+
+    window.toggleWalk = function () {
+      walkMode = !walkMode;
+      const btn = document.getElementById('walkBtn');
+      btn.classList.toggle('on', walkMode);
+      btn.textContent = walkMode ? '退出探索' : '进入探索（人物视角）';
+      document.getElementById('joystick').classList.toggle('show', walkMode);
+      document.getElementById('walkTip').classList.toggle('show', walkMode);
+      document.getElementById('hint').style.display = walkMode ? 'none' : '';
+      document.getElementById('miniMap').style.display = walkMode ? 'none' : '';
+      if (walkMode) {
+        if (document.getElementById('mapPanel').classList.contains('show')) togglePanel(false);
+        player.root.visible = true;
+        const tgt = controls.target;
+        const px = tgt.x, pz = tgt.z + 8;
+        player.root.position.set(px, terrainHeight(px, pz), pz);
+        yaw = Math.atan2(-px, -pz);
+        pitch = -0.22;
+        controls.enabled = false;
+      } else {
+        player.root.visible = false;
+        controls.enabled = true;
+        controls.target.set(0, 4, 0);
+        camera.position.set(0, 95, 185);
+        nearFind = null;
+        document.getElementById('nearTip').classList.remove('show');
+      }
+    };
+
+    function lerpAngle(a, b, k) {
+      let d = ((b - a) % (Math.PI * 2) + Math.PI * 3) % (Math.PI * 2) - Math.PI;
+      return a + d * k;
+    }
+
+    function updateWalk(dt) {
+      let mx = 0, mz = 0;
+      if (keys['w'] || keys['arrowup']) mz += 1;
+      if (keys['s'] || keys['arrowdown']) mz -= 1;
+      if (keys['a'] || keys['arrowleft']) mx -= 1;
+      if (keys['d'] || keys['arrowright']) mx += 1;
+      mx += joy.x; mz += -joy.y;
+      const len = Math.hypot(mx, mz);
+      walking = len > 0.06;
+      running = !!keys['shift'];
+
+      if (walking) {
+        const fwdX = Math.sin(yaw), fwdZ = Math.cos(yaw);
+        const rgtX = Math.cos(yaw), rgtZ = -Math.sin(yaw);
+        const dx = (fwdX * mz + rgtX * mx) / Math.max(1, len);
+        const dz = (fwdZ * mz + rgtZ * mx) / Math.max(1, len);
+        const spd = (running ? 30 : 15) * Math.min(1, len);
+        const P = player.root.position;
+        P.x += dx * spd * dt; P.z += dz * spd * dt;
+        const R = 135, rr = Math.hypot(P.x, P.z);
+        if (rr > R) { P.x = P.x / rr * R; P.z = P.z / rr * R; }
+        player.root.rotation.y = lerpAngle(player.root.rotation.y, Math.atan2(dx, dz), Math.min(1, dt * 12));
+      }
+      player.root.position.y = terrainHeight(player.root.position.x, player.root.position.z);
+      player.update(t, dt, walking, running);
+
+      // 第三人称跟随
+      const tx = player.root.position.x, ty = player.root.position.y + 4.6, tz = player.root.position.z;
+      const cd = 17, cp = Math.cos(pitch);
+      const want = new THREE.Vector3(
+        tx - Math.sin(yaw) * cp * cd,
+        Math.max(terrainHeight(tx, tz) + 1.6, ty - Math.sin(pitch) * cd),
+        tz - Math.cos(yaw) * cp * cd
+      );
+      camera.position.lerp(want, Math.min(1, dt * 7));
+      camera.lookAt(tx, ty, tz);
+
+      // 邻近提示
+      let nd = 1e9, nf = null;
+      markers.forEach(g => {
+        const d = Math.hypot(g.position.x - tx, g.position.z - tz);
+        if (d < nd) { nd = d; nf = g.userData.find; }
+      });
+      nearFind = (nd < 11) ? nf : null;
+      const tip = document.getElementById('nearTip');
+      if (nearFind) { tip.textContent = '发现 · ' + nearFind.name + '（点这里 / 按 E 查看）'; tip.classList.add('show'); }
+      else tip.classList.remove('show');
+    }
+
+    window.viewNear = function () { if (walkMode && nearFind) selectFind(nearFind); };
+
+    (function bindJoystick() {
+      const el = document.getElementById('joystick');
+      const knob = el.querySelector('.knob');
+      const R = 42;
+      function setKnob(x, y) {
+        knob.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+        joy.x = x / R; joy.y = y / R;
+      }
+      function move(e) {
+        if (!joy.active) return;
+        let dx = e.clientX - joy.cx, dy = e.clientY - joy.cy;
+        const d = Math.hypot(dx, dy);
+        if (d > R) { dx = dx / d * R; dy = dy / d * R; }
+        setKnob(dx, dy);
+      }
+      el.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        try { el.setPointerCapture(e.pointerId); } catch (err) {}
+        joy.active = true;
+        const r = el.getBoundingClientRect();
+        joy.cx = r.left + r.width / 2; joy.cy = r.top + r.height / 2;
+        move(e);
+      });
+      el.addEventListener('pointermove', move);
+      el.addEventListener('pointerup', () => { joy.active = false; setKnob(0, 0); });
+      el.addEventListener('pointercancel', () => { joy.active = false; setKnob(0, 0); });
+    })();
+
+    window.addEventListener('keydown', e => {
+      const k = (e.key || '').toLowerCase();
+      if (k === 'shift') keys['shift'] = true;
+      if (walkMode && (k === 'w' || k === 'a' || k === 's' || k === 'd' || k.indexOf('arrow') === 0)) {
+        e.preventDefault();
+        keys[k] = true;
+      }
+      if (walkMode && k === 'e') viewNear();
+    });
+    window.addEventListener('keyup', e => {
+      const k = (e.key || '').toLowerCase();
+      if (k === 'shift') keys['shift'] = false;
+      keys[k] = false;
+    });
+    (function bindLook() {
+      let lx = 0, ly = 0, drag = false;
+      window.addEventListener('pointerdown', e => {
+        if (!walkMode) return;
+        const el = e.target;
+        if (el && el.closest && el.closest('#joystick,#card,#walkBtn,#miniMap,#mapPanel,#nearTip,#hud')) return;
+        drag = true; lx = e.clientX; ly = e.clientY;
+      });
+      window.addEventListener('pointerup', () => { drag = false; });
+      window.addEventListener('pointercancel', () => { drag = false; });
+      window.addEventListener('pointermove', e => {
+        if (!walkMode || !drag) return;
+        yaw -= (e.clientX - lx) * 0.0045;
+        pitch = Math.max(-1.15, Math.min(0.55, pitch - (e.clientY - ly) * 0.0035));
+        lx = e.clientX; ly = e.clientY;
+      });
+    })();
+
     // ---------- 地点地标 + 可发现点 ----------
     function buildPlaceMarkers() {
       const typeColor = { '兽': 0xff8a3c, '鸟': 0x3aa0ff, '草': 0x36c46a, '木': 0xb07a3a };
@@ -603,35 +1144,39 @@
           const g = new THREE.Group();
           g.position.set(wx, wy, wz);
 
-          const base = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.9, 0.6, 12),
-            new THREE.MeshStandardMaterial({ color: 0xd7dee3, roughness: 0.9 }));
-          base.position.y = 0.3; base.receiveShadow = true; base.castShadow = true;
-          g.add(base);
-          const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.42, 5, 10),
-            new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5 }));
-          pillar.position.y = 3.1; pillar.castShadow = true;
-          g.add(pillar);
+          // 三维活物本体（程序化建模，各部位关节会动）
+          const creature = buildCreature(f);
+          const cr = creature.root;
+          cr.rotation.y = Math.atan2(wx - pc.x, wz - pc.z) + Math.PI;
+          g.add(cr);
+          creatures.push(creature);
+          f._creature = creature;
 
-          const orb = new THREE.Mesh(new THREE.SphereGeometry(1.35, 28, 28),
-            new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.95, roughness: 0.28 }));
-          orb.position.y = 6.8;
-          orb.userData.find = f; orb.userData.baseY = 6.8; orb.userData.phase = Math.random() * 6;
-          g.add(orb);
-          markers.push(orb);
+          // 脚下感应圈 + 旋转光环（保留"可发现"提示）
+          const disc = new THREE.Mesh(new THREE.CircleGeometry(3.6, 40),
+            new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.2, depthWrite: false }));
+          disc.rotation.x = -Math.PI / 2; disc.position.y = 0.03;
+          g.add(disc);
 
-          const ring = new THREE.Mesh(new THREE.TorusGeometry(2.15, 0.09, 10, 40),
+          const ring = new THREE.Mesh(new THREE.TorusGeometry(3.0, 0.1, 10, 44),
             new THREE.MeshBasicMaterial({ color: col }));
-          ring.position.y = 6.8; ring.rotation.x = Math.PI / 2;
+          ring.position.y = 0.14; ring.rotation.x = Math.PI / 2;
           g.add(ring);
           spinners.push(ring);
 
-          const disc = new THREE.Mesh(new THREE.CircleGeometry(2.6, 32),
-            new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.22, depthWrite: false }));
-          disc.rotation.x = -Math.PI / 2; disc.position.y = 0.02;
-          g.add(disc);
+          g.userData.find = f;
+          g.userData.disc = disc;
+          g.userData.ring = ring;
+          g.userData.phase = Math.random() * 6;
+
+          // 定位锚点（供镜头飞入/血条定位，不参与渲染）
+          const anchor = new THREE.Object3D();
+          anchor.position.y = 4.2;
+          g.add(anchor);
 
           scene.add(g);
-          f._orb = orb;
+          f._orb = anchor;
+          markers.push(g);
         });
       });
     }
@@ -668,8 +1213,12 @@
       ndc.x = ((e.clientX - r.left) / r.width) * 2 - 1;
       ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
       ray.setFromCamera(ndc, camera);
-      const hit = ray.intersectObjects(markers, false)[0];
-      if (hit) selectFind(hit.object.userData.find);
+      const hit = ray.intersectObjects(markers, true)[0];
+      if (hit) {
+        let o = hit.object;
+        while (o && !o.userData.find) o = o.parent;
+        if (o) selectFind(o.userData.find);
+      }
     }
 
     let flying = false;
@@ -687,7 +1236,7 @@
 
     function selectFind(f) {
       const p = f._orb.getWorldPosition(new THREE.Vector3());
-      flyTo(p.x + 16, p.y + 10, p.z + 26, p.x, p.y, p.z);
+      if (!walkMode) flyTo(p.x + 16, p.y + 10, p.z + 26, p.x, p.y, p.z);
       openCard(f);
       if (unlocked.indexOf(f.id) < 0) {
         unlocked.push(f.id); saveUnlocked(unlocked);
@@ -975,9 +1524,12 @@
       requestAnimationFrame(animate);
       const dt = clock ? Math.min(clock.getDelta(), 0.05) : 0.016;
       t += dt;
-      markers.forEach(b => {
-        b.material.emissiveIntensity = 0.7 + Math.sin(t * 2 + b.userData.phase) * 0.3;
-        b.position.y = b.userData.baseY + Math.sin(t * 1.5 + b.userData.phase) * 0.3;
+      // 所有三维活物动起来（走/跳/扇翅/摇尾/摇曳）
+      creatures.forEach(c => c.update(t, dt));
+      markers.forEach(g => {
+        const u = g.userData;
+        if (!u.disc) return;
+        u.disc.material.opacity = 0.12 + Math.sin(t * 1.8 + u.phase) * 0.07;
       });
       spinners.forEach(r => { r.rotation.z += 0.6 * dt; });
       clouds.forEach(c => {
@@ -1003,7 +1555,9 @@
         pos.needsUpdate = true;
         waterGeo.computeVertexNormals();
       }
-      if (flying) {
+      if (walkMode) {
+        updateWalk(dt);
+      } else if (flying) {
         camera.position.lerp(camPos, 0.08);
         controls.target.lerp(camTar, 0.08);
         camera.lookAt(controls.target);
