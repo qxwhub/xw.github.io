@@ -13,27 +13,24 @@
     #scene { position:fixed; inset:0; }
     canvas { display:block; }
 
-    #hud { position:fixed; top:0; left:0; right:0; z-index:20; display:flex; align-items:center; gap:10px;
-      padding:8px 12px; background:rgba(255,255,255,.66); backdrop-filter:blur(8px);
-      box-shadow:0 1px 10px rgba(31,41,55,.08); color:#1f2937; pointer-events:none; }
-    #hud > * { pointer-events:auto; }
-    #hud .spacer { flex:1; }
-    /* D-Pad 方向按钮（右下） */
-    #dpad { position:fixed; right:24px; bottom:26px; z-index:25; width:160px; height:160px;
+    /* D-Pad 方向按钮（左下 · 圆形方向盘） */
+    #dpad { position:fixed; left:24px; bottom:26px; z-index:25; width:160px; height:160px;
+      border-radius:50%; background:rgba(255,255,255,.42); border:2px solid rgba(255,255,255,.7);
+      backdrop-filter:blur(6px); box-shadow:0 4px 20px rgba(0,0,0,.18);
       display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr);
-      gap:4px; }
-    #dpad .dpad-btn { border:1px solid rgba(31,41,55,.18);
-      background:rgba(255,255,255,.58); backdrop-filter:blur(4px); color:#374151;
-      font-size:22px; font-weight:700; cursor:pointer; user-select:none;
-      box-shadow:0 2px 8px rgba(0,0,0,.12); transition:all .08s; border-radius:12px; }
+      gap:2px; }
+    #dpad .dpad-btn { border:none; background:transparent; color:#1f2937;
+      font-size:20px; font-weight:700; cursor:pointer; user-select:none;
+      border-radius:50%; transition:all .08s; }
     #dpad .dpad-btn:active, #dpad .dpad-btn.hold {
-      background:rgba(20,184,166,.85); color:#fff; transform:scale(0.92); box-shadow:inset 0 2px 6px rgba(0,0,0,.25); }
+      background:rgba(20,184,166,.9); color:#fff; box-shadow:0 2px 10px rgba(0,0,0,.2); }
     #dpad .up    { grid-column:2; grid-row:1; }
     #dpad .down  { grid-column:2; grid-row:3; }
     #dpad .left  { grid-column:1; grid-row:2; }
     #dpad .right { grid-column:3; grid-row:2; }
-    #dpad .center{ grid-column:2; grid-row:2; font-size:18px; background:rgba(47,174,106,.75); color:#fff; }
-    #dpad .center:active, #dpad .center.hold { background:rgba(22,163,74,.95); transform:scale(0.92); }
+    #dpad .center{ grid-column:2; grid-row:2; font-size:15px;
+      background:rgba(47,174,106,.8); color:#fff; border-radius:50%; }
+    #dpad .center:active, #dpad .center.hold { background:rgba(22,163,74,.98); transform:scale(0.9); }
 
     /* mapPanel 底部环境条（时间/天气/音效） */
     #mapPanel .mp-env { padding:6px 10px; border-top:1px solid #eef0f2; background:#fafbfc; }
@@ -98,10 +95,6 @@
       font-size:13px; color:#14532d; line-height:1.9; }
     #card .c-foot { padding:10px 18px 16px; border-top:1px solid #eef0f2; font-size:11px; color:#9ca3af; }
 
-    #nearTip { position:fixed; left:50%; bottom:86px; transform:translateX(-50%); z-index:26;
-      background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; border-radius:999px; padding:8px 18px; font-size:13px;
-      box-shadow:0 6px 20px rgba(0,0,0,.14); cursor:pointer; font-weight:700; white-space:nowrap; }
-
     #loading { position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center;
       background:#dfeef7; color:#475569; font-size:14px; }
     #loading.hide { display:none; }
@@ -115,12 +108,7 @@
 <body>
   <div id="scene"></div>
 
-  <div id="hud">
-    <div class="spacer"></div>
-    <div class="hud-right"></div>
-  </div>
-
-  <!-- D-Pad 方向按钮 -->
+  <!-- D-Pad 方向按钮（左下） -->
   <div id="dpad">
     <button class="dpad-btn up" data-key="w">▲</button>
     <button class="dpad-btn left" data-key="a">◀</button>
@@ -128,8 +116,6 @@
     <button class="dpad-btn right" data-key="d">▶</button>
     <button class="dpad-btn down" data-key="s">▼</button>
   </div>
-
-  <div id="nearTip" onclick="viewNear()"></div>
 
   <div id="miniMap" onclick="togglePanel(true)" title="点击放大地图">
     <div class="mm-title"><span>山海舆图</span><span>⤢</span></div>
@@ -1037,7 +1023,6 @@
         player.root.visible = false;
         controls.enabled = true;
         nearFind = null;
-        document.getElementById('nearTip').classList.remove('show');
       }
       // UI 同步
       document.getElementById('dpad').style.display = walkMode ? 'grid' : 'none';
@@ -1105,9 +1090,6 @@
         if (d < nd) { nd = d; nf = g.userData.find; }
       });
       nearFind = (nd < 11) ? nf : null;
-      const tip = document.getElementById('nearTip');
-      if (nearFind) { tip.textContent = '发现 · ' + nearFind.name + '（点这里 / 按 E 查看）'; tip.classList.add('show'); }
-      else tip.classList.remove('show');
     }
 
     window.viewNear = function () { if (walkMode && nearFind) selectFind(nearFind); };
@@ -1158,7 +1140,7 @@
       window.addEventListener('pointerdown', e => {
         if (!walkMode) return;
         const el = e.target;
-        if (el && el.closest && el.closest('#dpad,#card,#miniMap,#mapPanel,#nearTip,#hud')) return;
+        if (el && el.closest && el.closest('#dpad,#card,#miniMap,#mapPanel')) return;
         drag = true; lx = e.clientX; ly = e.clientY;
       });
       window.addEventListener('pointerup', () => { drag = false; });
@@ -1378,12 +1360,8 @@
     function drawPlaces(parent) {
       DATA.places.forEach(p => {
         const g = svgEl('g', {});
+        g.setAttribute('data-place', p.id);
         g.style.cursor = 'pointer';
-        g.addEventListener('click', () => {
-          if (mapDragMoved) return;
-          togglePanel(false);
-          flyToPlace(p.id);
-        });
         g.appendChild(svgEl('circle', { cx: p.mini[0], cy: p.mini[1], r: 7, fill: 'rgba(47,174,106,0.18)' }));
         g.appendChild(svgEl('circle', { cx: p.mini[0], cy: p.mini[1], r: 3.6, fill: '#2fae6a', stroke: '#fff', 'stroke-width': 1.3 }));
         const t = svgEl('text', { x: p.mini[0], y: p.mini[1] - 6.5, 'font-size': 5.6, 'text-anchor': 'middle', fill: '#1f2937', 'font-weight': 700 });
@@ -1491,6 +1469,9 @@
         try { body.setPointerCapture(e.pointerId); } catch (err) {}
         pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
         mapDragMoved = false;
+        // 记录是否点在地点上
+        const g = e.target.closest('[data-place]');
+        body._downOnPlace = g ? g.getAttribute('data-place') : null;
         if (pointers.size === 1) body.classList.add('grabbing');
         if (pointers.size === 2) lastDist = dist();
       });
@@ -1517,9 +1498,17 @@
         }
       });
       function endPointer(e) {
+        const wasSingle = pointers.size === 1;
         pointers.delete(e.pointerId);
         if (pointers.size < 2) lastDist = 0;
         if (pointers.size === 0) body.classList.remove('grabbing');
+        // 单指点击 → 地点传送
+        if (wasSingle && !mapDragMoved && body._downOnPlace) {
+          const id = body._downOnPlace;
+          body._downOnPlace = null;
+          togglePanel(false);
+          flyToPlace(id);
+        }
       }
       body.addEventListener('pointerup', endPointer);
       body.addEventListener('pointercancel', endPointer);
