@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>山海经 · 异兽图鉴（平面舆图）</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l3 7h7l-5.5 4 2 7L12 17l-6.5 4 2-7L2 9h7z' fill='%23e23b2b'/%3E%3C/svg%3E">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body { width:100%; min-height:100vh; }
+    body { font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","HarmonyOS Sans SC","Microsoft YaHei",sans-serif;
+      color:#1d1d1f; background:#e9dcc0; overflow-x:hidden; }
+
+    /* 顶部 HUD */
+    #hud { position:fixed; top:0; left:0; right:0; z-index:20; display:flex; align-items:center; gap:10px;
+      padding:10px 14px; background:linear-gradient(180deg, rgba(70,46,16,.82), rgba(70,46,16,0));
+      pointer-events:none; color:#fff; }
+    #hud .title { font-size:15px; font-weight:700; text-shadow:0 1px 4px rgba(0,0,0,.5); white-space:nowrap; }
+    #hud .title small { font-size:11px; font-weight:400; opacity:.75; display:block; margin-top:1px; }
+    #hud .prog { font-size:12px; background:rgba(255,255,255,.16); padding:4px 10px; border-radius:999px; white-space:nowrap; }
+    #hud .spacer { flex:1; }
+    #hud .chips { display:flex; gap:6px; flex-wrap:wrap; pointer-events:auto; }
+    #hud .chip { font-size:12px; color:#fff; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.22);
+      padding:4px 10px; border-radius:999px; cursor:pointer; transition:all .15s; white-space:nowrap; }
+    #hud .chip:hover { background:rgba(255,255,255,.3); }
+    #hud .chip.done { background:rgba(34,197,94,.34); border-color:rgba(34,197,94,.6); }
+    #hud .link3d { font-size:12px; color:#fff; text-decoration:none; background:rgba(226,59,43,.7);
+      border:1px solid rgba(255,255,255,.3); padding:4px 10px; border-radius:999px; white-space:nowrap; }
+    #hud .link3d:hover { background:rgba(226,59,43,.95); }
+
+    /* 地图区 */
+    #mapWrap { position:relative; width:100%; max-width:980px; margin:64px auto 0; padding:0 10px 70px; }
+    .basemap { width:100%; height:auto; display:block; filter:drop-shadow(0 10px 30px rgba(80,55,20,.35)); border-radius:14px; }
+    /* pin 层：与底图等比叠加 */
+    #pins { position:absolute; left:10px; right:10px; top:0; bottom:0; pointer-events:none; }
+    .pin { position:absolute; transform:translate(-50%,-50%); pointer-events:auto; cursor:pointer;
+      display:flex; flex-direction:column; align-items:center; gap:4px; background:none; border:none; padding:0; }
+    .pin .glow { position:absolute; top:-6px; width:64px; height:64px; border-radius:50%;
+      background:radial-gradient(circle, rgba(226,59,43,.5), rgba(226,59,43,0) 70%); animation:pulse 2.2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{ transform:scale(.85); opacity:.7 } 50%{ transform:scale(1.15); opacity:1 } }
+    .pin .ico { width:58px; height:58px; border-radius:50%; background:#fffdf6; border:2px solid #b08948;
+      box-shadow:0 4px 12px rgba(80,55,20,.35); padding:4px; transition:transform .15s; position:relative; z-index:1; }
+    .pin .ico svg { width:100%; height:100%; display:block; }
+    .pin:hover .ico { transform:scale(1.08); }
+    .pin .lbl { font-size:12px; font-weight:700; color:#5a3e1e; background:rgba(255,253,246,.9);
+      border:1px solid #d9c39a; padding:1px 8px; border-radius:999px; white-space:nowrap; position:relative; z-index:1; }
+    .pin.done .ico { border-color:#22c55e; box-shadow:0 0 0 3px rgba(34,197,94,.3); }
+    .pin.done .lbl { color:#15803d; border-color:#86efac; }
+
+    #hint { position:fixed; bottom:12px; left:0; right:0; z-index:20; text-align:center; color:#5a3e1e;
+      font-size:12px; opacity:.8; pointer-events:none; text-shadow:0 1px 2px rgba(255,255,255,.5); }
+
+    /* 底部说明（平面版特有） */
+    #legend { max-width:980px; margin:0 auto; padding:0 16px 60px; color:#6b4f2a; font-size:12.5px; line-height:1.9; }
+    #legend b { color:#5a3e1e; }
+
+    /* 异兽卡（右侧滑入，复用 3D 版结构） */
+    #card { position:fixed; top:0; right:0; height:100%; width:380px; max-width:90vw; z-index:30;
+      background:#fff; box-shadow:-8px 0 40px rgba(0,0,0,.3); transform:translateX(105%);
+      transition:transform .35s cubic-bezier(.22,.61,.36,1); display:flex; flex-direction:column; }
+    #card.open { transform:translateX(0); }
+    #card .c-head { display:flex; align-items:flex-start; gap:12px; padding:18px 18px 10px; border-bottom:1px solid #eee; }
+    #card .c-svg { width:84px; height:84px; flex-shrink:0; background:#faf7f2; border-radius:14px; border:1px solid #eee; padding:6px; }
+    #card .c-svg svg { width:100%; height:100%; }
+    #card .c-name { flex:1; min-width:0; }
+    #card .c-name h2 { font-size:19px; color:#1f2937; }
+    #card .c-name .py { font-size:12px; color:#9ca3af; margin-top:2px; }
+    #card .c-name .tag { display:inline-block; margin-top:6px; font-size:11px; color:#0d9488; background:#ccfbf1;
+      border:1px solid #99f6e4; padding:1px 8px; border-radius:999px; }
+    #card .c-close { width:30px; height:30px; flex-shrink:0; border:none; background:#f3f4f6; border-radius:8px;
+      color:#6b7280; font-size:16px; cursor:pointer; }
+    #card .c-close:hover { background:#e5e7eb; }
+    #card .c-body { padding:14px 18px 24px; overflow-y:auto; flex:1; }
+    #card .c-body h3 { font-size:13px; color:#e11d48; margin:16px 0 6px; }
+    #card .c-body h3:first-child { margin-top:0; }
+    #card .c-body p { font-size:13px; color:#4b5563; line-height:1.9; }
+    #card .c-body .orig { background:#faf7f2; border-left:3px solid #e23b2b; padding:10px 12px; border-radius:0 8px 8px 0;
+      font-size:13px; color:#7c2d12; line-height:1.9; }
+    #card .c-foot { padding:10px 18px 16px; border-top:1px solid #eee; font-size:11px; color:#9ca3af; }
+
+    @media (max-width:560px) {
+      #hud .title { font-size:13px; }
+      #hud .chips { display:none; }
+      #card { width:100%; max-width:100%; }
+      .pin .ico { width:50px; height:50px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="hud">
+    <div class="title">山海经 · 异兽图鉴<small>平面舆图 · 点标记查看异兽</small></div>
+    <div class="prog" id="prog">已解锁 0 / 0</div>
+    <div class="spacer"></div>
+    <div class="chips" id="chips"></div>
+    <a class="link3d" href="shanhaijing.html">3D 版 ↗</a>
+  </div>
+
+  <div id="mapWrap">
+    <!-- 平面古地图底图（自绘 SVG）：上北下南左西右东，中居中山经，外环大荒 -->
+    <svg class="basemap" viewBox="0 0 1000 760" xmlns="http://www.w3.org/2000/svg" aria-label="山海经平面舆图">
+      <defs>
+        <radialGradient id="paper" cx="50%" cy="46%" r="70%">
+          <stop offset="0%" stop-color="#f5ecd4"/>
+          <stop offset="70%" stop-color="#ecdcb8"/>
+          <stop offset="100%" stop-color="#e0cd9f"/>
+        </radialGradient>
+        <linearGradient id="water" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#bcd6e0"/>
+          <stop offset="100%" stop-color="#a6c6d4"/>
+        </linearGradient>
+      </defs>
+
+      <rect x="0" y="0" width="1000" height="760" rx="14" fill="url(#paper)"/>
+      <!-- 外缘双框 -->
+      <rect x="14" y="14" width="972" height="732" rx="10" fill="none" stroke="#b08948" stroke-width="3"/>
+      <rect x="24" y="24" width="952" height="712" rx="8" fill="none" stroke="#b08948" stroke-width="1" opacity=".6"/>
+
+      <!-- 外环：海外 · 大荒 -->
+      <circle cx="500" cy="380" r="330" fill="none" stroke="#b08948" stroke-width="1.6" stroke-dasharray="6 8" opacity=".75"/>
+      <text x="500" y="58" text-anchor="middle" font-size="22" fill="#7a5a2c" font-weight="700" letter-spacing="6">海 外 · 大 荒</text>
+
+      <!-- 中心：中山经 -->
+      <circle cx="500" cy="380" r="96" fill="#f0e3c2" stroke="#9c7a3e" stroke-width="2"/>
+      <circle cx="500" cy="380" r="96" fill="none" stroke="#9c7a3e" stroke-width="1" stroke-dasharray="3 5" opacity=".5"/>
+      <text x="500" y="376" text-anchor="middle" font-size="20" fill="#5a3e1e" font-weight="700">中山经</text>
+      <text x="500" y="398" text-anchor="middle" font-size="12" fill="#8a6d3b">五藏山经 · 中枢</text>
+
+      <!-- 四方山经区块 -->
+      <g font-size="17" font-weight="700" fill="#5a3e1e">
+        <!-- 北（上） -->
+        <path d="M500 96 L560 150 L440 150 Z" fill="#e7d3a6" stroke="#9c7a3e" stroke-width="1.5"/>
+        <text x="500" y="138" text-anchor="middle" font-size="15">北山经</text>
+        <!-- 南（下） -->
+        <path d="M500 664 L560 610 L440 610 Z" fill="#e7d3a6" stroke="#9c7a3e" stroke-width="1.5"/>
+        <text x="500" y="644" text-anchor="middle" font-size="15">南山经</text>
+        <!-- 西（左） -->
+        <path d="M150 380 L210 330 L210 430 Z" fill="#e7d3a6" stroke="#9c7a3e" stroke-width="1.5"/>
+        <text x="186" y="385" text-anchor="middle" font-size="15">西山经</text>
+        <!-- 东（右） -->
+        <path d="M850 380 L790 330 L790 430 Z" fill="#e7d3a6" stroke="#9c7a3e" stroke-width="1.5"/>
+        <text x="814" y="385" text-anchor="middle" font-size="15">东山经</text>
+      </g>
+
+      <!-- 山脉剪影（装饰） -->
+      <g fill="#c2a36b" opacity=".75" stroke="#9c7a3e" stroke-width="1">
+        <path d="M250 470 l30 -50 l26 40 l24 -58 l30 52 l22 -34 l26 46 Z"/>
+        <path d="M700 250 l28 -46 l24 38 l26 -54 l28 48 l20 -30 l24 42 Z"/>
+        <path d="M360 600 l24 -40 l22 32 l20 -46 l26 40 l18 -26 l22 38 Z"/>
+      </g>
+
+      <!-- 河流（贝塞尔） -->
+      <g fill="none" stroke="url(#water)" stroke-width="6" stroke-linecap="round" opacity=".9">
+        <path d="M500 476 C460 540 560 580 520 660"/>
+        <path d="M500 284 C540 220 440 190 480 110"/>
+        <path d="M404 380 C320 360 280 420 200 400"/>
+        <path d="M596 380 C680 400 720 340 800 360"/>
+      </g>
+
+      <!-- 方位文字（细） -->
+      <g font-size="13" fill="#8a6d3b" opacity=".8" text-anchor="middle">
+        <text x="500" y="86">北</text>
+        <text x="500" y="700">南</text>
+        <text x="120" y="384">西</text>
+        <text x="884" y="384">东</text>
+      </g>
+
+      <!-- 指南针（右上） -->
+      <g transform="translate(905,70)">
+        <circle r="22" fill="#f5ecd4" stroke="#9c7a3e" stroke-width="1.5"/>
+        <path d="M0 -16 L5 0 L0 16 L-5 0 Z" fill="#e23b2b"/>
+        <path d="M0 -16 L5 0 L0 0 Z" fill="#b01818"/>
+        <text x="0" y="-26" text-anchor="middle" font-size="11" fill="#5a3e1e" font-weight="700">北</text>
+      </g>
+    </svg>
+
+    <div id="pins"></div>
+  </div>
+
+  <div id="legend">
+    <b>说明：</b>地图按《山海经》结构绘制——中心<b>中山经</b>，四方<b>南/西/北/东</b>山经环绕，外环为<b>海外·大荒</b>。标记为代表性异兽，点击查看自绘立绘、原文、白话与形象解读。进度自动保存在本机。
+  </div>
+
+  <div id="hint">点击地图上的发光标记，查看异兽详情</div>
+
+  <!-- 异兽卡 -->
+  <div id="card">
+    <div class="c-head">
+      <div class="c-svg" id="cSvg"></div>
+      <div class="c-name">
+        <h2 id="cName">—</h2>
+        <div class="py" id="cPy"></div>
+        <span class="tag" id="cTag"></span>
+      </div>
+      <button class="c-close" onclick="closeCard()">✕</button>
+    </div>
+    <div class="c-body" id="cBody"></div>
+    <div class="c-foot">原文取自权威本；白话/解读为整理说明，非逐字译文。</div>
+  </div>
+
+  <script src="shanhaijing-data.js?v=1"></script>
+  <script>
+    var DATA = window.SHANHAIJING;
+    if (!DATA || !DATA.creatures) {
+      document.getElementById('mapWrap').innerHTML = '<p style="padding:40px;text-align:center;color:#8a6d3b">数据加载失败</p>';
+      throw new Error('no data');
+    }
+
+    // 平面坐标（百分比，相对 #pins 容器）：上北下南左西右东
+    var MAP2D = {
+      jiuweihu: [64, 78],   // 南山经 → 下方偏东
+      fenghuang: [42, 84],  // 南山经 → 下方偏中
+      jingwei:  [33, 24]    // 北山经 → 上方偏西
+    };
+
+    // 解锁进度（平面版独立存储）
+    var STORE = 'shj2d_unlocked_v1';
+    var unlocked = [];
+    try { unlocked = JSON.parse(localStorage.getItem(STORE) || '[]'); } catch (e) { unlocked = []; }
+    function saveUnlocked() { try { localStorage.setItem(STORE, JSON.stringify(unlocked)); } catch (e) {} }
+
+    var actx = null;
+    function chime() {
+      try {
+        actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+        if (actx.state === 'suspended') actx.resume();
+        var scale = [261.63, 293.66, 329.63, 392.00, 440.00]; // 宫商角徵羽
+        var f = scale[Math.floor(Math.random() * scale.length)];
+        var o = actx.createOscillator(), g = actx.createGain();
+        o.type = 'triangle'; o.frequency.value = f;
+        var t = actx.currentTime;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.25, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+        o.connect(g).connect(actx.destination);
+        o.start(t); o.stop(t + 0.95);
+      } catch (e) {}
+    }
+
+    // 生成 pin
+    var pinsBox = document.getElementById('pins');
+    var chipsBox = document.getElementById('chips');
+    DATA.creatures.forEach(function (c) {
+      var pos = MAP2D[c.id] || [50, 50];
+      var btn = document.createElement('button');
+      btn.className = 'pin' + (unlocked.indexOf(c.id) >= 0 ? ' done' : '');
+      btn.style.left = pos[0] + '%';
+      btn.style.top = pos[1] + '%';
+      btn.setAttribute('data-id', c.id);
+      btn.innerHTML = '<span class="glow"></span><span class="ico">' + c.svg + '</span><span class="lbl">' + c.name + '</span>';
+      btn.onclick = function () { openCard(c.id); };
+      pinsBox.appendChild(btn);
+
+      var chip = document.createElement('span');
+      chip.className = 'chip' + (unlocked.indexOf(c.id) >= 0 ? ' done' : '');
+      chip.textContent = c.name;
+      chip.setAttribute('data-id', c.id);
+      chip.onclick = function () { openCard(c.id); };
+      chipsBox.appendChild(chip);
+    });
+
+    function updateProgress() {
+      document.getElementById('prog').textContent = '已解锁 ' + unlocked.length + ' / ' + DATA.creatures.length;
+      var chips = chipsBox.querySelectorAll('.chip');
+      chips.forEach(function (ch) {
+        ch.classList.toggle('done', unlocked.indexOf(ch.getAttribute('data-id')) >= 0);
+      });
+      var pins = pinsBox.querySelectorAll('.pin');
+      pins.forEach(function (p) {
+        p.classList.toggle('done', unlocked.indexOf(p.getAttribute('data-id')) >= 0);
+      });
+    }
+    updateProgress();
+
+    var card = document.getElementById('card');
+    function openCard(id) {
+      var c = null;
+      DATA.creatures.forEach(function (x) { if (x.id === id) c = x; });
+      if (!c) return;
+      document.getElementById('cSvg').innerHTML = c.svg;
+      document.getElementById('cName').textContent = c.name;
+      document.getElementById('cPy').textContent = c.pinyin || '';
+      document.getElementById('cTag').textContent = c.region || '';
+      document.getElementById('cBody').innerHTML =
+        '<h3>原文</h3><div class="orig">' + (c.original || '') + '</div>' +
+        '<h3>白话</h3><p>' + (c.baihua || '') + '</p>' +
+        '<h3>形象解读</h3><p>' + (c.note || '') + '</p>';
+      card.classList.add('open');
+      if (unlocked.indexOf(id) < 0) {
+        unlocked.push(id);
+        saveUnlocked();
+        updateProgress();
+        chime();
+      }
+    }
+    window.closeCard = function () { card.classList.remove('open'); };
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeCard(); });
+  </script>
+</body>
+</html>
