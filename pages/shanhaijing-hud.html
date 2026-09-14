@@ -565,10 +565,18 @@
 
     // 右侧大地图缩放/平移
     const mapState = { scale: 1, x: 0, y: 0 };
+    const MAP_W = 100;  // viewBox 基准宽高
+    function clampMap() {
+      // 可视区域大小 = 100/scale；限制视窗原点在 [0 - span, span] 之内，保证地图不被拖出视野
+      const span = MAP_W - MAP_W / mapState.scale;
+      mapState.x = Math.max(0, Math.min(span, mapState.x));
+      mapState.y = Math.max(0, Math.min(span, mapState.y));
+    }
     function applyMapTransform() {
+      clampMap();
       const svg = document.getElementById('mapSvg');
       svg.setAttribute('viewBox',
-        (0 - mapState.x) + ' ' + (0 - mapState.y) + ' ' + (100 / mapState.scale) + ' ' + (100 / mapState.scale));
+        (0 - mapState.x) + ' ' + (0 - mapState.y) + ' ' + (MAP_W / mapState.scale) + ' ' + (MAP_W / mapState.scale));
     }
     window.zoomMap = function (k) {
       mapState.scale = Math.max(1, Math.min(4, mapState.scale * k));
@@ -591,9 +599,9 @@
       body.addEventListener('pointermove', e => {
         if (!dragging) return;
         const rect = svg.getBoundingClientRect();
-        const dx = (e.clientX - lx) / rect.width * (100 / mapState.scale);
-        const dy = (e.clientY - ly) / rect.height * (100 / mapState.scale);
-        mapState.x -= dx; mapState.y -= dy; lx = e.clientX; ly = e.clientY;
+        const dx = (e.clientX - lx) / rect.width * (MAP_W / mapState.scale);
+        const dy = (e.clientY - ly) / rect.height * (MAP_W / mapState.scale);
+        mapState.x += dx; mapState.y += dy; lx = e.clientX; ly = e.clientY;
         applyMapTransform();
       });
     })();
