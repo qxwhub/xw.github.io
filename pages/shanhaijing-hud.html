@@ -24,51 +24,44 @@
     #hud .prog { font-size:11px; background:#eef6ef; color:#15803d; border:1px solid #bbf0c8;
       padding:3px 9px; border-radius:999px; white-space:nowrap; font-weight:600; }
     #hud .spacer { flex:1; }
-    #hud .chips { display:flex; gap:5px; flex-wrap:wrap; }
-    #hud .chip { font-size:11px; color:#374151; background:rgba(31,41,55,.06); border:1px solid rgba(31,41,55,.12);
-      padding:3px 8px; border-radius:999px; cursor:pointer; transition:all .15s; white-space:nowrap; }
-    #hud .chip:hover { background:rgba(31,41,55,.12); }
-    #hud .chip.done { background:#dcfce7; border-color:#86efac; color:#15803d; }
+    /* D-Pad 方向按钮（右下） */
+    #dpad { position:fixed; right:24px; bottom:26px; z-index:25; width:160px; height:160px;
+      display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr);
+      gap:4px; }
+    #dpad .dpad-btn { border:1px solid rgba(31,41,55,.18);
+      background:rgba(255,255,255,.58); backdrop-filter:blur(4px); color:#374151;
+      font-size:22px; font-weight:700; cursor:pointer; user-select:none;
+      box-shadow:0 2px 8px rgba(0,0,0,.12); transition:all .08s; border-radius:12px; }
+    #dpad .dpad-btn:active, #dpad .dpad-btn.hold {
+      background:rgba(20,184,166,.85); color:#fff; transform:scale(0.92); box-shadow:inset 0 2px 6px rgba(0,0,0,.25); }
+    #dpad .up    { grid-column:2; grid-row:1; }
+    #dpad .down  { grid-column:2; grid-row:3; }
+    #dpad .left  { grid-column:1; grid-row:2; }
+    #dpad .right { grid-column:3; grid-row:2; }
+    #dpad .center{ grid-column:2; grid-row:2; font-size:18px; background:rgba(47,174,106,.75); color:#fff; }
+    #dpad .center:active, #dpad .center.hold { background:rgba(22,163,74,.95); transform:scale(0.92); }
 
-    .iconBtn { display:inline-flex; align-items:center; gap:4px; border:1px solid rgba(31,41,55,.14);
-      background:rgba(255,255,255,.88); border-radius:999px; padding:4px 10px; font-size:11px; color:#374151;
-      cursor:pointer; transition:all .15s; }
-    .iconBtn:hover { background:#fff; }
-    .iconBtn svg { width:14px; height:14px; }
+    /* 摇杆 —— 默认显示（直接进探索模式） */
+    #joystick { position:fixed; left:24px; bottom:26px; z-index:25; width:120px; height:120px; border-radius:50%;
+      background:rgba(255,255,255,.55); border:2px solid rgba(31,41,55,.18); box-shadow:0 4px 16px rgba(0,0,0,.12);
+      touch-action:none; display:block; }
+    #joystick .knob { position:absolute; left:50%; top:50%; width:54px; height:54px; margin:-27px 0 0 -27px; border-radius:50%;
+      background:rgba(20,184,166,.85); border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,.22); }
 
-    .modeBar { display:flex; align-items:center; gap:4px; background:rgba(31,41,55,.06); border:1px solid rgba(31,41,55,.1);
-      border-radius:999px; padding:3px; }
-    .modeBar .modeBtn { border:none; background:transparent; border-radius:999px; padding:3px 10px; font-size:11px;
-      color:#4b5563; cursor:pointer; transition:all .15s; white-space:nowrap; }
-    .modeBar .modeBtn.on { background:#fff; color:#0f766e; box-shadow:0 1px 4px rgba(0,0,0,.1); font-weight:700; }
-    .modeBar .modeBtn:disabled { opacity:.45; cursor:not-allowed; }
-
-    .envBtn { width:30px; height:30px; border-radius:50%; border:1px solid rgba(31,41,55,.14);
-      background:rgba(255,255,255,.88); display:flex; align-items:center; justify-content:center;
-      cursor:pointer; transition:all .15s; }
-    .envBtn:hover { background:#fff; }
-    .envBtn svg { width:16px; height:16px; }
-    .envBtn.on { background:#ccfbf1; border-color:#99f6e4; color:#0f766e; }
-
-    #envPanel { position:fixed; top:48px; right:10px; width:220px; z-index:31;
-      background:rgba(255,255,255,.96); border:1px solid rgba(31,41,55,.12); border-radius:14px;
-      box-shadow:0 10px 40px rgba(31,41,55,.2); padding:12px 14px; transform:translateX(120%);
-      transition:transform .3s cubic-bezier(.22,.61,.36,1); }
-    #envPanel.show { transform:translateX(0); }
-    #envPanel .env-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-    #envPanel .env-row:last-child { margin-bottom:0; }
-    #envPanel label { font-size:11px; color:#4b5563; }
-    #envPanel input[type=range] { width:100%; margin:6px 0; }
-    #envPanel .timeVal { font-size:12px; font-weight:700; color:#1f2937; min-width:44px; text-align:right; }
-    #envPanel .weatherGroup { display:flex; gap:5px; }
-    #envPanel .weatherGroup button { flex:1; border:1px solid rgba(31,41,55,.12); background:#f8fafc;
-      border-radius:8px; padding:4px 0; font-size:11px; color:#4b5563; cursor:pointer; }
-    #envPanel .weatherGroup button.on { background:#e0f2fe; border-color:#7dd3fc; color:#0369a1; font-weight:700; }
-    #envPanel .toggle { position:relative; width:36px; height:20px; border-radius:999px; background:#d1d5db; cursor:pointer; transition:background .2s; }
-    #envPanel .toggle.on { background:#2fae6a; }
-    #envPanel .toggle::after { content:''; position:absolute; left:2px; top:2px; width:16px; height:16px; border-radius:50%;
+    /* mapPanel 底部环境条（时间/天气/音效） */
+    #mapPanel .mp-env { padding:6px 10px; border-top:1px solid #eef0f2; background:#fafbfc; }
+    #mapPanel .mp-env .env-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-size:11px; color:#4b5563; }
+    #mapPanel .mp-env label { font-size:11px; color:#6b7280; white-space:nowrap; }
+    #mapPanel .mp-env .timeVal { font-size:12px; font-weight:700; color:#1f2937; min-width:44px; font-variant-numeric:tabular-nums; }
+    #mapPanel .mp-env .weatherGroup { display:flex; gap:4px; }
+    #mapPanel .mp-env .weatherGroup button { border:1px solid rgba(31,41,55,.12); background:#fff;
+      border-radius:6px; padding:2px 10px; font-size:11px; color:#4b5563; cursor:pointer; }
+    #mapPanel .mp-env .weatherGroup button.on { background:#e0f2fe; border-color:#7dd3fc; color:#0369a1; font-weight:700; }
+    #mapPanel .mp-env .toggle { position:relative; width:32px; height:18px; border-radius:999px; background:#d1d5db; cursor:pointer; transition:background .2s; flex-shrink:0; }
+    #mapPanel .mp-env .toggle.on { background:#2fae6a; }
+    #mapPanel .mp-env .toggle::after { content:''; position:absolute; left:2px; top:2px; width:14px; height:14px; border-radius:50%;
       background:#fff; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
-    #envPanel .toggle.on::after { transform:translateX(16px); }
+    #mapPanel .mp-env .toggle.on::after { transform:translateX(14px); }
 
     #hint { position:fixed; bottom:14px; left:0; right:0; z-index:20; text-align:center; color:#374151;
       font-size:12px; opacity:.85; pointer-events:none;
@@ -123,22 +116,13 @@
       font-size:13px; color:#14532d; line-height:1.9; }
     #card .c-foot { padding:10px 18px 16px; border-top:1px solid #eef0f2; font-size:11px; color:#9ca3af; }
 
-    #joystick { position:fixed; left:24px; bottom:26px; z-index:25; width:120px; height:120px; border-radius:50%;
-      background:rgba(255,255,255,.55); border:2px solid rgba(31,41,55,.18); box-shadow:0 4px 16px rgba(0,0,0,.12);
-      display:none; touch-action:none; }
-    #joystick.show { display:block; }
-    #joystick .knob { position:absolute; left:50%; top:50%; width:54px; height:54px; margin:-27px 0 0 -27px; border-radius:50%;
-      background:rgba(20,184,166,.85); border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,.22); }
-
-    #walkTip { position:fixed; left:50%; bottom:16px; transform:translateX(-50%); z-index:26; display:none;
+    #walkTip { position:fixed; left:50%; bottom:16px; transform:translateX(-50%); z-index:26;
       background:rgba(255,255,255,.93); border:1px solid rgba(31,41,55,.14); border-radius:999px; padding:7px 18px;
       font-size:12px; color:#374151; box-shadow:0 4px 16px rgba(0,0,0,.12); white-space:nowrap; max-width:94vw; }
-    #walkTip.show { display:block; }
 
-    #nearTip { position:fixed; left:50%; bottom:86px; transform:translateX(-50%); z-index:26; display:none;
+    #nearTip { position:fixed; left:50%; bottom:86px; transform:translateX(-50%); z-index:26;
       background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; border-radius:999px; padding:8px 18px; font-size:13px;
       box-shadow:0 6px 20px rgba(0,0,0,.14); cursor:pointer; font-weight:700; white-space:nowrap; }
-    #nearTip.show { display:block; }
 
     #loading { position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center;
       background:#dfeef7; color:#475569; font-size:14px; }
@@ -146,7 +130,6 @@
 
     @media (max-width:560px) {
       #hud .title { font-size:14px; }
-      #hud .chips { display:none; }
       #card { width:100%; max-width:100%; }
       #miniMap { width:106px; height:106px; }
     }
@@ -157,29 +140,26 @@
 
   <div id="hud">
     <div class="hud-left">
-      <button class="iconBtn" id="backBtn" onclick="backToOverview()" title="返回总览">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        总览
-      </button>
       <div class="title">山海世界<small>山海经 · 试作 Demo</small></div>
       <div class="prog" id="prog">已发现 0 / 0</div>
     </div>
     <div class="spacer"></div>
-    <div class="hud-right">
-      <div class="modeBar">
-        <button class="modeBtn" id="exploreBtn" onclick="toggleWalk()">探索</button>
-        <button class="modeBtn" id="viewBtn" onclick="toggleView()" disabled>视角</button>
-      </div>
-      <button class="envBtn" id="envBtn" onclick="toggleEnvPanel()" title="环境">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-      </button>
-    </div>
-    <div class="chips" id="chips"></div>
+    <div class="hud-right"></div>
   </div>
 
-  <div id="hint">拖拽旋转 · 滚轮缩放 · 右上角地图点开放大 · 点击发光点发现异兽草木</div>
+  <div id="hint">D-Pad / WASD 走路 · 鼠标按住画面拖动转视角 · Shift 奔跑 · 点击地点传送过去 · 靠近异兽按 E 或点它</div>
 
   <div id="joystick"><div class="knob"></div></div>
+
+  <!-- D-Pad 方向按钮 -->
+  <div id="dpad">
+    <button class="dpad-btn up" data-key="w">▲</button>
+    <button class="dpad-btn left" data-key="a">◀</button>
+    <button class="dpad-btn center" id="runBtn" data-key="shift">🏃</button>
+    <button class="dpad-btn right" data-key="d">▶</button>
+    <button class="dpad-btn down" data-key="s">▼</button>
+  </div>
+
   <div id="walkTip">W A S D / 方向键 走路 · 按住空白处拖动转视角 · Shift 加速 · 靠近活物点它或按 E 查看</div>
   <div id="nearTip" onclick="viewNear()"></div>
 
@@ -201,27 +181,20 @@
     <div class="mp-body" id="mpBody">
       <svg id="mapSvg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"></svg>
     </div>
-    <div class="mp-foot">滚轮 / 双指缩放（以光标为中心）· 拖拽平移 · 点击地点飞入该处</div>
-  </div>
-
-  <div id="envPanel">
-    <div class="env-row">
-      <label>时间 <span id="timeVal" class="timeVal">12:00</span></label>
-      <div class="toggle" id="autoTimeToggle" onclick="toggleAutoTime()"></div>
-    </div>
-    <input type="range" id="timeSlider" min="0" max="24" step="0.05" value="12" oninput="setTimeOfDay(this.value)">
-    <div class="env-row" style="margin-top:8px">
-      <label>天气</label>
-      <div class="weatherGroup">
-        <button id="wClear" class="on" onclick="setWeather('clear')">晴</button>
-        <button id="wRain" onclick="setWeather('rain')">雨</button>
-        <button id="wSnow" onclick="setWeather('snow')">雪</button>
+    <div class="mp-env">
+      <div class="env-row">
+        <label>时间 <span id="timeVal" class="timeVal">—:—</span></label>
+        <label>天气</label>
+        <div class="weatherGroup">
+          <button id="wClear" class="on" onclick="setWeather('clear')">晴</button>
+          <button id="wRain" onclick="setWeather('rain')">雨</button>
+          <button id="wSnow" onclick="setWeather('snow')">雪</button>
+        </div>
+        <label>音效</label>
+        <div class="toggle" id="soundToggle" onclick="toggleSound()"></div>
       </div>
     </div>
-    <div class="env-row" style="margin-top:8px">
-      <label>自然音效</label>
-      <div class="toggle" id="soundToggle" onclick="toggleSound()"></div>
-    </div>
+    <div class="mp-foot">滚轮 / 双指缩放（以光标为中心）· 拖拽平移 · 点击地点飞入该处</div>
   </div>
 
   <div id="card">
@@ -240,7 +213,7 @@
 
   <div id="loading">正在加载山海世界…（需联网加载 3D 库）</div>
 
-  <script src="shanhaijing-map.js?v=2"></script>
+  <script src="shanhaijing-map.js?v=20260914"></script>
   <script type="importmap">
   {
     "imports": {
@@ -277,7 +250,8 @@
     let waterGeo = null, waterBase = null, water = null;
     let actx = null;
     let weatherSystem = null, weatherType = 'clear';
-    let timeOfDay = 12, autoTime = false;
+    const _now = new Date();
+    let timeOfDay = _now.getHours() + _now.getMinutes() / 60;
     let soundOn = false;
     let audioNodes = { master: null, wind: null, rain: null, water: null, birdInt: null, windGain: null, rainGain: null, waterGain: null };
 
@@ -376,9 +350,40 @@
       window.addEventListener('resize', onResize);
 
       buildMiniMap();
-      buildChips();
       updateProgress();
       document.getElementById('loading').classList.add('hide');
+      // 直接进入探索模式（和平精英式）
+      setWalk(true);
+
+      // 时间跟随真实系统时间
+      applyTime();
+      document.getElementById('timeVal').textContent = formatTime(timeOfDay);
+      setInterval(() => {
+        const d = new Date();
+        const real = d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600;
+        let diff = real - timeOfDay;
+        // 处理跨天
+        if (diff > 12) diff -= 24;
+        if (diff < -12) diff += 24;
+        if (Math.abs(diff) > 0.003) setTimeOfDay(real);
+      }, 1000);
+
+      // 初始化随机天气 + 运行中随机切换
+      const randTypes = ['clear', 'clear', 'rain', 'snow']; // clear 权重高一点
+      setWeather(randTypes[Math.floor(Math.random() * randTypes.length)]);
+      function scheduleWeather() {
+        const delay = 30000 + Math.random() * 150000; // 30~180 秒
+        setTimeout(() => {
+          if (Math.random() < 0.25) { // 25% 概率变天
+            let next;
+            do { next = randTypes[Math.floor(Math.random() * randTypes.length)]; } while (next === weatherType && randTypes.length > 1);
+            setWeather(next);
+          }
+          scheduleWeather();
+        }, delay);
+      }
+      scheduleWeather();
+
       animate();
     }
 
@@ -1047,24 +1052,11 @@
       scene.add(player.root);
     }
 
-    function updateModeUI() {
-      const ex = document.getElementById('exploreBtn');
-      const vi = document.getElementById('viewBtn');
-      ex.classList.toggle('on', walkMode);
-      ex.textContent = walkMode ? '退出' : '探索';
-      vi.disabled = !walkMode;
-      vi.textContent = firstPerson ? '第一人称' : '第三人称';
-      document.getElementById('joystick').classList.toggle('show', walkMode);
-      document.getElementById('walkTip').classList.toggle('show', walkMode);
-      document.getElementById('hint').style.display = walkMode ? 'none' : '';
-      document.getElementById('miniMap').style.display = walkMode ? 'none' : '';
-    }
     function setWalk(on) {
       if (walkMode === on) return;
       walkMode = on;
       if (walkMode) {
         if (document.getElementById('mapPanel').classList.contains('show')) togglePanel(false);
-        if (document.getElementById('envPanel').classList.contains('show')) toggleEnvPanel();
         player.root.visible = true;
         const tgt = controls.target;
         const px = tgt.x, pz = tgt.z + 8;
@@ -1076,19 +1068,16 @@
         firstPerson = false;
         player.root.visible = false;
         controls.enabled = true;
-        controls.target.set(0, 4, 0);
-        camera.position.set(0, 95, 185);
         nearFind = null;
         document.getElementById('nearTip').classList.remove('show');
       }
-      updateModeUI();
+      // UI 同步（直接探索模式：摇杆/D-Pad/迷你地图/walkTip 全部显示）
+      document.getElementById('joystick').style.display = walkMode ? 'block' : 'none';
+      document.getElementById('dpad').style.display = walkMode ? 'grid' : 'none';
+      document.getElementById('walkTip').classList.toggle('show', walkMode);
+      document.getElementById('hint').style.display = walkMode ? 'none' : '';
+      document.getElementById('miniMap').style.display = walkMode ? '' : 'none';
     }
-    window.toggleWalk = function () { setWalk(!walkMode); };
-    window.toggleView = function () {
-      if (!walkMode) return;
-      firstPerson = !firstPerson;
-      updateModeUI();
-    };
 
     function lerpAngle(a, b, k) {
       let d = ((b - a) % (Math.PI * 2) + Math.PI * 3) % (Math.PI * 2) - Math.PI;
@@ -1186,26 +1175,53 @@
       el.addEventListener('pointercancel', () => { joy.active = false; setKnob(0, 0); });
     })();
 
+    // D-Pad 按钮 → keys 状态（鼠标/触屏按下持续移动，松开停止）
+    (function bindDPad() {
+      document.querySelectorAll('#dpad .dpad-btn').forEach(btn => {
+        const key = btn.dataset.key;
+        const start = e => {
+          e.preventDefault();
+          try { btn.setPointerCapture(e.pointerId); } catch(err){}
+          keys[key] = true;
+          btn.classList.add('hold');
+        };
+        const end = () => { keys[key] = false; btn.classList.remove('hold'); };
+        btn.addEventListener('pointerdown', start);
+        btn.addEventListener('pointerup', end);
+        btn.addEventListener('pointercancel', end);
+        btn.addEventListener('pointerleave', end);
+      });
+    })();
+
+    // 键盘输入 → keys 状态 + D-Pad hold 反馈
+    function dpBtnHold(key, on) {
+      const b = document.querySelector('#dpad .dpad-btn[data-key="' + key + '"]');
+      if (b) b.classList.toggle('hold', on);
+    }
     window.addEventListener('keydown', e => {
       const k = (e.key || '').toLowerCase();
-      if (k === 'shift') keys['shift'] = true;
-      if (walkMode && (k === 'w' || k === 'a' || k === 's' || k === 'd' || k.indexOf('arrow') === 0)) {
+      if (k === 'shift') { keys['shift'] = true; dpBtnHold('shift', true); }
+      const kMap = { w:'w', a:'a', s:'s', d:'d', arrowup:'w', arrowleft:'a', arrowdown:'s', arrowright:'d' };
+      if (kMap[k]) {
         e.preventDefault();
-        keys[k] = true;
+        keys[kMap[k]] = true;
+        dpBtnHold(kMap[k], true);
       }
       if (walkMode && k === 'e') viewNear();
     });
     window.addEventListener('keyup', e => {
       const k = (e.key || '').toLowerCase();
-      if (k === 'shift') keys['shift'] = false;
-      keys[k] = false;
+      if (k === 'shift') { keys['shift'] = false; dpBtnHold('shift', false); }
+      const kMap = { w:'w', a:'a', s:'s', d:'d', arrowup:'w', arrowleft:'a', arrowdown:'s', arrowright:'d' };
+      if (kMap[k]) { keys[kMap[k]] = false; dpBtnHold(kMap[k], false); }
     });
+
     (function bindLook() {
       let lx = 0, ly = 0, drag = false;
       window.addEventListener('pointerdown', e => {
         if (!walkMode) return;
         const el = e.target;
-        if (el && el.closest && el.closest('#joystick,#card,#exploreBtn,#viewBtn,#envBtn,#envPanel,#backBtn,#miniMap,#mapPanel,#nearTip,#hud')) return;
+        if (el && el.closest && el.closest('#joystick,#dpad,#card,#miniMap,#mapPanel,#nearTip,#hud')) return;
         drag = true; lx = e.clientX; ly = e.clientY;
       });
       window.addEventListener('pointerup', () => { drag = false; });
@@ -1321,31 +1337,22 @@
       }
     }
 
-    let flying = false;
-    const camPos = new THREE.Vector3(), camTar = new THREE.Vector3();
-    function flyTo(px, py, pz, tx, ty, tz) {
-      camPos.set(px, py, pz); camTar.set(tx, ty, tz); flying = true; controls.enabled = false;
-    }
-    function backToOverview() {
-      closeCard();
-      if (walkMode) setWalk(false);
-      flyTo(0, 95, 185, 0, 4, 0);
-    }
-    window.backToOverview = backToOverview;
-
     function selectFind(f) {
-      const p = f._orb.getWorldPosition(new THREE.Vector3());
-      if (!walkMode) flyTo(p.x + 16, p.y + 10, p.z + 26, p.x, p.y, p.z);
       openCard(f);
       if (unlocked.indexOf(f.id) < 0) {
         unlocked.push(f.id); saveUnlocked(unlocked);
-        updateProgress(); buildChips(); chime(true);
+        updateProgress(); chime(true);
       } else { chime(false); }
     }
     function flyToPlace(id) {
+      // 大地图点击地点 → 人物传送过去（和平精英式）
       const pc = PLACE_POS[id];
       const gy = terrainHeight(pc.x, pc.z);
-      flyTo(pc.x + 4, gy + 62, pc.z + 95, pc.x, gy + 6, pc.z);
+      // 直接把人物放到目标点旁 8 单位处
+      player.root.position.set(pc.x + 6, gy, pc.z + 10);
+      player.root.rotation.y = Math.atan2(6, 10);
+      yaw = Math.atan2(-6, -10);
+      pitch = -0.22;
     }
 
     // ---------- 卡片 ----------
@@ -1369,18 +1376,6 @@
       const total = DATA.places.reduce((n, p) => n + p.finds.length, 0);
       document.getElementById('prog').textContent = '已发现 ' + unlocked.length + ' / ' + total;
     }
-    function buildChips() {
-      const box = document.getElementById('chips');
-      box.innerHTML = '';
-      DATA.places.forEach(p => p.finds.forEach(f => {
-        const b = document.createElement('button');
-        b.className = 'chip' + (unlocked.indexOf(f.id) >= 0 ? ' done' : '');
-        b.textContent = f.name;
-        b.onclick = () => selectFind(f);
-        box.appendChild(b);
-      }));
-    }
-
     // ---------- 舆图 ----------
     const typeColorHex = { '兽': '#ff8a3c', '鸟': '#3aa0ff', '草': '#36c46a', '木': '#b07a3a' };
     function svgEl(tag, attrs) {
@@ -1646,15 +1641,10 @@
     window.setTimeOfDay = function (v) {
       timeOfDay = parseFloat(v);
       if (timeOfDay >= 24) timeOfDay = 0;
-      document.getElementById('timeSlider').value = timeOfDay;
-      document.getElementById('timeVal').textContent = formatTime(timeOfDay);
+      if (timeOfDay < 0) timeOfDay += 24;
+      const tv = document.getElementById('timeVal');
+      if (tv) tv.textContent = formatTime(timeOfDay);
       applyTime();
-    };
-    window.toggleAutoTime = function () {
-      autoTime = !autoTime;
-      const el = document.getElementById('autoTimeToggle');
-      el.classList.toggle('on', autoTime);
-      document.getElementById('timeSlider').disabled = autoTime;
     };
 
     function buildWeather(type) {
@@ -1793,12 +1783,6 @@
       if (soundOn) { ensureAudio(); initAudio(); updateAmbientGains(); }
       else if (actx && actx.state === 'running') actx.suspend();
     };
-    window.toggleEnvPanel = function () {
-      const p = document.getElementById('envPanel');
-      const show = !p.classList.contains('show');
-      p.classList.toggle('show', show);
-      if (show && document.getElementById('mapPanel').classList.contains('show')) togglePanel(false);
-    };
 
     // ---------- 音效 ----------
     function ensureAudio() {
@@ -1858,15 +1842,9 @@
         pos.needsUpdate = true;
         waterGeo.computeVertexNormals();
       }
-      if (autoTime) setTimeOfDay(timeOfDay + dt * 0.05);
       updateWeather(dt);
       if (walkMode) {
         updateWalk(dt);
-      } else if (flying) {
-        camera.position.lerp(camPos, 0.08);
-        controls.target.lerp(camTar, 0.08);
-        camera.lookAt(controls.target);
-        if (camera.position.distanceTo(camPos) < 1.2) { flying = false; controls.enabled = true; }
       } else {
         controls.update();
       }
