@@ -127,6 +127,22 @@
     padding:9px 0 5px; border-bottom:1px dashed var(--line); margin:2px 0 4px;
   }
   @media (max-width:900px){ #azRail{right:4px; padding:5px 2px;} #azRail button{width:17px; height:14px; font-size:10px;} }
+  .prog{
+    display:flex; align-items:center; gap:14px; margin-top:11px; flex-wrap:wrap;
+    background:#f1fbf5; border:1px solid #b8e6cb; border-radius:9px; padding:8px 13px;
+  }
+  .prog-main{display:flex; align-items:baseline; gap:6px; flex:0 0 auto;}
+  .prog-num{font-size:19px; font-weight:800; color:#15803d; letter-spacing:.3px;}
+  .prog-num b{font-size:23px;}
+  .prog-num #doneT{color:#4b7f5e; font-weight:600; font-size:14px;}  .prog-label{font-size:12px; color:#4b7f5e; font-weight:600;}
+  .prog-track{flex:1; min-width:120px; height:9px; background:#dff2e6; border-radius:99px; overflow:hidden;}
+  .prog-fill{height:100%; width:0; background:linear-gradient(90deg,#34d399,#16a34a); border-radius:99px; transition:width .25s;}
+  .prog-sub{font-size:12px; color:#4b7f5e; flex:0 0 auto;}
+  .prog-reset{background:#fff !important;}
+  @media (max-width:640px){
+    .prog{gap:9px; padding:7px 10px;} .prog-num{font-size:16px;} .prog-num b{font-size:19px;}
+    .prog-track{order:4; flex-basis:100%;} .prog-sub{font-size:11px;}
+  }
   footer{
     max-width:1280px; margin:0 auto; padding:0 24px 50px;
     color:var(--muted); font-size:12px; line-height:1.9;
@@ -144,7 +160,7 @@
 <header>
   <div class="wrap">
     <h1>C.K. Ogden · Basic English 850 核心词表 <small>Basic English: A General Introduction with Rules and Grammar, 1930</small></h1>
-    <div class="meta">全部 <b>850</b> 词 ＝ 操作词 <b>100</b> ＋ 通用名词 <b>400</b> ＋ 具体名词 <b>200</b> ＋ 性质词 <b>100</b> ＋ 反义性质词 <b>50</b>　｜　词表依据 Wiktionary “Basic English word list” 核校</div>
+    <div class="meta"><b>Basic English 850</b> ＝ 操作词 <b>100</b> ＋ 通用名词 <b>400</b> ＋ 具体名词 <b>200</b> ＋ 性质词 <b>100</b> ＋ 反义性质词 <b>50</b>（Ogden 原表，依据 Wiktionary “Basic English word list” 核校）　＋　四级补充 <b>3713</b> 词　｜　共 <b>4563</b> 词，达到大学英语四级水平</div>
     <div class="bar">
       <button class="eyeall" id="eyeAll" type="button" aria-pressed="false">
         <span class="i-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></span>
@@ -154,7 +170,15 @@
       <input id="q" type="search" placeholder="搜索：输入英文或中文，如 water / 水 / qual" autocomplete="off">
       <button class="tbtn" id="hideDone" type="button" aria-pressed="false">隐藏已记住</button>
       <button class="tbtn" id="resetDone" type="button">清空记录</button>
-      <span class="hint" id="doneCnt">已记住 0 / 850</span>
+    </div>
+    <div class="prog" id="progBar">
+      <div class="prog-main">
+        <span class="prog-num"><b id="doneN">0</b> / <span id="doneT">0</span></span>
+        <span class="prog-label">已记住</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+      <div class="prog-sub"><span id="progPct">0%</span> · 还剩 <span id="progLeft">0</span> 词没记</div>
+      <button class="tbtn prog-reset" id="resetDone2" type="button">清空记录</button>
       <span class="hint">Ogden 主张：这 850 词 + 简单规则，可替代约 2 万词</span>
     </div>
   </div>
@@ -1192,10 +1216,20 @@
     if (raw[w]) { done[w] = 1; words[i].classList.add('done'); }
   }
 
-  var doneCnt = document.getElementById('doneCnt');
+  var doneN = document.getElementById('doneN');
+  var doneT = document.getElementById('doneT');
+  var progFill = document.getElementById('progFill');
+  var progPct = document.getElementById('progPct');
+  var progLeft = document.getElementById('progLeft');
   function syncDone(){
     var n = Object.keys(done).length;
-    doneCnt.textContent = '已记住 ' + n + ' / ' + words.length;
+    var t = words.length;
+    var pct = t ? Math.round(n / t * 100) : 0;
+    doneN.textContent = n;
+    doneT.textContent = t;
+    progFill.style.width = pct + '%';
+    progPct.textContent = pct + '%';
+    progLeft.textContent = Math.max(0, t - n);
     STORE.set(KEY, done);
   }
   syncDone();
@@ -1221,14 +1255,15 @@
   applyHideDone();
   hideDone.addEventListener('click', function(){ hideDoneOn = !hideDoneOn; applyHideDone(); });
 
-  var resetDone = document.getElementById('resetDone');
-  resetDone.addEventListener('click', function(){
+  function doReset(){
     if (!Object.keys(done).length) return;
     if (!confirm('清空全部「已记住」标记？')) return;
     done = {};
     words.forEach(function(el){ el.classList.remove('done'); });
     syncDone();
-  });
+  }
+  document.getElementById('resetDone').addEventListener('click', doReset);
+  document.getElementById('resetDone2').addEventListener('click', doReset);
 })();
 </script>
 </body>
