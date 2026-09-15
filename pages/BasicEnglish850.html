@@ -39,6 +39,18 @@
   }
   .tbtn:hover{border-color:#c9ced6; background:#fafbfc;}
   .tbtn[aria-pressed="true"]{background:#e8f1fe; border-color:#b9d3fb; color:#1d4ed8; font-weight:600;}
+  .eyeall{
+    font:inherit; font-size:13px; font-weight:600; display:flex; align-items:center; gap:7px;
+    background:#111827; color:#fff; border:1px solid #111827; border-radius:9px;
+    padding:8px 14px; cursor:pointer; flex:0 0 auto; white-space:nowrap;
+    transition:background .12s, border-color .12s, color .12s;
+  }
+  .eyeall:hover{background:#1f2937;}
+  .eyeall svg{width:16px; height:16px;}
+  .eyeall .i-offq{display:none;}
+  .eyeall[aria-pressed="true"]{background:#fff; color:#1d4ed8; border-color:#b9d3fb;}
+  .eyeall[aria-pressed="true"] .i-on{display:none;}
+  .eyeall[aria-pressed="true"] .i-offq{display:block;}
   main{max-width:1280px; margin:0 auto; padding:20px 24px 60px;}
   section{margin-bottom:26px;}
   .sec-head{
@@ -112,12 +124,16 @@
     <h1>C.K. Ogden · Basic English 850 核心词表 <small>Basic English: A General Introduction with Rules and Grammar, 1930</small></h1>
     <div class="meta">全部 <b>850</b> 词 ＝ 操作词 <b>100</b> ＋ 通用名词 <b>400</b> ＋ 具体名词 <b>200</b> ＋ 性质词 <b>100</b> ＋ 反义性质词 <b>50</b>　｜　词表依据 Wiktionary “Basic English word list” 核校</div>
     <div class="bar">
+      <button class="eyeall" id="eyeAll" type="button" aria-pressed="false">
+        <span class="i-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></span>
+        <span class="i-offq"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M1 1l22 22"/></svg></span>
+        <span class="eyeall-txt">显示释义</span>
+      </button>
       <input id="q" type="search" placeholder="搜索：输入英文或中文，如 water / 水 / qual" autocomplete="off">
-      <span class="hint">Ogden 主张：这 850 词 + 简单规则，可替代约 2 万词</span>
-      <button class="tbtn" id="eyeAll" type="button">隐藏全部释义</button>
       <button class="tbtn" id="hideDone" type="button" aria-pressed="false">隐藏已记住</button>
       <button class="tbtn" id="resetDone" type="button">清空记录</button>
       <span class="hint" id="doneCnt">已记住 0 / 850</span>
+      <span class="hint">Ogden 主张：这 850 词 + 简单规则，可替代约 2 万词</span>
     </div>
   </div>
 </header>
@@ -1059,9 +1075,10 @@
   if (STORE.get(KEY_HIDE, false)) document.body.classList.add('hide-all-zh');
 
   var eyeAll = document.getElementById('eyeAll');
+  var eyeAllTxt = eyeAll.querySelector('.eyeall-txt');
   function syncEyeAll(){
     var on = document.body.classList.contains('hide-all-zh');
-    eyeAll.textContent = on ? '显示全部释义' : '隐藏全部释义';
+    eyeAllTxt.textContent = on ? '显示释义' : '隐藏释义';
     eyeAll.setAttribute('aria-pressed', on ? 'true' : 'false');
   }
   syncEyeAll();
