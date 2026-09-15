@@ -105,6 +105,28 @@
   .w.done .star{color:#16a34a; background:#dcfce7;}
   .w.done .en{color:#15803d;}
   body.hide-done .w.done{display:none;}
+  #azRail{
+    position:fixed; right:8px; top:50%; transform:translateY(-50%); z-index:30;
+    display:flex; flex-direction:column; gap:1px; padding:7px 3px;
+    background:rgba(255,255,255,.92); backdrop-filter:blur(8px);
+    border:1px solid var(--line); border-radius:9px;
+    box-shadow:0 4px 16px rgba(31,41,55,.1);
+  }
+  #azRail button{
+    font:inherit; font-size:11px; font-weight:600; line-height:1; color:var(--muted);
+    width:19px; height:15px; padding:0; border:0; background:transparent;
+    border-radius:4px; cursor:pointer; transition:background .1s, color .1s;
+  }
+  #azRail button:hover{background:#111827; color:#fff;}
+  #azRail button.no{color:#d8dbe0; cursor:default;}
+  #azRail button.no:hover{background:transparent; color:#d8dbe0;}
+  #azRail .top{color:var(--ink); border-bottom:1px solid var(--line); height:18px; margin-bottom:3px;}
+  .az-head{
+    scroll-margin-top:110px; font-size:12px; font-weight:700; color:#7c3aed;
+    letter-spacing:1px; padding:9px 0 5px; border-bottom:1px dashed var(--line);
+    margin:2px 0 8px;
+  }
+  @media (max-width:900px){ #azRail{right:4px; padding:5px 2px;} #azRail button{width:17px; height:14px; font-size:10px;} }
   footer{
     max-width:1280px; margin:0 auto; padding:0 24px 50px;
     color:var(--muted); font-size:12px; line-height:1.9;
@@ -137,6 +159,7 @@
     </div>
   </div>
 </header>
+<nav id="azRail" aria-label="字母跳转"></nav>
 <main>
   <section data-i="0">
     <div class="sec-head" style="border-left-color:#2563eb">
@@ -1058,9 +1081,14 @@
       + '<span class="i-off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M1 1l22 22"/></svg></span>';
     var STAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
     var esc = function(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
-    var buf = [];
+    var buf = [], curLetter = '';
     for (var i = 0; i < data.length; i++) {
       var r = data[i];
+      var L = (r.w[0] || '#').toUpperCase();
+      if (L !== curLetter) {
+        curLetter = L;
+        buf.push('<div class="az-head" id="az-' + esc(L) + '">' + esc(L) + '</div>');
+      }
       buf.push('<div class="w" data-w="' + esc(r.w.toLowerCase()) + '" data-zh="' + esc(r.zh) + '">'
         + '<div class="w-top"><span class="en">' + esc(r.w) + '</span><span class="w-act">'
         + '<button class="eye" type="button" aria-label="显示/隐藏释义" title="显示/隐藏释义">' + EYE + '</button>'
@@ -1070,6 +1098,33 @@
         + '<span class="zh">' + esc(r.zh) + '</span></div>');
     }
     grid.innerHTML = buf.join('');
+
+    // ---------- 右侧 A–Z 跳转栏 ----------
+    var rail = document.getElementById('azRail');
+    var top = document.createElement('button');
+    top.className = 'top'; top.type = 'button'; top.textContent = '↑'; top.title = '回到顶部';
+    top.addEventListener('click', function(){ window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    rail.appendChild(top);
+
+    var present = {};
+    for (var j = 0; j < data.length; j++) present[(data[j].w[0] || '#').toUpperCase()] = 1;
+
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(ch){
+      var b = document.createElement('button');
+      b.type = 'button'; b.textContent = ch;
+      if (present[ch]) {
+        b.title = '跳到 ' + ch;
+        b.addEventListener('click', function(){
+          var t = document.getElementById('az-' + ch);
+          if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          rail.querySelectorAll('button').forEach(function(x){ x.style.background=''; x.style.color=''; });
+          b.style.background = '#111827'; b.style.color = '#fff';
+        });
+      } else {
+        b.className = 'no'; b.title = '此表中无 ' + ch + ' 开头词';
+      }
+      rail.appendChild(b);
+    });
   })();
 
   var secs = Array.prototype.slice.call(document.querySelectorAll('section'));
