@@ -17,36 +17,36 @@
   }
   header{
     background:var(--card); border-bottom:1px solid var(--line);
-    padding:26px 24px 20px; position:sticky; top:0; z-index:20;
+    padding:12px 20px 10px; position:sticky; top:0; z-index:20;
   }
   .wrap{max-width:1280px; margin:0 auto;}
-  h1{margin:0 0 6px; font-size:22px; letter-spacing:.2px;}
-  h1 small{font-weight:400; color:var(--muted); font-size:13px; margin-left:8px;}
-  .meta{color:var(--muted); font-size:13px; margin-bottom:14px;}
+  h1{margin:0 0 3px; font-size:15px; letter-spacing:.1px;}
+  h1 small{font-weight:400; color:var(--muted); font-size:11px; margin-left:6px;}
+  .meta{color:var(--muted); font-size:11px; margin-bottom:7px; line-height:1.45;}
   .meta b{color:var(--ink);}
-  .bar{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  .bar{display:flex; gap:7px; align-items:center; flex-wrap:wrap;}
   #q{
-    flex:1; min-width:220px; padding:9px 12px; font-size:14px;
-    border:1px solid var(--line); border-radius:8px; outline:none; background:#fff;
+    flex:1; min-width:180px; padding:5px 10px; font-size:12.5px;
+    border:1px solid var(--line); border-radius:7px; outline:none; background:#fff;
     transition:border-color .15s, box-shadow .15s;
   }
   #q:focus{border-color:#9ca3af; box-shadow:0 0 0 3px rgba(17,24,39,.06);}
-  .hint{color:var(--muted); font-size:12px;}
+  .hint{color:var(--muted); font-size:11px;}
   .tbtn{
-    font:inherit; font-size:12px; color:var(--ink); background:#fff;
-    border:1px solid var(--line); border-radius:7px; padding:6px 11px; cursor:pointer;
+    font:inherit; font-size:11.5px; color:var(--ink); background:#fff;
+    border:1px solid var(--line); border-radius:6px; padding:4px 9px; cursor:pointer;
     transition:border-color .12s, background .12s, color .12s;
   }
   .tbtn:hover{border-color:#c9ced6; background:#fafbfc;}
   .tbtn[aria-pressed="true"]{background:#e8f1fe; border-color:#b9d3fb; color:#1d4ed8; font-weight:600;}
   .eyeall{
-    font:inherit; font-size:13px; font-weight:600; display:flex; align-items:center; gap:7px;
-    background:#111827; color:#fff; border:1px solid #111827; border-radius:9px;
-    padding:8px 14px; cursor:pointer; flex:0 0 auto; white-space:nowrap;
+    font:inherit; font-size:11.5px; font-weight:600; display:flex; align-items:center; gap:5px;
+    background:#111827; color:#fff; border:1px solid #111827; border-radius:7px;
+    padding:5px 11px; cursor:pointer; flex:0 0 auto; white-space:nowrap;
     transition:background .12s, border-color .12s, color .12s;
   }
   .eyeall:hover{background:#1f2937;}
-  .eyeall svg{width:16px; height:16px;}
+  .eyeall svg{width:13px; height:13px;}
   .eyeall .i-offq{display:none;}
   .eyeall[aria-pressed="true"]{background:#fff; color:#1d4ed8; border-color:#b9d3fb;}
   .eyeall[aria-pressed="true"] .i-on{display:none;}
@@ -128,20 +128,21 @@
   }
   @media (max-width:900px){ #azRail{right:4px; padding:5px 2px;} #azRail button{width:17px; height:14px; font-size:10px;} }
   .prog{
-    display:flex; align-items:center; gap:14px; margin-top:11px; flex-wrap:wrap;
-    background:#f1fbf5; border:1px solid #b8e6cb; border-radius:9px; padding:8px 13px;
+    display:inline-flex; align-items:center; gap:9px; margin-top:8px; flex-wrap:wrap;
+    background:#f1fbf5; border:1px solid #b8e6cb; border-radius:7px; padding:4px 10px;
+    font-size:11px;
   }
-  .prog-main{display:flex; align-items:baseline; gap:6px; flex:0 0 auto;}
-  .prog-num{font-size:19px; font-weight:800; color:#15803d; letter-spacing:.3px;}
-  .prog-num b{font-size:23px;}
-  .prog-num #doneT{color:#4b7f5e; font-weight:600; font-size:14px;}  .prog-label{font-size:12px; color:#4b7f5e; font-weight:600;}
-  .prog-track{flex:1; min-width:120px; height:9px; background:#dff2e6; border-radius:99px; overflow:hidden;}
+  .prog-main{display:flex; align-items:baseline; gap:4px; flex:0 0 auto;}
+  .prog-num{font-size:12px; font-weight:800; color:#15803d; letter-spacing:.2px;}
+  .prog-num b{font-size:14px;}
+  .prog-num #doneT{color:#4b7f5e; font-weight:600; font-size:11px;}  .prog-label{font-size:11px; color:#4b7f5e; font-weight:600;}
+  .prog-track{flex:1; min-width:80px; height:6px; background:#dff2e6; border-radius:99px; overflow:hidden; align-self:center;}
   .prog-fill{height:100%; width:0; background:linear-gradient(90deg,#34d399,#16a34a); border-radius:99px; transition:width .25s;}
-  .prog-sub{font-size:12px; color:#4b7f5e; flex:0 0 auto;}
-  .prog-reset{background:#fff !important;}
+  .prog-sub{font-size:11px; color:#4b7f5e; flex:0 0 auto;}
+  .prog-reset{padding:2px 8px !important; font-size:11px !important; background:#fff !important;}
   @media (max-width:640px){
-    .prog{gap:9px; padding:7px 10px;} .prog-num{font-size:16px;} .prog-num b{font-size:19px;}
-    .prog-track{order:4; flex-basis:100%;} .prog-sub{font-size:11px;}
+    .prog{gap:7px; padding:4px 9px;} .prog-num{font-size:11px;} .prog-num b{font-size:13px;}
+    .prog-track{order:4; flex-basis:100%;} .prog-sub{font-size:10px;}
   }
   footer{
     max-width:1280px; margin:0 auto; padding:0 24px 50px;
@@ -179,7 +180,7 @@
       <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
       <div class="prog-sub"><span id="progPct">0%</span> · 还剩 <span id="progLeft">0</span> 词没记</div>
       <button class="tbtn prog-reset" id="resetDone2" type="button">清空记录</button>
-      <span class="hint">Ogden 主张：这 850 词 + 简单规则，可替代约 2 万词</span>
+      <span class="hint">Ogden：这 850 词 + 简单规则，可替代约 2 万词</span>
     </div>
   </div>
 </header>
