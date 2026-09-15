@@ -74,14 +74,17 @@
     transition:border-color .12s, transform .12s, background .15s;
   }
   .w:hover{border-color:#c9ced6; transform:translateY(-1px);}
-  .w .w-top{display:flex; align-items:center; gap:6px;}
-  .w .en{font-size:13px; font-weight:600; letter-spacing:.2px; flex:1; min-width:0; cursor:pointer;}
+  .w .w-top{display:flex; align-items:center; gap:4px;}
+  .w .en{
+    font-size:13px; font-weight:600; letter-spacing:.2px; flex:1 1 auto; min-width:0;
+    cursor:pointer; line-height:1.25; word-break:break-word; overflow-wrap:anywhere;
+  }
   .w .en:hover{color:#2563eb;}
-  .w .w-act{display:flex; gap:2px; flex:0 0 auto;}
+  .w .w-act{display:flex; gap:1px; flex:0 0 auto; position:relative; z-index:1; background:var(--card);}
   .w .w-act button{
-    width:18px; height:18px; padding:0; border:0; background:transparent; cursor:pointer;
+    width:17px; height:17px; padding:0; border:0; background:transparent; cursor:pointer;
     color:#b6bcc6; border-radius:5px; display:flex; align-items:center; justify-content:center;
-    transition:color .12s, background .12s;
+    transition:color .12s, background .12s; flex:0 0 auto;
   }
   .w .w-act button:hover{background:#f0f1f4;}
   .w .w-act svg{width:12px; height:12px;}
@@ -148,6 +151,8 @@
   @media (max-width:640px){
     .prog{gap:7px; padding:4px 9px;} .prog-num{font-size:11px;} .prog-num b{font-size:13px;}
     .prog-track{order:4; flex-basis:100%;} .prog-sub{font-size:10px;}
+    .grid{grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:7px;}
+    .w .en{font-size:12.5px;}
   }
   footer{
     max-width:1280px; margin:0 auto; padding:0 24px 50px;
@@ -1181,6 +1186,23 @@
   }
   q.addEventListener('input', run);
   q.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ q.value=''; run(); } });
+
+  // ---------- 长单词自适应字号（防与右侧按钮重叠） ----------
+  function fitLongWords(){
+    var ens = document.querySelectorAll('.w .en');
+    for (var i = 0; i < ens.length; i++) {
+      var el = ens[i];
+      el.style.fontSize = '';                 // 先复位，再按实际溢出情况缩
+      var fs = 13;
+      var guard = 0;
+      while (el.scrollWidth > el.clientWidth + 1 && fs > 9.5 && guard++ < 12) {
+        fs -= 0.5;
+        el.style.fontSize = fs + 'px';
+      }
+    }
+  }
+  fitLongWords();
+  window.addEventListener('resize', function(){ clearTimeout(window.__fitT); window.__fitT = setTimeout(fitLongWords, 150); });
 
   // ---------- 释义显隐 ----------
   var KEY_HIDE = 'be850_hidezh_v1';
