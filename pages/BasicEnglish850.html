@@ -66,24 +66,24 @@
   }
   .grid{
     display:grid; gap:8px;
-    grid-template-columns:repeat(auto-fill, minmax(148px, 1fr));
+    grid-template-columns:repeat(auto-fill, minmax(118px, 1fr));
   }
   .w{
     background:var(--card); border:1px solid var(--line); border-radius:8px;
-    padding:7px 8px 7px 10px; display:flex; flex-direction:column; gap:2px;
+    padding:5px 6px 5px 8px; display:flex; flex-direction:column; gap:1px;
     transition:border-color .12s, transform .12s, background .15s;
   }
   .w:hover{border-color:#c9ced6; transform:translateY(-1px);}
   .w .w-top{display:flex; align-items:center; gap:6px;}
-  .w .en{font-size:15px; font-weight:600; letter-spacing:.2px; flex:1; min-width:0;}
+  .w .en{font-size:13px; font-weight:600; letter-spacing:.2px; flex:1; min-width:0;}
   .w .w-act{display:flex; gap:2px; flex:0 0 auto;}
   .w .w-act button{
-    width:22px; height:22px; padding:0; border:0; background:transparent; cursor:pointer;
+    width:18px; height:18px; padding:0; border:0; background:transparent; cursor:pointer;
     color:#b6bcc6; border-radius:5px; display:flex; align-items:center; justify-content:center;
     transition:color .12s, background .12s;
   }
   .w .w-act button:hover{background:#f0f1f4;}
-  .w .w-act svg{width:15px; height:15px;}
+  .w .w-act svg{width:12px; height:12px;}
   .w .eye .i-off{display:none;}
   .w.hide-zh .eye{color:#2563eb;}
   .w.hide-zh .eye .i-on{display:none;}
@@ -99,8 +99,8 @@
   body.hide-all-zh .w.hide-zh .zh{filter:none; opacity:1;}
   body.hide-all-zh .w .ipa{filter:blur(5px); opacity:.32; user-select:none;}
   body.hide-all-zh .w.hide-zh .ipa{filter:none; opacity:1;}
-  .w .zh{font-size:12px; color:var(--muted); transition:filter .15s, opacity .15s;}
-  .w .ipa{font-size:11px; color:var(--muted); font-weight:400; letter-spacing:.2px;}
+  .w .zh{font-size:11px; color:var(--muted); transition:filter .15s, opacity .15s;}
+  .w .ipa{font-size:10.5px; color:var(--muted); font-weight:400; letter-spacing:.2px;}
   .w.done{background:#f2fbf5; border-color:#9fdcb4;}
   .w.done .star{color:#16a34a; background:#dcfce7;}
   .w.done .en{color:#15803d;}
@@ -1024,6 +1024,13 @@
     </div>
   </section>
   <div class="empty" id="empty">没有匹配的词</div>
+
+  <section data-i="5" id="cet4-section">
+    <div class="sec-head" style="border-left-color:#7c3aed">
+      <h2>四级补充词汇 · CET-4</h2><span class="sub">大学英语四级大纲词汇（与上面 850 词不重复），按 A–Z 排列；释义音标整理自公开词表，仅供学习参考</span><span class="cnt">3713 词</span>
+    </div>
+    <div class="grid" id="cet4-grid"></div>
+  </section>
 </main>
 <footer>
   <div class="wrap">
@@ -1036,12 +1043,37 @@
     <br>中文释义为便于理解的简要对应，实际词义随语境变化。
   </div>
 </footer>
+<script src="basic-english-cet4-data.js?v=1"></script>
 <script>
 (function(){
   var q = document.getElementById('q');
+  var empty = document.getElementById('empty');
+
+  // ---------- 四级补充词汇：由数据文件渲染 ----------
+  (function renderCet4(){
+    var data = window.BE_CET4;
+    var grid = document.getElementById('cet4-grid');
+    if (!data || !grid) return;
+    var EYE = '<span class="i-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></span>'
+      + '<span class="i-off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M1 1l22 22"/></svg></span>';
+    var STAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    var esc = function(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+    var buf = [];
+    for (var i = 0; i < data.length; i++) {
+      var r = data[i];
+      buf.push('<div class="w" data-w="' + esc(r.w.toLowerCase()) + '" data-zh="' + esc(r.zh) + '">'
+        + '<div class="w-top"><span class="en">' + esc(r.w) + '</span><span class="w-act">'
+        + '<button class="eye" type="button" aria-label="显示/隐藏释义" title="显示/隐藏释义">' + EYE + '</button>'
+        + '<button class="star" type="button" aria-label="标记已记住" title="标记为已记住">' + STAR + '</button>'
+        + '</span></div>'
+        + (r.ipa ? '<span class="ipa">/' + esc(r.ipa) + '/</span>' : '')
+        + '<span class="zh">' + esc(r.zh) + '</span></div>');
+    }
+    grid.innerHTML = buf.join('');
+  })();
+
   var secs = Array.prototype.slice.call(document.querySelectorAll('section'));
   var words = Array.prototype.slice.call(document.querySelectorAll('.w'));
-  var empty = document.getElementById('empty');
   function run(){
     var v = q.value.trim().toLowerCase();
     var any = false;
