@@ -18,12 +18,12 @@ var WPS = [
   'assets/wp-pink.svg?v=a392b4b5',
   'assets/wp-grey.svg?v=a949c596',
   'assets/macos-catalina-mountains.jpg?v=5318ebec',
-  'assets/macos-mojave-fusion.jpg?v=e7949fec',
-  'assets/macos-monterey-stock-.jpg?v=f0799373',
+  'assets/macos-mojave-fusion.jpg?v=905c4a26',
+  'assets/macos-monterey-stock-.jpg?v=5524b574',
   'assets/macos-sierra-sierra.jpg?v=e0d58a84',
-  'assets/vector-art-colorful.jpg?v=d89aa0c6',
+  'assets/vector-art-colorful.jpg?v=45432d37',
   'assets/waves-aerial-view.jpg?v=e0b6edb5',
-  'assets/landscape-rocks.jpg?v=a9066e88'
+  'assets/landscape-rocks.jpg?v=675a5397'
 ];
 
 // ============================================================

@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C.K. Ogden Basic English · 850 核心词表</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --ink:#1a1d21; --muted:#6b7280;
+    --line:#e5e7eb; --accent:#111827;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
+    line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  header{
+    background:var(--card); border-bottom:1px solid var(--line);
+    padding:26px 24px 20px; position:sticky; top:0; z-index:20;
+  }
+  .wrap{max-width:1280px; margin:0 auto;}
+  h1{margin:0 0 6px; font-size:22px; letter-spacing:.2px;}
+  h1 small{font-weight:400; color:var(--muted); font-size:13px; margin-left:8px;}
+  .meta{color:var(--muted); font-size:13px; margin-bottom:14px;}
+  .meta b{color:var(--ink);}
+  .bar{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  #q{
+    flex:1; min-width:220px; padding:9px 12px; font-size:14px;
+    border:1px solid var(--line); border-radius:8px; outline:none; background:#fff;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  #q:focus{border-color:#9ca3af; box-shadow:0 0 0 3px rgba(17,24,39,.06);}
+  .hint{color:var(--muted); font-size:12px;}
+  main{max-width:1280px; margin:0 auto; padding:20px 24px 60px;}
+  section{margin-bottom:26px;}
+  .sec-head{
+    display:flex; align-items:baseline; gap:10px;
+    padding:0 0 10px; border-bottom:2px solid var(--line); margin-bottom:14px;
+    border-left:4px solid var(--accent); padding-left:12px;
+  }
+  .sec-head h2{margin:0; font-size:17px;}
+  .sec-head .sub{color:var(--muted); font-size:12px; flex:1;}
+  .sec-head .cnt{
+    font-size:12px; color:var(--muted); background:#eef0f3;
+    border-radius:20px; padding:2px 10px; white-space:nowrap;
+  }
+  .grid{
+    display:grid; gap:8px;
+    grid-template-columns:repeat(auto-fill, minmax(148px, 1fr));
+  }
+  .w{
+    background:var(--card); border:1px solid var(--line); border-radius:8px;
+    padding:8px 10px; display:flex; flex-direction:column; gap:2px;
+    transition:border-color .12s, transform .12s;
+  }
+  .w:hover{border-color:#c9ced6; transform:translateY(-1px);}
+  .w .en{font-size:15px; font-weight:600; letter-spacing:.2px;}
+  .w .zh{font-size:12px; color:var(--muted);}
+  footer{
+    max-width:1280px; margin:0 auto; padding:0 24px 50px;
+    color:var(--muted); font-size:12px; line-height:1.9;
+  }
+  footer b{color:var(--ink);}
+  .empty{color:var(--muted); font-size:13px; padding:30px 0; text-align:center; display:none;}
+  @media print{
+    header{position:static;} #q{display:none;}
+    body{background:#fff;} .w{break-inside:avoid;}
+    .grid{grid-template-columns:repeat(auto-fill, minmax(130px,1fr));}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>C.K. Ogden · Basic English 850 核心词表 <small>Basic English: A General Introduction with Rules and Grammar, 1930</small></h1>
+    <div class="meta">全部 <b>850</b> 词 ＝ 操作词 <b>100</b> ＋ 通用名词 <b>400</b> ＋ 具体名词 <b>200</b> ＋ 性质词 <b>100</b> ＋ 反义性质词 <b>50</b>　｜　词表依据 Wiktionary “Basic English word list” 核校</div>
+    <div class="bar">
+      <input id="q" type="search" placeholder="搜索：输入英文或中文，如 water / 水 / qual" autocomplete="off">
+      <span class="hint">Ogden 主张：这 850 词 + 简单规则，可替代约 2 万词</span>
+    </div>
+  </div>
+</header>
+<main>
+  <section data-i="0">
+    <div class="sec-head" style="border-left-color:#2563eb">
+      <h2>操作词 · Operations</h2><span class="sub">表达&quot;做、是、有、去、来&quot;等基本动作与语法关系，是 850 词的核心骨架</span><span class="cnt">100 词</span>
+    </div>
+    <div class="grid">
+      <div class="w" data-w="come" data-zh="来"><span class="en">come</span><span class="zh">来</span></div>
+      <div class="w" data-w="get" data-zh="得到／取"><span class="en">get</span><span class="zh">得到／取</span></div>
+      <div class="w" data-w="give" data-zh="给"><span class="en">give</span><span class="zh">给</span></div>
+      <div class="w" data-w="go" data-zh="去"><span class="en">go</span><span class="zh">去</span></div>
+      <div class="w" data-w="keep" data-zh="保持"><span class="en">keep</span><span class="zh">保持</span></div>
+      <div class="w" data-w="let" data-zh="让"><span class="en">let</span><span class="zh">让</span></div>
+      <div class="w" data-w="make" data-zh="做／制作"><span class="en">make</span><span class="zh">做／制作</span></div>
+      <div class="w" data-w="put" data-zh="放"><span class="en">put</span><span class="zh">放</span></div>
+      <div class="w" data-w="seem" data-zh="似乎"><span class="en">seem</span><span class="zh">似乎</span></div>
+      <div class="w" data-w="take" data-zh="拿／带走"><span class="en">take</span><span class="zh">拿／带走</span></div>
+      <div class="w" data-w="be" data-zh="是"><span class="en">be</span><span class="zh">是</span></div>
+      <div class="w" data-w="do" data-zh="做"><span class="en">do</span><span class="zh">做</span></div>
+      <div class="w" data-w="have" data-zh="有"><span class="en">have</span><span class="zh">有</span></div>
+      <div class="w" data-w="say" data-zh="说"><span class="en">say</span><span class="zh">说</span></div>
+      <div class="w" data-w="see" data-zh="看见"><span class="en">see</span><span class="zh">看见</span></div>
+      <div class="w" data-w="send" data-zh="送／寄"><span class="en">send</span><span class="zh">送／寄</span></div>
+      <div class="w" data-w="may" data-zh="可以"><span class="en">may</span><span class="zh">可以</span></div>
+      <div class="w" data-w="will" data-zh="将要"><span class="en">will</span><span class="zh">将要</span></div>
+      <div class="w" data-w="about" data-zh="关于／大约"><span class="en">about</span><span class="zh">关于／大约</span></div>
+      <div class="w" data-w="across" data-zh="穿过"><span class="en">across</span><span class="zh">穿过</span></div>
+      <div class="w" data-w="after" data-zh="在…之后"><span class="en">after</span><span class="zh">在…之后</span></div>
+      <div class="w" data-w="against" data-zh="反对／靠着"><span class="en">against</span><span class="zh">反对／靠着</span></div>
+      <div class="w" data-w="among" data-zh="在…之中"><span class="en">among</span><span class="zh">在…之中</span></div>
+      <div class="w" data-w="at" data-zh="在"><span class="en">at</span><span class="zh">在</span></div>
+      <div class="w" data-w="before" data-zh="在…之前"><span class="en">before</span><span class="zh">在…之前</span></div>
+      <div class="w" data-w="between" data-zh="在两者之间"><span class="en">between</span><span class="zh">在两者之间</span></div>
+      <div class="w" data-w="by" data-zh="由／通过"><span class="en">by</span><span class="zh">由／通过</span></div>
+      <div class="w" data-w="down" data-zh="向下"><span class="en">down</span><span class="zh">向下</span></div>
+      <div class="w" data-w="from" data-zh="从"><span class="en">from</span><span class="zh">从</span></div>
+      <div class="w" data-w="in" data-zh="在…里"><span class="en">in</span><span class="zh">在…里</span></div>
+      <div class="w" data-w="off" data-zh="离开／关掉"><span class="en">off</span><span class="zh">离开／关掉</span></div>
+      <div class="w" data-w="on" data-zh="在…上面"><span class="en">on</span><span class="zh">在…上面</span></div>
+      <div class="w" data-w="over" data-zh="在上方／超过"><span class="en">over</span><span class="zh">在上方／超过</span></div>
+      <div class="w" data-w="through" data-zh="穿过"><span class="en">through</span><span class="zh">穿过</span></div>
+      <div class="w" data-w="to" data-zh="到／向"><span class="en">to</span><span class="zh">到／向</span></div>
+      <div class="w" data-w="under" data-zh="在…下面"><span class="en">under</span><span class="zh">在…下面</span></div>
+      <div class="w" data-w="up" data-zh="向上"><span class="en">up</span><span class="zh">向上</span></div>
+      <div class="w" data-w="with" data-zh="和／带着"><span class="en">with</span><span class="zh">和／带着</span></div>
+      <div class="w" data-w="as" data-zh="如同／作为"><span class="en">as</span><span class="zh">如同／作为</span></div>
+      <div class="w" data-w="for" data-zh="为了"><span class="en">for</span><span class="zh">为了</span></div>
+      <div class="w" data-w="of" data-zh="…的"><span class="en">of</span><span class="zh">…的</span></div>
+      <div class="w" data-w="till" data-zh="直到"><span class="en">till</span><span class="zh">直到</span></div>
+      <div class="w" data-w="than" data-zh="比"><span class="en">than</span><span class="zh">比</span></div>
+      <div class="w" data-w="a" data-zh="一个"><span class="en">a</span><span class="zh">一个</span></div>
+      <div class="w" data-w="the" data-zh="这个／那个"><span class="en">the</span><span class="zh">这个／那个</span></div>
+      <div class="w" data-w="all" data-zh="全部"><span class="en">all</span><span class="zh">全部</span></div>
+      <div class="w" data-w="any" data-zh="任何"><span class="en">any</span><span class="zh">任何</span></div>
+      <div class="w" data-w="every" data-zh="每一个"><span class="en">every</span><span class="zh">每一个</span></div>
+      <div class="w" data-w="no" data-zh="没有"><span class="en">no</span><span class="zh">没有</span></div>
+      <div class="w" data-w="other" data-zh="其他的"><span class="en">other</span><span class="zh">其他的</span></div>
+      <div class="w" data-w="some" data-zh="一些"><span class="en">some</span><span class="zh">一些</span></div>
+      <div class="w" data-w="such" data-zh="这样的"><span class="en">such</span><span class="zh">这样的</span></div>
+      <div class="w" data-w="that" data-zh="那个"><span class="en">that</span><span class="zh">那个</span></div>
+      <div class="w" data-w="this" data-zh="这个"><span class="en">this</span><span class="zh">这个</span></div>
+      <div class="w" data-w="i" data-zh="我"><span class="en">I</span><span class="zh">我</span></div>
+      <div class="w" data-w="he" data-zh="他"><span class="en">he</span><span class="zh">他</span></div>
+      <div class="w" data-w="you" data-zh="你"><span class="en">you</span><span class="zh">你</span></div>
+      <div class="w" data-w="who" data-zh="谁"><span class="en">who</span><span class="zh">谁</span></div>
+      <div class="w" data-w="and" data-zh="和"><span class="en">and</span><span class="zh">和</span></div>
+      <div class="w" data-w="because" data-zh="因为"><span class="en">because</span><span class="zh">因为</span></div>
+      <div class="w" data-w="but" data-zh="但是"><span class="en">but</span><span class="zh">但是</span></div>
+      <div class="w" data-w="or" data-zh="或者"><span class="en">or</span><span class="zh">或者</span></div>
+      <div class="w" data-w="if" data-zh="如果"><span class="en">if</span><span class="zh">如果</span></div>
+      <div class="w" data-w="though" data-zh="虽然"><span class="en">though</span><span class="zh">虽然</span></div>
+      <div class="w" data-w="while" data-zh="当…时"><span class="en">while</span><span class="zh">当…时</span></div>
+      <div class="w" data-w="how" data-zh="怎样"><span class="en">how</span><span class="zh">怎样</span></div>
+      <div class="w" data-w="when" data-zh="何时"><span class="en">when</span><span class="zh">何时</span></div>
+      <div class="w" data-w="where" data-zh="哪里"><span class="en">where</span><span class="zh">哪里</span></div>
+      <div class="w" data-w="why" data-zh="为什么"><span class="en">why</span><span class="zh">为什么</span></div>
+      <div class="w" data-w="again" data-zh="再一次"><span class="en">again</span><span class="zh">再一次</span></div>
+      <div class="w" data-w="ever" data-zh="曾经"><span class="en">ever</span><span class="zh">曾经</span></div>
+      <div class="w" data-w="far" data-zh="远"><span class="en">far</span><span class="zh">远</span></div>
+      <div class="w" data-w="forward" data-zh="向前"><span class="en">forward</span><span class="zh">向前</span></div>
+      <div class="w" data-w="here" data-zh="这里"><span class="en">here</span><span class="zh">这里</span></div>
+      <div class="w" data-w="near" data-zh="近"><span class="en">near</span><span class="zh">近</span></div>
+      <div class="w" data-w="now" data-zh="现在"><span class="en">now</span><span class="zh">现在</span></div>
+      <div class="w" data-w="out" data-zh="在外面"><span class="en">out</span><span class="zh">在外面</span></div>
+      <div class="w" data-w="still" data-zh="仍然"><span class="en">still</span><span class="zh">仍然</span></div>
+      <div class="w" data-w="then" data-zh="然后／那时"><span class="en">then</span><span class="zh">然后／那时</span></div>
+      <div class="w" data-w="there" data-zh="那里"><span class="en">there</span><span class="zh">那里</span></div>
+      <div class="w" data-w="together" data-zh="一起"><span class="en">together</span><span class="zh">一起</span></div>
+      <div class="w" data-w="well" data-zh="好"><span class="en">well</span><span class="zh">好</span></div>
+      <div class="w" data-w="almost" data-zh="几乎"><span class="en">almost</span><span class="zh">几乎</span></div>
+      <div class="w" data-w="enough" data-zh="足够"><span class="en">enough</span><span class="zh">足够</span></div>
+      <div class="w" data-w="even" data-zh="甚至"><span class="en">even</span><span class="zh">甚至</span></div>
+      <div class="w" data-w="little" data-zh="少／小"><span class="en">little</span><span class="zh">少／小</span></div>
+      <div class="w" data-w="much" data-zh="多"><span class="en">much</span><span class="zh">多</span></div>
+      <div class="w" data-w="not" data-zh="不"><span class="en">not</span><span class="zh">不</span></div>
+      <div class="w" data-w="only" data-zh="仅仅"><span class="en">only</span><span class="zh">仅仅</span></div>
+      <div class="w" data-w="quite" data-zh="相当"><span class="en">quite</span><span class="zh">相当</span></div>
+      <div class="w" data-w="so" data-zh="所以／如此"><span class="en">so</span><span class="zh">所以／如此</span></div>
+      <div class="w" data-w="very" data-zh="非常"><span class="en">very</span><span class="zh">非常</span></div>
+      <div class="w" data-w="tomorrow" data-zh="明天"><span class="en">tomorrow</span><span class="zh">明天</span></div>
+      <div class="w" data-w="yesterday" data-zh="昨天"><span class="en">yesterday</span><span class="zh">昨天</span></div>
+      <div class="w" data-w="north" data-zh="北"><span class="en">north</span><span class="zh">北</span></div>
+      <div class="w" data-w="south" data-zh="南"><span class="en">south</span><span class="zh">南</span></div>
+      <div class="w" data-w="east" data-zh="东"><span class="en">east</span><span class="zh">东</span></div>
+      <div class="w" data-w="west" data-zh="西"><span class="en">west</span><span class="zh">西</span></div>
+      <div class="w" data-w="please" data-zh="请"><span class="en">please</span><span class="zh">请</span></div>
+      <div class="w" data-w="yes" data-zh="是"><span class="en">yes</span><span class="zh">是</span></div>
+    </div>
+  </section>
+  <section data-i="1">
+    <div class="sec-head" style="border-left-color:#059669">
+      <h2>通用名词 · Things (General)</h2><span class="sub">抽象与一般事物名词，属于这一类</span><span class="cnt">400 词</span>
+    </div>
+    <div class="grid">
+      <div class="w" data-w="account" data-zh="账户／记述"><span class="en">account</span><span class="zh">账户／记述</span></div>
+      <div class="w" data-w="act" data-zh="行为"><span class="en">act</span><span class="zh">行为</span></div>
+      <div class="w" data-w="addition" data-zh="增加"><span class="en">addition</span><span class="zh">增加</span></div>
+      <div class="w" data-w="adjustment" data-zh="调整"><span class="en">adjustment</span><span class="zh">调整</span></div>
+      <div class="w" data-w="advertisement" data-zh="广告"><span class="en">advertisement</span><span class="zh">广告</span></div>
+      <div class="w" data-w="agreement" data-zh="同意／协议"><span class="en">agreement</span><span class="zh">同意／协议</span></div>
+      <div class="w" data-w="air" data-zh="空气"><span class="en">air</span><span class="zh">空气</span></div>
+      <div class="w" data-w="amount" data-zh="数量"><span class="en">amount</span><span class="zh">数量</span></div>
+      <div class="w" data-w="amusement" data-zh="娱乐"><span class="en">amusement</span><span class="zh">娱乐</span></div>
+      <div class="w" data-w="animal" data-zh="动物"><span class="en">animal</span><span class="zh">动物</span></div>
+      <div class="w" data-w="answer" data-zh="回答"><span class="en">answer</span><span class="zh">回答</span></div>
+      <div class="w" data-w="apparatus" data-zh="器械"><span class="en">apparatus</span><span class="zh">器械</span></div>
+      <div class="w" data-w="approval" data-zh="批准"><span class="en">approval</span><span class="zh">批准</span></div>
+      <div class="w" data-w="argument" data-zh="争论"><span class="en">argument</span><span class="zh">争论</span></div>
+      <div class="w" data-w="art" data-zh="艺术"><span class="en">art</span><span class="zh">艺术</span></div>
+      <div class="w" data-w="attack" data-zh="攻击"><span class="en">attack</span><span class="zh">攻击</span></div>
+      <div class="w" data-w="attempt" data-zh="尝试"><span class="en">attempt</span><span class="zh">尝试</span></div>
+      <div class="w" data-w="attention" data-zh="注意"><span class="en">attention</span><span class="zh">注意</span></div>
+      <div class="w" data-w="attraction" data-zh="吸引"><span class="en">attraction</span><span class="zh">吸引</span></div>
+      <div class="w" data-w="authority" data-zh="权威"><span class="en">authority</span><span class="zh">权威</span></div>
+      <div class="w" data-w="back" data-zh="背部／后面"><span class="en">back</span><span class="zh">背部／后面</span></div>
+      <div class="w" data-w="balance" data-zh="平衡"><span class="en">balance</span><span class="zh">平衡</span></div>
+      <div class="w" data-w="base" data-zh="基础"><span class="en">base</span><span class="zh">基础</span></div>
+      <div class="w" data-w="behaviour" data-zh="行为"><span class="en">behaviour</span><span class="zh">行为</span></div>
+      <div class="w" data-w="belief" data-zh="信念"><span class="en">belief</span><span class="zh">信念</span></div>
+      <div class="w" data-w="birth" data-zh="出生"><span class="en">birth</span><span class="zh">出生</span></div>
+      <div class="w" data-w="bit" data-zh="一点"><span class="en">bit</span><span class="zh">一点</span></div>
+      <div class="w" data-w="bite" data-zh="咬"><span class="en">bite</span><span class="zh">咬</span></div>
+      <div class="w" data-w="blood" data-zh="血"><span class="en">blood</span><span class="zh">血</span></div>
+      <div class="w" data-w="blow" data-zh="打击／吹"><span class="en">blow</span><span class="zh">打击／吹</span></div>
+      <div class="w" data-w="body" data-zh="身体"><span class="en">body</span><span class="zh">身体</span></div>
+      <div class="w" data-w="brass" data-zh="黄铜"><span class="en">brass</span><span class="zh">黄铜</span></div>
+      <div class="w" data-w="bread" data-zh="面包"><span class="en">bread</span><span class="zh">面包</span></div>
+      <div class="w" data-w="breath" data-zh="呼吸"><span class="en">breath</span><span class="zh">呼吸</span></div>
+      <div class="w" data-w="brother" data-zh="兄弟"><span class="en">brother</span><span class="zh">兄弟</span></div>
+      <div class="w" data-w="building" data-zh="建筑物"><span class="en">building</span><span class="zh">建筑物</span></div>
+      <div class="w" data-w="burn" data-zh="烧伤"><span class="en">burn</span><span class="zh">烧伤</span></div>
+      <div class="w" data-w="burst" data-zh="爆裂"><span class="en">burst</span><span class="zh">爆裂</span></div>
+      <div class="w" data-w="business" data-zh="生意"><span class="en">business</span><span class="zh">生意</span></div>
+      <div class="w" data-w="butter" data-zh="黄油"><span class="en">butter</span><span class="zh">黄油</span></div>
+      <div class="w" data-w="canvas" data-zh="帆布"><span class="en">canvas</span><span class="zh">帆布</span></div>
+      <div class="w" data-w="care" data-zh="照料"><span class="en">care</span><span class="zh">照料</span></div>
+      <div class="w" data-w="cause" data-zh="原因"><span class="en">cause</span><span class="zh">原因</span></div>
+      <div class="w" data-w="chalk" data-zh="粉笔"><span class="en">chalk</span><span class="zh">粉笔</span></div>
+      <div class="w" data-w="chance" data-zh="机会"><span class="en">chance</span><span class="zh">机会</span></div>
+      <div class="w" data-w="change" data-zh="变化"><span class="en">change</span><span class="zh">变化</span></div>
+      <div class="w" data-w="cloth" data-zh="布"><span class="en">cloth</span><span class="zh">布</span></div>
+      <div class="w" data-w="coal" data-zh="煤"><span class="en">coal</span><span class="zh">煤</span></div>
+      <div class="w" data-w="colour" data-zh="颜色"><span class="en">colour</span><span class="zh">颜色</span></div>
+      <div class="w" data-w="comfort" data-zh="舒适"><span class="en">comfort</span><span class="zh">舒适</span></div>
+      <div class="w" data-w="committee" data-zh="委员会"><span class="en">committee</span><span class="zh">委员会</span></div>
+      <div class="w" data-w="company" data-zh="公司／陪伴"><span class="en">company</span><span class="zh">公司／陪伴</span></div>
+      <div class="w" data-w="comparison" data-zh="比较"><span class="en">comparison</span><span class="zh">比较</span></div>
+      <div class="w" data-w="competition" data-zh="竞争"><span class="en">competition</span><span class="zh">竞争</span></div>
+      <div class="w" data-w="condition" data-zh="状况"><span class="en">condition</span><span class="zh">状况</span></div>
+      <div class="w" data-w="connection" data-zh="连接"><span class="en">connection</span><span class="zh">连接</span></div>
+      <div class="w" data-w="control" data-zh="控制"><span class="en">control</span><span class="zh">控制</span></div>
+      <div class="w" data-w="cook" data-zh="厨师"><span class="en">cook</span><span class="zh">厨师</span></div>
+      <div class="w" data-w="copper" data-zh="铜"><span class="en">copper</span><span class="zh">铜</span></div>
+      <div class="w" data-w="copy" data-zh="副本"><span class="en">copy</span><span class="zh">副本</span></div>
+      <div class="w" data-w="cork" data-zh="软木塞"><span class="en">cork</span><span class="zh">软木塞</span></div>
+      <div class="w" data-w="cotton" data-zh="棉花"><span class="en">cotton</span><span class="zh">棉花</span></div>
+      <div class="w" data-w="cough" data-zh="咳嗽"><span class="en">cough</span><span class="zh">咳嗽</span></div>
+      <div class="w" data-w="country" data-zh="国家"><span class="en">country</span><span class="zh">国家</span></div>
+      <div class="w" data-w="cover" data-zh="覆盖物"><span class="en">cover</span><span class="zh">覆盖物</span></div>
+      <div class="w" data-w="crack" data-zh="裂缝"><span class="en">crack</span><span class="zh">裂缝</span></div>
+      <div class="w" data-w="credit" data-zh="信用"><span class="en">credit</span><span class="zh">信用</span></div>
+      <div class="w" data-w="crime" data-zh="犯罪"><span class="en">crime</span><span class="zh">犯罪</span></div>
+      <div class="w" data-w="crush" data-zh="压碎"><span class="en">crush</span><span class="zh">压碎</span></div>
+      <div class="w" data-w="cry" data-zh="哭／喊"><span class="en">cry</span><span class="zh">哭／喊</span></div>
+      <div class="w" data-w="current" data-zh="水流／电流"><span class="en">current</span><span class="zh">水流／电流</span></div>
+      <div class="w" data-w="curve" data-zh="曲线"><span class="en">curve</span><span class="zh">曲线</span></div>
+      <div class="w" data-w="damage" data-zh="损害"><span class="en">damage</span><span class="zh">损害</span></div>
+      <div class="w" data-w="danger" data-zh="危险"><span class="en">danger</span><span class="zh">危险</span></div>
+      <div class="w" data-w="daughter" data-zh="女儿"><span class="en">daughter</span><span class="zh">女儿</span></div>
+      <div class="w" data-w="day" data-zh="白天／日"><span class="en">day</span><span class="zh">白天／日</span></div>
+      <div class="w" data-w="death" data-zh="死亡"><span class="en">death</span><span class="zh">死亡</span></div>
+      <div class="w" data-w="debt" data-zh="债务"><span class="en">debt</span><span class="zh">债务</span></div>
+      <div class="w" data-w="decision" data-zh="决定"><span class="en">decision</span><span class="zh">决定</span></div>
+      <div class="w" data-w="degree" data-zh="程度／度"><span class="en">degree</span><span class="zh">程度／度</span></div>
+      <div class="w" data-w="design" data-zh="设计"><span class="en">design</span><span class="zh">设计</span></div>
+      <div class="w" data-w="desire" data-zh="欲望"><span class="en">desire</span><span class="zh">欲望</span></div>
+      <div class="w" data-w="destruction" data-zh="破坏"><span class="en">destruction</span><span class="zh">破坏</span></div>
+      <div class="w" data-w="detail" data-zh="细节"><span class="en">detail</span><span class="zh">细节</span></div>
+      <div class="w" data-w="development" data-zh="发展"><span class="en">development</span><span class="zh">发展</span></div>
+      <div class="w" data-w="digestion" data-zh="消化"><span class="en">digestion</span><span class="zh">消化</span></div>
+      <div class="w" data-w="direction" data-zh="方向"><span class="en">direction</span><span class="zh">方向</span></div>
+      <div class="w" data-w="discovery" data-zh="发现"><span class="en">discovery</span><span class="zh">发现</span></div>
+      <div class="w" data-w="discussion" data-zh="讨论"><span class="en">discussion</span><span class="zh">讨论</span></div>
+      <div class="w" data-w="disease" data-zh="疾病"><span class="en">disease</span><span class="zh">疾病</span></div>
+      <div class="w" data-w="disgust" data-zh="厌恶"><span class="en">disgust</span><span class="zh">厌恶</span></div>
+      <div class="w" data-w="distance" data-zh="距离"><span class="en">distance</span><span class="zh">距离</span></div>
+      <div class="w" data-w="distribution" data-zh="分配"><span class="en">distribution</span><span class="zh">分配</span></div>
+      <div class="w" data-w="division" data-zh="分割"><span class="en">division</span><span class="zh">分割</span></div>
+      <div class="w" data-w="doubt" data-zh="怀疑"><span class="en">doubt</span><span class="zh">怀疑</span></div>
+      <div class="w" data-w="drink" data-zh="饮料"><span class="en">drink</span><span class="zh">饮料</span></div>
+      <div class="w" data-w="driving" data-zh="驾驶"><span class="en">driving</span><span class="zh">驾驶</span></div>
+      <div class="w" data-w="dust" data-zh="灰尘"><span class="en">dust</span><span class="zh">灰尘</span></div>
+      <div class="w" data-w="earth" data-zh="地球／泥土"><span class="en">earth</span><span class="zh">地球／泥土</span></div>
+      <div class="w" data-w="edge" data-zh="边缘"><span class="en">edge</span><span class="zh">边缘</span></div>
+      <div class="w" data-w="education" data-zh="教育"><span class="en">education</span><span class="zh">教育</span></div>
+      <div class="w" data-w="effect" data-zh="效果"><span class="en">effect</span><span class="zh">效果</span></div>
+      <div class="w" data-w="end" data-zh="末端"><span class="en">end</span><span class="zh">末端</span></div>
+      <div class="w" data-w="error" data-zh="错误"><span class="en">error</span><span class="zh">错误</span></div>
+      <div class="w" data-w="event" data-zh="事件"><span class="en">event</span><span class="zh">事件</span></div>
+      <div class="w" data-w="example" data-zh="例子"><span class="en">example</span><span class="zh">例子</span></div>
+      <div class="w" data-w="exchange" data-zh="交换"><span class="en">exchange</span><span class="zh">交换</span></div>
+      <div class="w" data-w="existence" data-zh="存在"><span class="en">existence</span><span class="zh">存在</span></div>
+      <div class="w" data-w="expansion" data-zh="扩张"><span class="en">expansion</span><span class="zh">扩张</span></div>
+      <div class="w" data-w="experience" data-zh="经验"><span class="en">experience</span><span class="zh">经验</span></div>
+      <div class="w" data-w="expert" data-zh="专家"><span class="en">expert</span><span class="zh">专家</span></div>
+      <div class="w" data-w="fact" data-zh="事实"><span class="en">fact</span><span class="zh">事实</span></div>
+      <div class="w" data-w="fall" data-zh="落下"><span class="en">fall</span><span class="zh">落下</span></div>
+      <div class="w" data-w="family" data-zh="家庭"><span class="en">family</span><span class="zh">家庭</span></div>
+      <div class="w" data-w="father" data-zh="父亲"><span class="en">father</span><span class="zh">父亲</span></div>
+      <div class="w" data-w="fear" data-zh="恐惧"><span class="en">fear</span><span class="zh">恐惧</span></div>
+      <div class="w" data-w="feeling" data-zh="感觉"><span class="en">feeling</span><span class="zh">感觉</span></div>
+      <div class="w" data-w="fiction" data-zh="小说"><span class="en">fiction</span><span class="zh">小说</span></div>
+      <div class="w" data-w="field" data-zh="田野／领域"><span class="en">field</span><span class="zh">田野／领域</span></div>
+      <div class="w" data-w="fight" data-zh="战斗"><span class="en">fight</span><span class="zh">战斗</span></div>
+      <div class="w" data-w="fire" data-zh="火"><span class="en">fire</span><span class="zh">火</span></div>
+      <div class="w" data-w="flame" data-zh="火焰"><span class="en">flame</span><span class="zh">火焰</span></div>
+      <div class="w" data-w="flight" data-zh="飞行"><span class="en">flight</span><span class="zh">飞行</span></div>
+      <div class="w" data-w="flower" data-zh="花"><span class="en">flower</span><span class="zh">花</span></div>
+      <div class="w" data-w="fold" data-zh="折痕"><span class="en">fold</span><span class="zh">折痕</span></div>
+      <div class="w" data-w="food" data-zh="食物"><span class="en">food</span><span class="zh">食物</span></div>
+      <div class="w" data-w="force" data-zh="力量"><span class="en">force</span><span class="zh">力量</span></div>
+      <div class="w" data-w="form" data-zh="形式"><span class="en">form</span><span class="zh">形式</span></div>
+      <div class="w" data-w="friend" data-zh="朋友"><span class="en">friend</span><span class="zh">朋友</span></div>
+      <div class="w" data-w="front" data-zh="前面"><span class="en">front</span><span class="zh">前面</span></div>
+      <div class="w" data-w="fruit" data-zh="水果"><span class="en">fruit</span><span class="zh">水果</span></div>
+      <div class="w" data-w="glass" data-zh="玻璃"><span class="en">glass</span><span class="zh">玻璃</span></div>
+      <div class="w" data-w="gold" data-zh="金"><span class="en">gold</span><span class="zh">金</span></div>
+      <div class="w" data-w="government" data-zh="政府"><span class="en">government</span><span class="zh">政府</span></div>
+      <div class="w" data-w="grain" data-zh="谷物"><span class="en">grain</span><span class="zh">谷物</span></div>
+      <div class="w" data-w="grass" data-zh="草"><span class="en">grass</span><span class="zh">草</span></div>
+      <div class="w" data-w="grip" data-zh="紧握"><span class="en">grip</span><span class="zh">紧握</span></div>
+      <div class="w" data-w="group" data-zh="群体"><span class="en">group</span><span class="zh">群体</span></div>
+      <div class="w" data-w="growth" data-zh="生长"><span class="en">growth</span><span class="zh">生长</span></div>
+      <div class="w" data-w="guide" data-zh="向导"><span class="en">guide</span><span class="zh">向导</span></div>
+      <div class="w" data-w="harbour" data-zh="港口"><span class="en">harbour</span><span class="zh">港口</span></div>
+      <div class="w" data-w="harmony" data-zh="和谐"><span class="en">harmony</span><span class="zh">和谐</span></div>
+      <div class="w" data-w="hate" data-zh="恨"><span class="en">hate</span><span class="zh">恨</span></div>
+      <div class="w" data-w="hearing" data-zh="听觉"><span class="en">hearing</span><span class="zh">听觉</span></div>
+      <div class="w" data-w="heat" data-zh="热"><span class="en">heat</span><span class="zh">热</span></div>
+      <div class="w" data-w="help" data-zh="帮助"><span class="en">help</span><span class="zh">帮助</span></div>
+      <div class="w" data-w="history" data-zh="历史"><span class="en">history</span><span class="zh">历史</span></div>
+      <div class="w" data-w="hole" data-zh="洞"><span class="en">hole</span><span class="zh">洞</span></div>
+      <div class="w" data-w="hope" data-zh="希望"><span class="en">hope</span><span class="zh">希望</span></div>
+      <div class="w" data-w="hour" data-zh="小时"><span class="en">hour</span><span class="zh">小时</span></div>
+      <div class="w" data-w="humour" data-zh="幽默"><span class="en">humour</span><span class="zh">幽默</span></div>
+      <div class="w" data-w="ice" data-zh="冰"><span class="en">ice</span><span class="zh">冰</span></div>
+      <div class="w" data-w="idea" data-zh="想法"><span class="en">idea</span><span class="zh">想法</span></div>
+      <div class="w" data-w="impulse" data-zh="冲动"><span class="en">impulse</span><span class="zh">冲动</span></div>
+      <div class="w" data-w="increase" data-zh="增加"><span class="en">increase</span><span class="zh">增加</span></div>
+      <div class="w" data-w="industry" data-zh="工业"><span class="en">industry</span><span class="zh">工业</span></div>
+      <div class="w" data-w="ink" data-zh="墨水"><span class="en">ink</span><span class="zh">墨水</span></div>
+      <div class="w" data-w="insect" data-zh="昆虫"><span class="en">insect</span><span class="zh">昆虫</span></div>
+      <div class="w" data-w="instrument" data-zh="工具／乐器"><span class="en">instrument</span><span class="zh">工具／乐器</span></div>
+      <div class="w" data-w="insurance" data-zh="保险"><span class="en">insurance</span><span class="zh">保险</span></div>
+      <div class="w" data-w="interest" data-zh="兴趣／利息"><span class="en">interest</span><span class="zh">兴趣／利息</span></div>
+      <div class="w" data-w="invention" data-zh="发明"><span class="en">invention</span><span class="zh">发明</span></div>
+      <div class="w" data-w="iron" data-zh="铁"><span class="en">iron</span><span class="zh">铁</span></div>
+      <div class="w" data-w="jelly" data-zh="果冻"><span class="en">jelly</span><span class="zh">果冻</span></div>
+      <div class="w" data-w="join" data-zh="连接处"><span class="en">join</span><span class="zh">连接处</span></div>
+      <div class="w" data-w="journey" data-zh="旅程"><span class="en">journey</span><span class="zh">旅程</span></div>
+      <div class="w" data-w="judge" data-zh="法官"><span class="en">judge</span><span class="zh">法官</span></div>
+      <div class="w" data-w="jump" data-zh="跳"><span class="en">jump</span><span class="zh">跳</span></div>
+      <div class="w" data-w="kick" data-zh="踢"><span class="en">kick</span><span class="zh">踢</span></div>
+      <div class="w" data-w="kiss" data-zh="吻"><span class="en">kiss</span><span class="zh">吻</span></div>
+      <div class="w" data-w="knowledge" data-zh="知识"><span class="en">knowledge</span><span class="zh">知识</span></div>
+      <div class="w" data-w="land" data-zh="陆地"><span class="en">land</span><span class="zh">陆地</span></div>
+      <div class="w" data-w="language" data-zh="语言"><span class="en">language</span><span class="zh">语言</span></div>
+      <div class="w" data-w="laugh" data-zh="笑"><span class="en">laugh</span><span class="zh">笑</span></div>
+      <div class="w" data-w="law" data-zh="法律"><span class="en">law</span><span class="zh">法律</span></div>
+      <div class="w" data-w="lead" data-zh="铅"><span class="en">lead</span><span class="zh">铅</span></div>
+      <div class="w" data-w="learning" data-zh="学问"><span class="en">learning</span><span class="zh">学问</span></div>
+      <div class="w" data-w="leather" data-zh="皮革"><span class="en">leather</span><span class="zh">皮革</span></div>
+      <div class="w" data-w="letter" data-zh="信／字母"><span class="en">letter</span><span class="zh">信／字母</span></div>
+      <div class="w" data-w="level" data-zh="水平"><span class="en">level</span><span class="zh">水平</span></div>
+      <div class="w" data-w="lift" data-zh="举起／电梯"><span class="en">lift</span><span class="zh">举起／电梯</span></div>
+      <div class="w" data-w="light" data-zh="光"><span class="en">light</span><span class="zh">光</span></div>
+      <div class="w" data-w="limit" data-zh="限度"><span class="en">limit</span><span class="zh">限度</span></div>
+      <div class="w" data-w="linen" data-zh="亚麻布"><span class="en">linen</span><span class="zh">亚麻布</span></div>
+      <div class="w" data-w="liquid" data-zh="液体"><span class="en">liquid</span><span class="zh">液体</span></div>
+      <div class="w" data-w="list" data-zh="清单"><span class="en">list</span><span class="zh">清单</span></div>
+      <div class="w" data-w="look" data-zh="看／外表"><span class="en">look</span><span class="zh">看／外表</span></div>
+      <div class="w" data-w="loss" data-zh="损失"><span class="en">loss</span><span class="zh">损失</span></div>
+      <div class="w" data-w="love" data-zh="爱"><span class="en">love</span><span class="zh">爱</span></div>
+      <div class="w" data-w="machine" data-zh="机器"><span class="en">machine</span><span class="zh">机器</span></div>
+      <div class="w" data-w="man" data-zh="男人"><span class="en">man</span><span class="zh">男人</span></div>
+      <div class="w" data-w="manager" data-zh="经理"><span class="en">manager</span><span class="zh">经理</span></div>
+      <div class="w" data-w="mark" data-zh="标记"><span class="en">mark</span><span class="zh">标记</span></div>
+      <div class="w" data-w="market" data-zh="市场"><span class="en">market</span><span class="zh">市场</span></div>
+      <div class="w" data-w="mass" data-zh="质量／块"><span class="en">mass</span><span class="zh">质量／块</span></div>
+      <div class="w" data-w="meal" data-zh="一餐"><span class="en">meal</span><span class="zh">一餐</span></div>
+      <div class="w" data-w="measure" data-zh="量度"><span class="en">measure</span><span class="zh">量度</span></div>
+      <div class="w" data-w="meat" data-zh="肉"><span class="en">meat</span><span class="zh">肉</span></div>
+      <div class="w" data-w="meeting" data-zh="会议"><span class="en">meeting</span><span class="zh">会议</span></div>
+      <div class="w" data-w="memory" data-zh="记忆"><span class="en">memory</span><span class="zh">记忆</span></div>
+      <div class="w" data-w="metal" data-zh="金属"><span class="en">metal</span><span class="zh">金属</span></div>
+      <div class="w" data-w="middle" data-zh="中间"><span class="en">middle</span><span class="zh">中间</span></div>
+      <div class="w" data-w="milk" data-zh="牛奶"><span class="en">milk</span><span class="zh">牛奶</span></div>
+      <div class="w" data-w="mind" data-zh="心智"><span class="en">mind</span><span class="zh">心智</span></div>
+      <div class="w" data-w="mine" data-zh="矿"><span class="en">mine</span><span class="zh">矿</span></div>
+      <div class="w" data-w="minute" data-zh="分钟"><span class="en">minute</span><span class="zh">分钟</span></div>
+      <div class="w" data-w="mist" data-zh="薄雾"><span class="en">mist</span><span class="zh">薄雾</span></div>
+      <div class="w" data-w="money" data-zh="钱"><span class="en">money</span><span class="zh">钱</span></div>
+      <div class="w" data-w="month" data-zh="月"><span class="en">month</span><span class="zh">月</span></div>
+      <div class="w" data-w="morning" data-zh="早晨"><span class="en">morning</span><span class="zh">早晨</span></div>
+      <div class="w" data-w="mother" data-zh="母亲"><span class="en">mother</span><span class="zh">母亲</span></div>
+      <div class="w" data-w="motion" data-zh="运动"><span class="en">motion</span><span class="zh">运动</span></div>
+      <div class="w" data-w="mountain" data-zh="山"><span class="en">mountain</span><span class="zh">山</span></div>
+      <div class="w" data-w="move" data-zh="移动"><span class="en">move</span><span class="zh">移动</span></div>
+      <div class="w" data-w="music" data-zh="音乐"><span class="en">music</span><span class="zh">音乐</span></div>
+      <div class="w" data-w="name" data-zh="名字"><span class="en">name</span><span class="zh">名字</span></div>
+      <div class="w" data-w="nation" data-zh="民族／国家"><span class="en">nation</span><span class="zh">民族／国家</span></div>
+      <div class="w" data-w="need" data-zh="需要"><span class="en">need</span><span class="zh">需要</span></div>
+      <div class="w" data-w="news" data-zh="新闻"><span class="en">news</span><span class="zh">新闻</span></div>
+      <div class="w" data-w="night" data-zh="夜"><span class="en">night</span><span class="zh">夜</span></div>
+      <div class="w" data-w="noise" data-zh="噪音"><span class="en">noise</span><span class="zh">噪音</span></div>
+      <div class="w" data-w="note" data-zh="笔记"><span class="en">note</span><span class="zh">笔记</span></div>
+      <div class="w" data-w="number" data-zh="数字"><span class="en">number</span><span class="zh">数字</span></div>
+      <div class="w" data-w="observation" data-zh="观察"><span class="en">observation</span><span class="zh">观察</span></div>
+      <div class="w" data-w="offer" data-zh="提议"><span class="en">offer</span><span class="zh">提议</span></div>
+      <div class="w" data-w="oil" data-zh="油"><span class="en">oil</span><span class="zh">油</span></div>
+      <div class="w" data-w="operation" data-zh="操作"><span class="en">operation</span><span class="zh">操作</span></div>
+      <div class="w" data-w="opinion" data-zh="意见"><span class="en">opinion</span><span class="zh">意见</span></div>
+      <div class="w" data-w="order" data-zh="顺序／命令"><span class="en">order</span><span class="zh">顺序／命令</span></div>
+      <div class="w" data-w="organization" data-zh="组织"><span class="en">organization</span><span class="zh">组织</span></div>
+      <div class="w" data-w="ornament" data-zh="装饰"><span class="en">ornament</span><span class="zh">装饰</span></div>
+      <div class="w" data-w="owner" data-zh="主人"><span class="en">owner</span><span class="zh">主人</span></div>
+      <div class="w" data-w="page" data-zh="页"><span class="en">page</span><span class="zh">页</span></div>
+      <div class="w" data-w="pain" data-zh="疼痛"><span class="en">pain</span><span class="zh">疼痛</span></div>
+      <div class="w" data-w="paint" data-zh="油漆"><span class="en">paint</span><span class="zh">油漆</span></div>
+      <div class="w" data-w="paper" data-zh="纸"><span class="en">paper</span><span class="zh">纸</span></div>
+      <div class="w" data-w="part" data-zh="部分"><span class="en">part</span><span class="zh">部分</span></div>
+      <div class="w" data-w="paste" data-zh="浆糊"><span class="en">paste</span><span class="zh">浆糊</span></div>
+      <div class="w" data-w="payment" data-zh="支付"><span class="en">payment</span><span class="zh">支付</span></div>
+      <div class="w" data-w="peace" data-zh="和平"><span class="en">peace</span><span class="zh">和平</span></div>
+      <div class="w" data-w="person" data-zh="人"><span class="en">person</span><span class="zh">人</span></div>
+      <div class="w" data-w="place" data-zh="地点"><span class="en">place</span><span class="zh">地点</span></div>
+      <div class="w" data-w="plant" data-zh="植物／工厂"><span class="en">plant</span><span class="zh">植物／工厂</span></div>
+      <div class="w" data-w="play" data-zh="玩耍／戏剧"><span class="en">play</span><span class="zh">玩耍／戏剧</span></div>
+      <div class="w" data-w="pleasure" data-zh="愉快"><span class="en">pleasure</span><span class="zh">愉快</span></div>
+      <div class="w" data-w="point" data-zh="点"><span class="en">point</span><span class="zh">点</span></div>
+      <div class="w" data-w="poison" data-zh="毒药"><span class="en">poison</span><span class="zh">毒药</span></div>
+      <div class="w" data-w="polish" data-zh="抛光剂"><span class="en">polish</span><span class="zh">抛光剂</span></div>
+      <div class="w" data-w="porter" data-zh="搬运工"><span class="en">porter</span><span class="zh">搬运工</span></div>
+      <div class="w" data-w="position" data-zh="位置"><span class="en">position</span><span class="zh">位置</span></div>
+      <div class="w" data-w="powder" data-zh="粉末"><span class="en">powder</span><span class="zh">粉末</span></div>
+      <div class="w" data-w="power" data-zh="力量／权力"><span class="en">power</span><span class="zh">力量／权力</span></div>
+      <div class="w" data-w="price" data-zh="价格"><span class="en">price</span><span class="zh">价格</span></div>
+      <div class="w" data-w="print" data-zh="印刷"><span class="en">print</span><span class="zh">印刷</span></div>
+      <div class="w" data-w="process" data-zh="过程"><span class="en">process</span><span class="zh">过程</span></div>
+      <div class="w" data-w="produce" data-zh="产品"><span class="en">produce</span><span class="zh">产品</span></div>
+      <div class="w" data-w="profit" data-zh="利润"><span class="en">profit</span><span class="zh">利润</span></div>
+      <div class="w" data-w="property" data-zh="财产／性质"><span class="en">property</span><span class="zh">财产／性质</span></div>
+      <div class="w" data-w="prose" data-zh="散文"><span class="en">prose</span><span class="zh">散文</span></div>
+      <div class="w" data-w="protest" data-zh="抗议"><span class="en">protest</span><span class="zh">抗议</span></div>
+      <div class="w" data-w="pull" data-zh="拉"><span class="en">pull</span><span class="zh">拉</span></div>
+      <div class="w" data-w="punishment" data-zh="惩罚"><span class="en">punishment</span><span class="zh">惩罚</span></div>
+      <div class="w" data-w="purpose" data-zh="目的"><span class="en">purpose</span><span class="zh">目的</span></div>
+      <div class="w" data-w="push" data-zh="推"><span class="en">push</span><span class="zh">推</span></div>
+      <div class="w" data-w="quality" data-zh="品质"><span class="en">quality</span><span class="zh">品质</span></div>
+      <div class="w" data-w="question" data-zh="问题"><span class="en">question</span><span class="zh">问题</span></div>
+      <div class="w" data-w="rain" data-zh="雨"><span class="en">rain</span><span class="zh">雨</span></div>
+      <div class="w" data-w="range" data-zh="范围"><span class="en">range</span><span class="zh">范围</span></div>
+      <div class="w" data-w="rate" data-zh="比率"><span class="en">rate</span><span class="zh">比率</span></div>
+      <div class="w" data-w="ray" data-zh="光线"><span class="en">ray</span><span class="zh">光线</span></div>
+      <div class="w" data-w="reaction" data-zh="反应"><span class="en">reaction</span><span class="zh">反应</span></div>
+      <div class="w" data-w="reading" data-zh="阅读"><span class="en">reading</span><span class="zh">阅读</span></div>
+      <div class="w" data-w="reason" data-zh="理由"><span class="en">reason</span><span class="zh">理由</span></div>
+      <div class="w" data-w="record" data-zh="记录"><span class="en">record</span><span class="zh">记录</span></div>
+      <div class="w" data-w="regret" data-zh="遗憾"><span class="en">regret</span><span class="zh">遗憾</span></div>
+      <div class="w" data-w="relation" data-zh="关系"><span class="en">relation</span><span class="zh">关系</span></div>
+      <div class="w" data-w="religion" data-zh="宗教"><span class="en">religion</span><span class="zh">宗教</span></div>
+      <div class="w" data-w="representative" data-zh="代表"><span class="en">representative</span><span class="zh">代表</span></div>
+      <div class="w" data-w="request" data-zh="请求"><span class="en">request</span><span class="zh">请求</span></div>
+      <div class="w" data-w="respect" data-zh="尊重"><span class="en">respect</span><span class="zh">尊重</span></div>
+      <div class="w" data-w="rest" data-zh="休息／其余"><span class="en">rest</span><span class="zh">休息／其余</span></div>
+      <div class="w" data-w="reward" data-zh="奖赏"><span class="en">reward</span><span class="zh">奖赏</span></div>
+      <div class="w" data-w="rhythm" data-zh="节奏"><span class="en">rhythm</span><span class="zh">节奏</span></div>
+      <div class="w" data-w="rice" data-zh="大米"><span class="en">rice</span><span class="zh">大米</span></div>
+      <div class="w" data-w="river" data-zh="河"><span class="en">river</span><span class="zh">河</span></div>
+      <div class="w" data-w="road" data-zh="路"><span class="en">road</span><span class="zh">路</span></div>
+      <div class="w" data-w="roll" data-zh="卷／滚动"><span class="en">roll</span><span class="zh">卷／滚动</span></div>
+      <div class="w" data-w="room" data-zh="房间"><span class="en">room</span><span class="zh">房间</span></div>
+      <div class="w" data-w="rub" data-zh="摩擦"><span class="en">rub</span><span class="zh">摩擦</span></div>
+      <div class="w" data-w="rule" data-zh="规则"><span class="en">rule</span><span class="zh">规则</span></div>
+      <div class="w" data-w="run" data-zh="跑"><span class="en">run</span><span class="zh">跑</span></div>
+      <div class="w" data-w="salt" data-zh="盐"><span class="en">salt</span><span class="zh">盐</span></div>
+      <div class="w" data-w="sand" data-zh="沙"><span class="en">sand</span><span class="zh">沙</span></div>
+      <div class="w" data-w="scale" data-zh="刻度／天平"><span class="en">scale</span><span class="zh">刻度／天平</span></div>
+      <div class="w" data-w="science" data-zh="科学"><span class="en">science</span><span class="zh">科学</span></div>
+      <div class="w" data-w="sea" data-zh="海"><span class="en">sea</span><span class="zh">海</span></div>
+      <div class="w" data-w="seat" data-zh="座位"><span class="en">seat</span><span class="zh">座位</span></div>
+      <div class="w" data-w="secretary" data-zh="秘书"><span class="en">secretary</span><span class="zh">秘书</span></div>
+      <div class="w" data-w="selection" data-zh="选择"><span class="en">selection</span><span class="zh">选择</span></div>
+      <div class="w" data-w="self" data-zh="自我"><span class="en">self</span><span class="zh">自我</span></div>
+      <div class="w" data-w="sense" data-zh="感官／意义"><span class="en">sense</span><span class="zh">感官／意义</span></div>
+      <div class="w" data-w="servant" data-zh="仆人"><span class="en">servant</span><span class="zh">仆人</span></div>
+      <div class="w" data-w="sex" data-zh="性别"><span class="en">sex</span><span class="zh">性别</span></div>
+      <div class="w" data-w="shade" data-zh="阴影"><span class="en">shade</span><span class="zh">阴影</span></div>
+      <div class="w" data-w="shake" data-zh="摇动"><span class="en">shake</span><span class="zh">摇动</span></div>
+      <div class="w" data-w="shame" data-zh="羞耻"><span class="en">shame</span><span class="zh">羞耻</span></div>
+      <div class="w" data-w="shock" data-zh="震动"><span class="en">shock</span><span class="zh">震动</span></div>
+      <div class="w" data-w="side" data-zh="侧面"><span class="en">side</span><span class="zh">侧面</span></div>
+      <div class="w" data-w="sign" data-zh="标记／招牌"><span class="en">sign</span><span class="zh">标记／招牌</span></div>
+      <div class="w" data-w="silk" data-zh="丝绸"><span class="en">silk</span><span class="zh">丝绸</span></div>
+      <div class="w" data-w="silver" data-zh="银"><span class="en">silver</span><span class="zh">银</span></div>
+      <div class="w" data-w="sister" data-zh="姐妹"><span class="en">sister</span><span class="zh">姐妹</span></div>
+      <div class="w" data-w="size" data-zh="尺寸"><span class="en">size</span><span class="zh">尺寸</span></div>
+      <div class="w" data-w="sky" data-zh="天空"><span class="en">sky</span><span class="zh">天空</span></div>
+      <div class="w" data-w="sleep" data-zh="睡眠"><span class="en">sleep</span><span class="zh">睡眠</span></div>
+      <div class="w" data-w="slip" data-zh="滑倒／纸片"><span class="en">slip</span><span class="zh">滑倒／纸片</span></div>
+      <div class="w" data-w="slope" data-zh="斜坡"><span class="en">slope</span><span class="zh">斜坡</span></div>
+      <div class="w" data-w="smash" data-zh="猛击"><span class="en">smash</span><span class="zh">猛击</span></div>
+      <div class="w" data-w="smell" data-zh="气味"><span class="en">smell</span><span class="zh">气味</span></div>
+      <div class="w" data-w="smile" data-zh="微笑"><span class="en">smile</span><span class="zh">微笑</span></div>
+      <div class="w" data-w="smoke" data-zh="烟"><span class="en">smoke</span><span class="zh">烟</span></div>
+      <div class="w" data-w="sneeze" data-zh="喷嚏"><span class="en">sneeze</span><span class="zh">喷嚏</span></div>
+      <div class="w" data-w="snow" data-zh="雪"><span class="en">snow</span><span class="zh">雪</span></div>
+      <div class="w" data-w="soap" data-zh="肥皂"><span class="en">soap</span><span class="zh">肥皂</span></div>
+      <div class="w" data-w="society" data-zh="社会"><span class="en">society</span><span class="zh">社会</span></div>
+      <div class="w" data-w="son" data-zh="儿子"><span class="en">son</span><span class="zh">儿子</span></div>
+      <div class="w" data-w="song" data-zh="歌"><span class="en">song</span><span class="zh">歌</span></div>
+      <div class="w" data-w="sort" data-zh="种类"><span class="en">sort</span><span class="zh">种类</span></div>
+      <div class="w" data-w="sound" data-zh="声音"><span class="en">sound</span><span class="zh">声音</span></div>
+      <div class="w" data-w="soup" data-zh="汤"><span class="en">soup</span><span class="zh">汤</span></div>
+      <div class="w" data-w="space" data-zh="空间"><span class="en">space</span><span class="zh">空间</span></div>
+      <div class="w" data-w="stage" data-zh="舞台／阶段"><span class="en">stage</span><span class="zh">舞台／阶段</span></div>
+      <div class="w" data-w="start" data-zh="开始"><span class="en">start</span><span class="zh">开始</span></div>
+      <div class="w" data-w="statement" data-zh="陈述"><span class="en">statement</span><span class="zh">陈述</span></div>
+      <div class="w" data-w="steam" data-zh="蒸汽"><span class="en">steam</span><span class="zh">蒸汽</span></div>
+      <div class="w" data-w="steel" data-zh="钢"><span class="en">steel</span><span class="zh">钢</span></div>
+      <div class="w" data-w="step" data-zh="脚步"><span class="en">step</span><span class="zh">脚步</span></div>
+      <div class="w" data-w="stitch" data-zh="针脚"><span class="en">stitch</span><span class="zh">针脚</span></div>
+      <div class="w" data-w="stone" data-zh="石头"><span class="en">stone</span><span class="zh">石头</span></div>
+      <div class="w" data-w="stop" data-zh="停止"><span class="en">stop</span><span class="zh">停止</span></div>
+      <div class="w" data-w="story" data-zh="故事"><span class="en">story</span><span class="zh">故事</span></div>
+      <div class="w" data-w="stretch" data-zh="伸展"><span class="en">stretch</span><span class="zh">伸展</span></div>
+      <div class="w" data-w="structure" data-zh="结构"><span class="en">structure</span><span class="zh">结构</span></div>
+      <div class="w" data-w="substance" data-zh="物质"><span class="en">substance</span><span class="zh">物质</span></div>
+      <div class="w" data-w="sugar" data-zh="糖"><span class="en">sugar</span><span class="zh">糖</span></div>
+      <div class="w" data-w="suggestion" data-zh="建议"><span class="en">suggestion</span><span class="zh">建议</span></div>
+      <div class="w" data-w="summer" data-zh="夏天"><span class="en">summer</span><span class="zh">夏天</span></div>
+      <div class="w" data-w="support" data-zh="支撑"><span class="en">support</span><span class="zh">支撑</span></div>
+      <div class="w" data-w="surprise" data-zh="惊讶"><span class="en">surprise</span><span class="zh">惊讶</span></div>
+      <div class="w" data-w="swim" data-zh="游泳"><span class="en">swim</span><span class="zh">游泳</span></div>
+      <div class="w" data-w="system" data-zh="系统"><span class="en">system</span><span class="zh">系统</span></div>
+      <div class="w" data-w="talk" data-zh="谈话"><span class="en">talk</span><span class="zh">谈话</span></div>
+      <div class="w" data-w="taste" data-zh="味道"><span class="en">taste</span><span class="zh">味道</span></div>
+      <div class="w" data-w="tax" data-zh="税"><span class="en">tax</span><span class="zh">税</span></div>
+      <div class="w" data-w="teaching" data-zh="教学"><span class="en">teaching</span><span class="zh">教学</span></div>
+      <div class="w" data-w="tendency" data-zh="倾向"><span class="en">tendency</span><span class="zh">倾向</span></div>
+      <div class="w" data-w="test" data-zh="测试"><span class="en">test</span><span class="zh">测试</span></div>
+      <div class="w" data-w="theory" data-zh="理论"><span class="en">theory</span><span class="zh">理论</span></div>
+      <div class="w" data-w="thing" data-zh="东西"><span class="en">thing</span><span class="zh">东西</span></div>
+      <div class="w" data-w="thought" data-zh="思想"><span class="en">thought</span><span class="zh">思想</span></div>
+      <div class="w" data-w="thunder" data-zh="雷"><span class="en">thunder</span><span class="zh">雷</span></div>
+      <div class="w" data-w="time" data-zh="时间"><span class="en">time</span><span class="zh">时间</span></div>
+      <div class="w" data-w="tin" data-zh="锡／罐头"><span class="en">tin</span><span class="zh">锡／罐头</span></div>
+      <div class="w" data-w="top" data-zh="顶部"><span class="en">top</span><span class="zh">顶部</span></div>
+      <div class="w" data-w="touch" data-zh="触摸"><span class="en">touch</span><span class="zh">触摸</span></div>
+      <div class="w" data-w="trade" data-zh="贸易"><span class="en">trade</span><span class="zh">贸易</span></div>
+      <div class="w" data-w="transport" data-zh="运输"><span class="en">transport</span><span class="zh">运输</span></div>
+      <div class="w" data-w="trick" data-zh="诡计"><span class="en">trick</span><span class="zh">诡计</span></div>
+      <div class="w" data-w="trouble" data-zh="麻烦"><span class="en">trouble</span><span class="zh">麻烦</span></div>
+      <div class="w" data-w="turn" data-zh="转动／转弯"><span class="en">turn</span><span class="zh">转动／转弯</span></div>
+      <div class="w" data-w="twist" data-zh="扭转"><span class="en">twist</span><span class="zh">扭转</span></div>
+      <div class="w" data-w="unit" data-zh="单位"><span class="en">unit</span><span class="zh">单位</span></div>
+      <div class="w" data-w="use" data-zh="使用"><span class="en">use</span><span class="zh">使用</span></div>
+      <div class="w" data-w="value" data-zh="价值"><span class="en">value</span><span class="zh">价值</span></div>
+      <div class="w" data-w="verse" data-zh="诗句"><span class="en">verse</span><span class="zh">诗句</span></div>
+      <div class="w" data-w="vessel" data-zh="容器／船"><span class="en">vessel</span><span class="zh">容器／船</span></div>
+      <div class="w" data-w="view" data-zh="视野"><span class="en">view</span><span class="zh">视野</span></div>
+      <div class="w" data-w="voice" data-zh="声音"><span class="en">voice</span><span class="zh">声音</span></div>
+      <div class="w" data-w="walk" data-zh="走路"><span class="en">walk</span><span class="zh">走路</span></div>
+      <div class="w" data-w="war" data-zh="战争"><span class="en">war</span><span class="zh">战争</span></div>
+      <div class="w" data-w="wash" data-zh="洗涤"><span class="en">wash</span><span class="zh">洗涤</span></div>
+      <div class="w" data-w="waste" data-zh="浪费"><span class="en">waste</span><span class="zh">浪费</span></div>
+      <div class="w" data-w="water" data-zh="水"><span class="en">water</span><span class="zh">水</span></div>
+      <div class="w" data-w="wave" data-zh="波浪"><span class="en">wave</span><span class="zh">波浪</span></div>
+      <div class="w" data-w="wax" data-zh="蜡"><span class="en">wax</span><span class="zh">蜡</span></div>
+      <div class="w" data-w="way" data-zh="道路／方式"><span class="en">way</span><span class="zh">道路／方式</span></div>
+      <div class="w" data-w="weather" data-zh="天气"><span class="en">weather</span><span class="zh">天气</span></div>
+      <div class="w" data-w="week" data-zh="星期"><span class="en">week</span><span class="zh">星期</span></div>
+      <div class="w" data-w="weight" data-zh="重量"><span class="en">weight</span><span class="zh">重量</span></div>
+      <div class="w" data-w="wind" data-zh="风"><span class="en">wind</span><span class="zh">风</span></div>
+      <div class="w" data-w="wine" data-zh="葡萄酒"><span class="en">wine</span><span class="zh">葡萄酒</span></div>
+      <div class="w" data-w="winter" data-zh="冬天"><span class="en">winter</span><span class="zh">冬天</span></div>
+      <div class="w" data-w="woman" data-zh="女人"><span class="en">woman</span><span class="zh">女人</span></div>
+      <div class="w" data-w="wood" data-zh="木材"><span class="en">wood</span><span class="zh">木材</span></div>
+      <div class="w" data-w="wool" data-zh="羊毛"><span class="en">wool</span><span class="zh">羊毛</span></div>
+      <div class="w" data-w="word" data-zh="单词"><span class="en">word</span><span class="zh">单词</span></div>
+      <div class="w" data-w="work" data-zh="工作"><span class="en">work</span><span class="zh">工作</span></div>
+      <div class="w" data-w="wound" data-zh="伤口"><span class="en">wound</span><span class="zh">伤口</span></div>
+      <div class="w" data-w="writing" data-zh="书写"><span class="en">writing</span><span class="zh">书写</span></div>
+      <div class="w" data-w="year" data-zh="年"><span class="en">year</span><span class="zh">年</span></div>
+    </div>
+  </section>
+  <section data-i="2">
+    <div class="sec-head" style="border-left-color:#d97706">
+      <h2>具体名词 · Things (Picturable)</h2><span class="sub">能画出来、看得见的实物名词</span><span class="cnt">200 词</span>
+    </div>
+    <div class="grid">
+      <div class="w" data-w="angle" data-zh="角"><span class="en">angle</span><span class="zh">角</span></div>
+      <div class="w" data-w="ant" data-zh="蚂蚁"><span class="en">ant</span><span class="zh">蚂蚁</span></div>
+      <div class="w" data-w="apple" data-zh="苹果"><span class="en">apple</span><span class="zh">苹果</span></div>
+      <div class="w" data-w="arch" data-zh="拱门"><span class="en">arch</span><span class="zh">拱门</span></div>
+      <div class="w" data-w="arm" data-zh="手臂"><span class="en">arm</span><span class="zh">手臂</span></div>
+      <div class="w" data-w="army" data-zh="军队"><span class="en">army</span><span class="zh">军队</span></div>
+      <div class="w" data-w="baby" data-zh="婴儿"><span class="en">baby</span><span class="zh">婴儿</span></div>
+      <div class="w" data-w="bag" data-zh="包"><span class="en">bag</span><span class="zh">包</span></div>
+      <div class="w" data-w="ball" data-zh="球"><span class="en">ball</span><span class="zh">球</span></div>
+      <div class="w" data-w="band" data-zh="带子"><span class="en">band</span><span class="zh">带子</span></div>
+      <div class="w" data-w="basin" data-zh="盆"><span class="en">basin</span><span class="zh">盆</span></div>
+      <div class="w" data-w="basket" data-zh="篮子"><span class="en">basket</span><span class="zh">篮子</span></div>
+      <div class="w" data-w="bath" data-zh="洗澡"><span class="en">bath</span><span class="zh">洗澡</span></div>
+      <div class="w" data-w="bed" data-zh="床"><span class="en">bed</span><span class="zh">床</span></div>
+      <div class="w" data-w="bee" data-zh="蜜蜂"><span class="en">bee</span><span class="zh">蜜蜂</span></div>
+      <div class="w" data-w="bell" data-zh="铃"><span class="en">bell</span><span class="zh">铃</span></div>
+      <div class="w" data-w="berry" data-zh="浆果"><span class="en">berry</span><span class="zh">浆果</span></div>
+      <div class="w" data-w="bird" data-zh="鸟"><span class="en">bird</span><span class="zh">鸟</span></div>
+      <div class="w" data-w="blade" data-zh="刀刃"><span class="en">blade</span><span class="zh">刀刃</span></div>
+      <div class="w" data-w="board" data-zh="木板"><span class="en">board</span><span class="zh">木板</span></div>
+      <div class="w" data-w="boat" data-zh="船"><span class="en">boat</span><span class="zh">船</span></div>
+      <div class="w" data-w="bone" data-zh="骨头"><span class="en">bone</span><span class="zh">骨头</span></div>
+      <div class="w" data-w="book" data-zh="书"><span class="en">book</span><span class="zh">书</span></div>
+      <div class="w" data-w="boot" data-zh="靴子"><span class="en">boot</span><span class="zh">靴子</span></div>
+      <div class="w" data-w="bottle" data-zh="瓶子"><span class="en">bottle</span><span class="zh">瓶子</span></div>
+      <div class="w" data-w="box" data-zh="盒子"><span class="en">box</span><span class="zh">盒子</span></div>
+      <div class="w" data-w="boy" data-zh="男孩"><span class="en">boy</span><span class="zh">男孩</span></div>
+      <div class="w" data-w="brain" data-zh="大脑"><span class="en">brain</span><span class="zh">大脑</span></div>
+      <div class="w" data-w="brake" data-zh="刹车"><span class="en">brake</span><span class="zh">刹车</span></div>
+      <div class="w" data-w="branch" data-zh="树枝"><span class="en">branch</span><span class="zh">树枝</span></div>
+      <div class="w" data-w="brick" data-zh="砖"><span class="en">brick</span><span class="zh">砖</span></div>
+      <div class="w" data-w="bridge" data-zh="桥"><span class="en">bridge</span><span class="zh">桥</span></div>
+      <div class="w" data-w="brush" data-zh="刷子"><span class="en">brush</span><span class="zh">刷子</span></div>
+      <div class="w" data-w="bucket" data-zh="桶"><span class="en">bucket</span><span class="zh">桶</span></div>
+      <div class="w" data-w="bulb" data-zh="灯泡"><span class="en">bulb</span><span class="zh">灯泡</span></div>
+      <div class="w" data-w="button" data-zh="纽扣"><span class="en">button</span><span class="zh">纽扣</span></div>
+      <div class="w" data-w="cake" data-zh="蛋糕"><span class="en">cake</span><span class="zh">蛋糕</span></div>
+      <div class="w" data-w="camera" data-zh="相机"><span class="en">camera</span><span class="zh">相机</span></div>
+      <div class="w" data-w="card" data-zh="卡片"><span class="en">card</span><span class="zh">卡片</span></div>
+      <div class="w" data-w="cart" data-zh="手推车"><span class="en">cart</span><span class="zh">手推车</span></div>
+      <div class="w" data-w="carriage" data-zh="马车／车厢"><span class="en">carriage</span><span class="zh">马车／车厢</span></div>
+      <div class="w" data-w="cat" data-zh="猫"><span class="en">cat</span><span class="zh">猫</span></div>
+      <div class="w" data-w="chain" data-zh="链子"><span class="en">chain</span><span class="zh">链子</span></div>
+      <div class="w" data-w="cheese" data-zh="奶酪"><span class="en">cheese</span><span class="zh">奶酪</span></div>
+      <div class="w" data-w="chest" data-zh="箱子／胸"><span class="en">chest</span><span class="zh">箱子／胸</span></div>
+      <div class="w" data-w="chin" data-zh="下巴"><span class="en">chin</span><span class="zh">下巴</span></div>
+      <div class="w" data-w="church" data-zh="教堂"><span class="en">church</span><span class="zh">教堂</span></div>
+      <div class="w" data-w="circle" data-zh="圆"><span class="en">circle</span><span class="zh">圆</span></div>
+      <div class="w" data-w="clock" data-zh="钟"><span class="en">clock</span><span class="zh">钟</span></div>
+      <div class="w" data-w="cloud" data-zh="云"><span class="en">cloud</span><span class="zh">云</span></div>
+      <div class="w" data-w="coat" data-zh="外套"><span class="en">coat</span><span class="zh">外套</span></div>
+      <div class="w" data-w="collar" data-zh="衣领"><span class="en">collar</span><span class="zh">衣领</span></div>
+      <div class="w" data-w="comb" data-zh="梳子"><span class="en">comb</span><span class="zh">梳子</span></div>
+      <div class="w" data-w="cord" data-zh="细绳"><span class="en">cord</span><span class="zh">细绳</span></div>
+      <div class="w" data-w="cow" data-zh="母牛"><span class="en">cow</span><span class="zh">母牛</span></div>
+      <div class="w" data-w="cup" data-zh="杯子"><span class="en">cup</span><span class="zh">杯子</span></div>
+      <div class="w" data-w="curtain" data-zh="窗帘"><span class="en">curtain</span><span class="zh">窗帘</span></div>
+      <div class="w" data-w="cushion" data-zh="坐垫"><span class="en">cushion</span><span class="zh">坐垫</span></div>
+      <div class="w" data-w="dog" data-zh="狗"><span class="en">dog</span><span class="zh">狗</span></div>
+      <div class="w" data-w="door" data-zh="门"><span class="en">door</span><span class="zh">门</span></div>
+      <div class="w" data-w="drain" data-zh="排水管"><span class="en">drain</span><span class="zh">排水管</span></div>
+      <div class="w" data-w="drawer" data-zh="抽屉"><span class="en">drawer</span><span class="zh">抽屉</span></div>
+      <div class="w" data-w="dress" data-zh="连衣裙"><span class="en">dress</span><span class="zh">连衣裙</span></div>
+      <div class="w" data-w="drop" data-zh="水滴"><span class="en">drop</span><span class="zh">水滴</span></div>
+      <div class="w" data-w="ear" data-zh="耳朵"><span class="en">ear</span><span class="zh">耳朵</span></div>
+      <div class="w" data-w="egg" data-zh="蛋"><span class="en">egg</span><span class="zh">蛋</span></div>
+      <div class="w" data-w="engine" data-zh="发动机"><span class="en">engine</span><span class="zh">发动机</span></div>
+      <div class="w" data-w="eye" data-zh="眼睛"><span class="en">eye</span><span class="zh">眼睛</span></div>
+      <div class="w" data-w="face" data-zh="脸"><span class="en">face</span><span class="zh">脸</span></div>
+      <div class="w" data-w="farm" data-zh="农场"><span class="en">farm</span><span class="zh">农场</span></div>
+      <div class="w" data-w="feather" data-zh="羽毛"><span class="en">feather</span><span class="zh">羽毛</span></div>
+      <div class="w" data-w="finger" data-zh="手指"><span class="en">finger</span><span class="zh">手指</span></div>
+      <div class="w" data-w="fish" data-zh="鱼"><span class="en">fish</span><span class="zh">鱼</span></div>
+      <div class="w" data-w="flag" data-zh="旗"><span class="en">flag</span><span class="zh">旗</span></div>
+      <div class="w" data-w="floor" data-zh="地板"><span class="en">floor</span><span class="zh">地板</span></div>
+      <div class="w" data-w="fly" data-zh="苍蝇"><span class="en">fly</span><span class="zh">苍蝇</span></div>
+      <div class="w" data-w="foot" data-zh="脚"><span class="en">foot</span><span class="zh">脚</span></div>
+      <div class="w" data-w="fork" data-zh="叉子"><span class="en">fork</span><span class="zh">叉子</span></div>
+      <div class="w" data-w="fowl" data-zh="家禽"><span class="en">fowl</span><span class="zh">家禽</span></div>
+      <div class="w" data-w="frame" data-zh="框架"><span class="en">frame</span><span class="zh">框架</span></div>
+      <div class="w" data-w="garden" data-zh="花园"><span class="en">garden</span><span class="zh">花园</span></div>
+      <div class="w" data-w="girl" data-zh="女孩"><span class="en">girl</span><span class="zh">女孩</span></div>
+      <div class="w" data-w="glove" data-zh="手套"><span class="en">glove</span><span class="zh">手套</span></div>
+      <div class="w" data-w="goat" data-zh="山羊"><span class="en">goat</span><span class="zh">山羊</span></div>
+      <div class="w" data-w="gun" data-zh="枪"><span class="en">gun</span><span class="zh">枪</span></div>
+      <div class="w" data-w="hair" data-zh="头发"><span class="en">hair</span><span class="zh">头发</span></div>
+      <div class="w" data-w="hammer" data-zh="锤子"><span class="en">hammer</span><span class="zh">锤子</span></div>
+      <div class="w" data-w="hand" data-zh="手"><span class="en">hand</span><span class="zh">手</span></div>
+      <div class="w" data-w="hat" data-zh="帽子"><span class="en">hat</span><span class="zh">帽子</span></div>
+      <div class="w" data-w="head" data-zh="头"><span class="en">head</span><span class="zh">头</span></div>
+      <div class="w" data-w="heart" data-zh="心脏"><span class="en">heart</span><span class="zh">心脏</span></div>
+      <div class="w" data-w="hook" data-zh="钩子"><span class="en">hook</span><span class="zh">钩子</span></div>
+      <div class="w" data-w="horn" data-zh="角／喇叭"><span class="en">horn</span><span class="zh">角／喇叭</span></div>
+      <div class="w" data-w="horse" data-zh="马"><span class="en">horse</span><span class="zh">马</span></div>
+      <div class="w" data-w="hospital" data-zh="医院"><span class="en">hospital</span><span class="zh">医院</span></div>
+      <div class="w" data-w="house" data-zh="房子"><span class="en">house</span><span class="zh">房子</span></div>
+      <div class="w" data-w="island" data-zh="岛"><span class="en">island</span><span class="zh">岛</span></div>
+      <div class="w" data-w="jewel" data-zh="宝石"><span class="en">jewel</span><span class="zh">宝石</span></div>
+      <div class="w" data-w="kettle" data-zh="水壶"><span class="en">kettle</span><span class="zh">水壶</span></div>
+      <div class="w" data-w="key" data-zh="钥匙"><span class="en">key</span><span class="zh">钥匙</span></div>
+      <div class="w" data-w="knee" data-zh="膝盖"><span class="en">knee</span><span class="zh">膝盖</span></div>
+      <div class="w" data-w="knife" data-zh="刀"><span class="en">knife</span><span class="zh">刀</span></div>
+      <div class="w" data-w="knot" data-zh="结"><span class="en">knot</span><span class="zh">结</span></div>
+      <div class="w" data-w="leaf" data-zh="叶子"><span class="en">leaf</span><span class="zh">叶子</span></div>
+      <div class="w" data-w="leg" data-zh="腿"><span class="en">leg</span><span class="zh">腿</span></div>
+      <div class="w" data-w="library" data-zh="图书馆"><span class="en">library</span><span class="zh">图书馆</span></div>
+      <div class="w" data-w="line" data-zh="线"><span class="en">line</span><span class="zh">线</span></div>
+      <div class="w" data-w="lip" data-zh="嘴唇"><span class="en">lip</span><span class="zh">嘴唇</span></div>
+      <div class="w" data-w="lock" data-zh="锁"><span class="en">lock</span><span class="zh">锁</span></div>
+      <div class="w" data-w="map" data-zh="地图"><span class="en">map</span><span class="zh">地图</span></div>
+      <div class="w" data-w="match" data-zh="火柴"><span class="en">match</span><span class="zh">火柴</span></div>
+      <div class="w" data-w="monkey" data-zh="猴子"><span class="en">monkey</span><span class="zh">猴子</span></div>
+      <div class="w" data-w="moon" data-zh="月亮"><span class="en">moon</span><span class="zh">月亮</span></div>
+      <div class="w" data-w="mouth" data-zh="嘴"><span class="en">mouth</span><span class="zh">嘴</span></div>
+      <div class="w" data-w="muscle" data-zh="肌肉"><span class="en">muscle</span><span class="zh">肌肉</span></div>
+      <div class="w" data-w="nail" data-zh="钉子／指甲"><span class="en">nail</span><span class="zh">钉子／指甲</span></div>
+      <div class="w" data-w="neck" data-zh="脖子"><span class="en">neck</span><span class="zh">脖子</span></div>
+      <div class="w" data-w="needle" data-zh="针"><span class="en">needle</span><span class="zh">针</span></div>
+      <div class="w" data-w="nerve" data-zh="神经"><span class="en">nerve</span><span class="zh">神经</span></div>
+      <div class="w" data-w="net" data-zh="网"><span class="en">net</span><span class="zh">网</span></div>
+      <div class="w" data-w="nose" data-zh="鼻子"><span class="en">nose</span><span class="zh">鼻子</span></div>
+      <div class="w" data-w="nut" data-zh="坚果"><span class="en">nut</span><span class="zh">坚果</span></div>
+      <div class="w" data-w="office" data-zh="办公室"><span class="en">office</span><span class="zh">办公室</span></div>
+      <div class="w" data-w="orange" data-zh="橙子"><span class="en">orange</span><span class="zh">橙子</span></div>
+      <div class="w" data-w="oven" data-zh="烤箱"><span class="en">oven</span><span class="zh">烤箱</span></div>
+      <div class="w" data-w="parcel" data-zh="包裹"><span class="en">parcel</span><span class="zh">包裹</span></div>
+      <div class="w" data-w="pen" data-zh="钢笔"><span class="en">pen</span><span class="zh">钢笔</span></div>
+      <div class="w" data-w="pencil" data-zh="铅笔"><span class="en">pencil</span><span class="zh">铅笔</span></div>
+      <div class="w" data-w="picture" data-zh="图画"><span class="en">picture</span><span class="zh">图画</span></div>
+      <div class="w" data-w="pig" data-zh="猪"><span class="en">pig</span><span class="zh">猪</span></div>
+      <div class="w" data-w="pin" data-zh="别针"><span class="en">pin</span><span class="zh">别针</span></div>
+      <div class="w" data-w="pipe" data-zh="管子"><span class="en">pipe</span><span class="zh">管子</span></div>
+      <div class="w" data-w="plane" data-zh="飞机"><span class="en">plane</span><span class="zh">飞机</span></div>
+      <div class="w" data-w="plate" data-zh="盘子"><span class="en">plate</span><span class="zh">盘子</span></div>
+      <div class="w" data-w="plough" data-zh="犁"><span class="en">plough</span><span class="zh">犁</span></div>
+      <div class="w" data-w="pocket" data-zh="口袋"><span class="en">pocket</span><span class="zh">口袋</span></div>
+      <div class="w" data-w="pot" data-zh="罐／锅"><span class="en">pot</span><span class="zh">罐／锅</span></div>
+      <div class="w" data-w="potato" data-zh="土豆"><span class="en">potato</span><span class="zh">土豆</span></div>
+      <div class="w" data-w="prison" data-zh="监狱"><span class="en">prison</span><span class="zh">监狱</span></div>
+      <div class="w" data-w="pump" data-zh="泵"><span class="en">pump</span><span class="zh">泵</span></div>
+      <div class="w" data-w="rail" data-zh="铁轨"><span class="en">rail</span><span class="zh">铁轨</span></div>
+      <div class="w" data-w="rat" data-zh="老鼠"><span class="en">rat</span><span class="zh">老鼠</span></div>
+      <div class="w" data-w="receipt" data-zh="收据"><span class="en">receipt</span><span class="zh">收据</span></div>
+      <div class="w" data-w="ring" data-zh="戒指／环"><span class="en">ring</span><span class="zh">戒指／环</span></div>
+      <div class="w" data-w="rod" data-zh="杆"><span class="en">rod</span><span class="zh">杆</span></div>
+      <div class="w" data-w="roof" data-zh="屋顶"><span class="en">roof</span><span class="zh">屋顶</span></div>
+      <div class="w" data-w="root" data-zh="根"><span class="en">root</span><span class="zh">根</span></div>
+      <div class="w" data-w="sail" data-zh="帆"><span class="en">sail</span><span class="zh">帆</span></div>
+      <div class="w" data-w="school" data-zh="学校"><span class="en">school</span><span class="zh">学校</span></div>
+      <div class="w" data-w="scissors" data-zh="剪刀"><span class="en">scissors</span><span class="zh">剪刀</span></div>
+      <div class="w" data-w="screw" data-zh="螺丝"><span class="en">screw</span><span class="zh">螺丝</span></div>
+      <div class="w" data-w="seed" data-zh="种子"><span class="en">seed</span><span class="zh">种子</span></div>
+      <div class="w" data-w="sheep" data-zh="绵羊"><span class="en">sheep</span><span class="zh">绵羊</span></div>
+      <div class="w" data-w="shelf" data-zh="架子"><span class="en">shelf</span><span class="zh">架子</span></div>
+      <div class="w" data-w="ship" data-zh="轮船"><span class="en">ship</span><span class="zh">轮船</span></div>
+      <div class="w" data-w="shirt" data-zh="衬衫"><span class="en">shirt</span><span class="zh">衬衫</span></div>
+      <div class="w" data-w="shoe" data-zh="鞋"><span class="en">shoe</span><span class="zh">鞋</span></div>
+      <div class="w" data-w="skin" data-zh="皮肤"><span class="en">skin</span><span class="zh">皮肤</span></div>
+      <div class="w" data-w="skirt" data-zh="裙子"><span class="en">skirt</span><span class="zh">裙子</span></div>
+      <div class="w" data-w="snake" data-zh="蛇"><span class="en">snake</span><span class="zh">蛇</span></div>
+      <div class="w" data-w="sock" data-zh="短袜"><span class="en">sock</span><span class="zh">短袜</span></div>
+      <div class="w" data-w="spade" data-zh="铲子"><span class="en">spade</span><span class="zh">铲子</span></div>
+      <div class="w" data-w="sponge" data-zh="海绵"><span class="en">sponge</span><span class="zh">海绵</span></div>
+      <div class="w" data-w="spoon" data-zh="勺子"><span class="en">spoon</span><span class="zh">勺子</span></div>
+      <div class="w" data-w="spring" data-zh="春天／弹簧"><span class="en">spring</span><span class="zh">春天／弹簧</span></div>
+      <div class="w" data-w="square" data-zh="正方形"><span class="en">square</span><span class="zh">正方形</span></div>
+      <div class="w" data-w="stamp" data-zh="邮票"><span class="en">stamp</span><span class="zh">邮票</span></div>
+      <div class="w" data-w="star" data-zh="星星"><span class="en">star</span><span class="zh">星星</span></div>
+      <div class="w" data-w="station" data-zh="车站"><span class="en">station</span><span class="zh">车站</span></div>
+      <div class="w" data-w="stem" data-zh="茎"><span class="en">stem</span><span class="zh">茎</span></div>
+      <div class="w" data-w="stick" data-zh="棍子"><span class="en">stick</span><span class="zh">棍子</span></div>
+      <div class="w" data-w="stocking" data-zh="长袜"><span class="en">stocking</span><span class="zh">长袜</span></div>
+      <div class="w" data-w="stomach" data-zh="胃"><span class="en">stomach</span><span class="zh">胃</span></div>
+      <div class="w" data-w="store" data-zh="商店"><span class="en">store</span><span class="zh">商店</span></div>
+      <div class="w" data-w="street" data-zh="街道"><span class="en">street</span><span class="zh">街道</span></div>
+      <div class="w" data-w="sun" data-zh="太阳"><span class="en">sun</span><span class="zh">太阳</span></div>
+      <div class="w" data-w="table" data-zh="桌子"><span class="en">table</span><span class="zh">桌子</span></div>
+      <div class="w" data-w="tail" data-zh="尾巴"><span class="en">tail</span><span class="zh">尾巴</span></div>
+      <div class="w" data-w="thread" data-zh="线"><span class="en">thread</span><span class="zh">线</span></div>
+      <div class="w" data-w="throat" data-zh="喉咙"><span class="en">throat</span><span class="zh">喉咙</span></div>
+      <div class="w" data-w="thumb" data-zh="拇指"><span class="en">thumb</span><span class="zh">拇指</span></div>
+      <div class="w" data-w="ticket" data-zh="票"><span class="en">ticket</span><span class="zh">票</span></div>
+      <div class="w" data-w="toe" data-zh="脚趾"><span class="en">toe</span><span class="zh">脚趾</span></div>
+      <div class="w" data-w="tongue" data-zh="舌头"><span class="en">tongue</span><span class="zh">舌头</span></div>
+      <div class="w" data-w="tooth" data-zh="牙齿"><span class="en">tooth</span><span class="zh">牙齿</span></div>
+      <div class="w" data-w="town" data-zh="城镇"><span class="en">town</span><span class="zh">城镇</span></div>
+      <div class="w" data-w="train" data-zh="火车"><span class="en">train</span><span class="zh">火车</span></div>
+      <div class="w" data-w="tray" data-zh="托盘"><span class="en">tray</span><span class="zh">托盘</span></div>
+      <div class="w" data-w="tree" data-zh="树"><span class="en">tree</span><span class="zh">树</span></div>
+      <div class="w" data-w="trousers" data-zh="长裤"><span class="en">trousers</span><span class="zh">长裤</span></div>
+      <div class="w" data-w="umbrella" data-zh="伞"><span class="en">umbrella</span><span class="zh">伞</span></div>
+      <div class="w" data-w="wall" data-zh="墙"><span class="en">wall</span><span class="zh">墙</span></div>
+      <div class="w" data-w="watch" data-zh="手表"><span class="en">watch</span><span class="zh">手表</span></div>
+      <div class="w" data-w="wheel" data-zh="轮子"><span class="en">wheel</span><span class="zh">轮子</span></div>
+      <div class="w" data-w="whip" data-zh="鞭子"><span class="en">whip</span><span class="zh">鞭子</span></div>
+      <div class="w" data-w="whistle" data-zh="哨子"><span class="en">whistle</span><span class="zh">哨子</span></div>
+      <div class="w" data-w="window" data-zh="窗户"><span class="en">window</span><span class="zh">窗户</span></div>
+      <div class="w" data-w="wing" data-zh="翅膀"><span class="en">wing</span><span class="zh">翅膀</span></div>
+      <div class="w" data-w="wire" data-zh="金属丝"><span class="en">wire</span><span class="zh">金属丝</span></div>
+      <div class="w" data-w="worm" data-zh="蠕虫"><span class="en">worm</span><span class="zh">蠕虫</span></div>
+    </div>
+  </section>
+  <section data-i="3">
+    <div class="sec-head" style="border-left-color:#7c3aed">
+      <h2>性质词 · Qualities (Descriptive)</h2><span class="sub">描述性质的形容词</span><span class="cnt">100 词</span>
+    </div>
+    <div class="grid">
+      <div class="w" data-w="able" data-zh="能够的"><span class="en">able</span><span class="zh">能够的</span></div>
+      <div class="w" data-w="acid" data-zh="酸的"><span class="en">acid</span><span class="zh">酸的</span></div>
+      <div class="w" data-w="angry" data-zh="生气的"><span class="en">angry</span><span class="zh">生气的</span></div>
+      <div class="w" data-w="automatic" data-zh="自动的"><span class="en">automatic</span><span class="zh">自动的</span></div>
+      <div class="w" data-w="beautiful" data-zh="美丽的"><span class="en">beautiful</span><span class="zh">美丽的</span></div>
+      <div class="w" data-w="black" data-zh="黑的"><span class="en">black</span><span class="zh">黑的</span></div>
+      <div class="w" data-w="boiling" data-zh="沸腾的"><span class="en">boiling</span><span class="zh">沸腾的</span></div>
+      <div class="w" data-w="bright" data-zh="明亮的"><span class="en">bright</span><span class="zh">明亮的</span></div>
+      <div class="w" data-w="broken" data-zh="破碎的"><span class="en">broken</span><span class="zh">破碎的</span></div>
+      <div class="w" data-w="brown" data-zh="棕色的"><span class="en">brown</span><span class="zh">棕色的</span></div>
+      <div class="w" data-w="cheap" data-zh="便宜的"><span class="en">cheap</span><span class="zh">便宜的</span></div>
+      <div class="w" data-w="chemical" data-zh="化学的"><span class="en">chemical</span><span class="zh">化学的</span></div>
+      <div class="w" data-w="chief" data-zh="主要的"><span class="en">chief</span><span class="zh">主要的</span></div>
+      <div class="w" data-w="clean" data-zh="干净的"><span class="en">clean</span><span class="zh">干净的</span></div>
+      <div class="w" data-w="clear" data-zh="清晰的"><span class="en">clear</span><span class="zh">清晰的</span></div>
+      <div class="w" data-w="common" data-zh="普通的"><span class="en">common</span><span class="zh">普通的</span></div>
+      <div class="w" data-w="complex" data-zh="复杂的"><span class="en">complex</span><span class="zh">复杂的</span></div>
+      <div class="w" data-w="conscious" data-zh="有意识的"><span class="en">conscious</span><span class="zh">有意识的</span></div>
+      <div class="w" data-w="cut" data-zh="切过的"><span class="en">cut</span><span class="zh">切过的</span></div>
+      <div class="w" data-w="deep" data-zh="深的"><span class="en">deep</span><span class="zh">深的</span></div>
+      <div class="w" data-w="dependent" data-zh="依赖的"><span class="en">dependent</span><span class="zh">依赖的</span></div>
+      <div class="w" data-w="early" data-zh="早的"><span class="en">early</span><span class="zh">早的</span></div>
+      <div class="w" data-w="elastic" data-zh="有弹性的"><span class="en">elastic</span><span class="zh">有弹性的</span></div>
+      <div class="w" data-w="electric" data-zh="电的"><span class="en">electric</span><span class="zh">电的</span></div>
+      <div class="w" data-w="equal" data-zh="相等的"><span class="en">equal</span><span class="zh">相等的</span></div>
+      <div class="w" data-w="fat" data-zh="胖的"><span class="en">fat</span><span class="zh">胖的</span></div>
+      <div class="w" data-w="fertile" data-zh="肥沃的"><span class="en">fertile</span><span class="zh">肥沃的</span></div>
+      <div class="w" data-w="first" data-zh="第一的"><span class="en">first</span><span class="zh">第一的</span></div>
+      <div class="w" data-w="fixed" data-zh="固定的"><span class="en">fixed</span><span class="zh">固定的</span></div>
+      <div class="w" data-w="flat" data-zh="平坦的"><span class="en">flat</span><span class="zh">平坦的</span></div>
+      <div class="w" data-w="free" data-zh="自由的"><span class="en">free</span><span class="zh">自由的</span></div>
+      <div class="w" data-w="frequent" data-zh="频繁的"><span class="en">frequent</span><span class="zh">频繁的</span></div>
+      <div class="w" data-w="full" data-zh="满的"><span class="en">full</span><span class="zh">满的</span></div>
+      <div class="w" data-w="general" data-zh="一般的"><span class="en">general</span><span class="zh">一般的</span></div>
+      <div class="w" data-w="good" data-zh="好的"><span class="en">good</span><span class="zh">好的</span></div>
+      <div class="w" data-w="great" data-zh="伟大的"><span class="en">great</span><span class="zh">伟大的</span></div>
+      <div class="w" data-w="grey" data-zh="灰色的"><span class="en">grey</span><span class="zh">灰色的</span></div>
+      <div class="w" data-w="hanging" data-zh="悬挂的"><span class="en">hanging</span><span class="zh">悬挂的</span></div>
+      <div class="w" data-w="happy" data-zh="快乐的"><span class="en">happy</span><span class="zh">快乐的</span></div>
+      <div class="w" data-w="hard" data-zh="硬的／难的"><span class="en">hard</span><span class="zh">硬的／难的</span></div>
+      <div class="w" data-w="healthy" data-zh="健康的"><span class="en">healthy</span><span class="zh">健康的</span></div>
+      <div class="w" data-w="high" data-zh="高的"><span class="en">high</span><span class="zh">高的</span></div>
+      <div class="w" data-w="hollow" data-zh="中空的"><span class="en">hollow</span><span class="zh">中空的</span></div>
+      <div class="w" data-w="important" data-zh="重要的"><span class="en">important</span><span class="zh">重要的</span></div>
+      <div class="w" data-w="kind" data-zh="友善的"><span class="en">kind</span><span class="zh">友善的</span></div>
+      <div class="w" data-w="like" data-zh="相似的"><span class="en">like</span><span class="zh">相似的</span></div>
+      <div class="w" data-w="living" data-zh="活的"><span class="en">living</span><span class="zh">活的</span></div>
+      <div class="w" data-w="long" data-zh="长的"><span class="en">long</span><span class="zh">长的</span></div>
+      <div class="w" data-w="male" data-zh="男性的"><span class="en">male</span><span class="zh">男性的</span></div>
+      <div class="w" data-w="married" data-zh="已婚的"><span class="en">married</span><span class="zh">已婚的</span></div>
+      <div class="w" data-w="material" data-zh="物质的"><span class="en">material</span><span class="zh">物质的</span></div>
+      <div class="w" data-w="medical" data-zh="医学的"><span class="en">medical</span><span class="zh">医学的</span></div>
+      <div class="w" data-w="military" data-zh="军事的"><span class="en">military</span><span class="zh">军事的</span></div>
+      <div class="w" data-w="natural" data-zh="自然的"><span class="en">natural</span><span class="zh">自然的</span></div>
+      <div class="w" data-w="necessary" data-zh="必要的"><span class="en">necessary</span><span class="zh">必要的</span></div>
+      <div class="w" data-w="new" data-zh="新的"><span class="en">new</span><span class="zh">新的</span></div>
+      <div class="w" data-w="normal" data-zh="正常的"><span class="en">normal</span><span class="zh">正常的</span></div>
+      <div class="w" data-w="open" data-zh="开着的"><span class="en">open</span><span class="zh">开着的</span></div>
+      <div class="w" data-w="parallel" data-zh="平行的"><span class="en">parallel</span><span class="zh">平行的</span></div>
+      <div class="w" data-w="past" data-zh="过去的"><span class="en">past</span><span class="zh">过去的</span></div>
+      <div class="w" data-w="physical" data-zh="身体的／物理的"><span class="en">physical</span><span class="zh">身体的／物理的</span></div>
+      <div class="w" data-w="political" data-zh="政治的"><span class="en">political</span><span class="zh">政治的</span></div>
+      <div class="w" data-w="poor" data-zh="穷的"><span class="en">poor</span><span class="zh">穷的</span></div>
+      <div class="w" data-w="possible" data-zh="可能的"><span class="en">possible</span><span class="zh">可能的</span></div>
+      <div class="w" data-w="present" data-zh="现在的"><span class="en">present</span><span class="zh">现在的</span></div>
+      <div class="w" data-w="private" data-zh="私人的"><span class="en">private</span><span class="zh">私人的</span></div>
+      <div class="w" data-w="probable" data-zh="很可能的"><span class="en">probable</span><span class="zh">很可能的</span></div>
+      <div class="w" data-w="quick" data-zh="快的"><span class="en">quick</span><span class="zh">快的</span></div>
+      <div class="w" data-w="quiet" data-zh="安静的"><span class="en">quiet</span><span class="zh">安静的</span></div>
+      <div class="w" data-w="ready" data-zh="准备好的"><span class="en">ready</span><span class="zh">准备好的</span></div>
+      <div class="w" data-w="red" data-zh="红的"><span class="en">red</span><span class="zh">红的</span></div>
+      <div class="w" data-w="regular" data-zh="规则的"><span class="en">regular</span><span class="zh">规则的</span></div>
+      <div class="w" data-w="responsible" data-zh="有责任的"><span class="en">responsible</span><span class="zh">有责任的</span></div>
+      <div class="w" data-w="right" data-zh="对的／右的"><span class="en">right</span><span class="zh">对的／右的</span></div>
+      <div class="w" data-w="round" data-zh="圆的"><span class="en">round</span><span class="zh">圆的</span></div>
+      <div class="w" data-w="same" data-zh="相同的"><span class="en">same</span><span class="zh">相同的</span></div>
+      <div class="w" data-w="second" data-zh="第二的"><span class="en">second</span><span class="zh">第二的</span></div>
+      <div class="w" data-w="separate" data-zh="分开的"><span class="en">separate</span><span class="zh">分开的</span></div>
+      <div class="w" data-w="serious" data-zh="严肃的"><span class="en">serious</span><span class="zh">严肃的</span></div>
+      <div class="w" data-w="sharp" data-zh="锋利的"><span class="en">sharp</span><span class="zh">锋利的</span></div>
+      <div class="w" data-w="smooth" data-zh="光滑的"><span class="en">smooth</span><span class="zh">光滑的</span></div>
+      <div class="w" data-w="sticky" data-zh="黏的"><span class="en">sticky</span><span class="zh">黏的</span></div>
+      <div class="w" data-w="stiff" data-zh="僵硬的"><span class="en">stiff</span><span class="zh">僵硬的</span></div>
+      <div class="w" data-w="straight" data-zh="直的"><span class="en">straight</span><span class="zh">直的</span></div>
+      <div class="w" data-w="strong" data-zh="强壮的"><span class="en">strong</span><span class="zh">强壮的</span></div>
+      <div class="w" data-w="sudden" data-zh="突然的"><span class="en">sudden</span><span class="zh">突然的</span></div>
+      <div class="w" data-w="sweet" data-zh="甜的"><span class="en">sweet</span><span class="zh">甜的</span></div>
+      <div class="w" data-w="tall" data-zh="高的"><span class="en">tall</span><span class="zh">高的</span></div>
+      <div class="w" data-w="thick" data-zh="厚的"><span class="en">thick</span><span class="zh">厚的</span></div>
+      <div class="w" data-w="tight" data-zh="紧的"><span class="en">tight</span><span class="zh">紧的</span></div>
+      <div class="w" data-w="tired" data-zh="疲倦的"><span class="en">tired</span><span class="zh">疲倦的</span></div>
+      <div class="w" data-w="true" data-zh="真的"><span class="en">true</span><span class="zh">真的</span></div>
+      <div class="w" data-w="violent" data-zh="猛烈的"><span class="en">violent</span><span class="zh">猛烈的</span></div>
+      <div class="w" data-w="waiting" data-zh="等待的"><span class="en">waiting</span><span class="zh">等待的</span></div>
+      <div class="w" data-w="warm" data-zh="温暖的"><span class="en">warm</span><span class="zh">温暖的</span></div>
+      <div class="w" data-w="wet" data-zh="湿的"><span class="en">wet</span><span class="zh">湿的</span></div>
+      <div class="w" data-w="wide" data-zh="宽的"><span class="en">wide</span><span class="zh">宽的</span></div>
+      <div class="w" data-w="wise" data-zh="明智的"><span class="en">wise</span><span class="zh">明智的</span></div>
+      <div class="w" data-w="yellow" data-zh="黄的"><span class="en">yellow</span><span class="zh">黄的</span></div>
+      <div class="w" data-w="young" data-zh="年轻的"><span class="en">young</span><span class="zh">年轻的</span></div>
+    </div>
+  </section>
+  <section data-i="4">
+    <div class="sec-head" style="border-left-color:#db2777">
+      <h2>反义性质词 · Qualities (Opposites)</h2><span class="sub">50 组成对出现的反义形容词（配 un- 或直接用反义词）</span><span class="cnt">50 词</span>
+    </div>
+    <div class="grid">
+      <div class="w" data-w="awake" data-zh="醒着的"><span class="en">awake</span><span class="zh">醒着的</span></div>
+      <div class="w" data-w="bad" data-zh="坏的"><span class="en">bad</span><span class="zh">坏的</span></div>
+      <div class="w" data-w="bent" data-zh="弯的"><span class="en">bent</span><span class="zh">弯的</span></div>
+      <div class="w" data-w="bitter" data-zh="苦的"><span class="en">bitter</span><span class="zh">苦的</span></div>
+      <div class="w" data-w="blue" data-zh="蓝的"><span class="en">blue</span><span class="zh">蓝的</span></div>
+      <div class="w" data-w="certain" data-zh="确定的"><span class="en">certain</span><span class="zh">确定的</span></div>
+      <div class="w" data-w="cold" data-zh="冷的"><span class="en">cold</span><span class="zh">冷的</span></div>
+      <div class="w" data-w="complete" data-zh="完整的"><span class="en">complete</span><span class="zh">完整的</span></div>
+      <div class="w" data-w="cruel" data-zh="残忍的"><span class="en">cruel</span><span class="zh">残忍的</span></div>
+      <div class="w" data-w="dark" data-zh="暗的"><span class="en">dark</span><span class="zh">暗的</span></div>
+      <div class="w" data-w="dead" data-zh="死的"><span class="en">dead</span><span class="zh">死的</span></div>
+      <div class="w" data-w="dear" data-zh="亲爱的／贵的"><span class="en">dear</span><span class="zh">亲爱的／贵的</span></div>
+      <div class="w" data-w="delicate" data-zh="精致的"><span class="en">delicate</span><span class="zh">精致的</span></div>
+      <div class="w" data-w="different" data-zh="不同的"><span class="en">different</span><span class="zh">不同的</span></div>
+      <div class="w" data-w="dirty" data-zh="脏的"><span class="en">dirty</span><span class="zh">脏的</span></div>
+      <div class="w" data-w="dry" data-zh="干的"><span class="en">dry</span><span class="zh">干的</span></div>
+      <div class="w" data-w="false" data-zh="假的"><span class="en">false</span><span class="zh">假的</span></div>
+      <div class="w" data-w="feeble" data-zh="虚弱的"><span class="en">feeble</span><span class="zh">虚弱的</span></div>
+      <div class="w" data-w="female" data-zh="女性的"><span class="en">female</span><span class="zh">女性的</span></div>
+      <div class="w" data-w="foolish" data-zh="愚蠢的"><span class="en">foolish</span><span class="zh">愚蠢的</span></div>
+      <div class="w" data-w="future" data-zh="未来的"><span class="en">future</span><span class="zh">未来的</span></div>
+      <div class="w" data-w="green" data-zh="绿的"><span class="en">green</span><span class="zh">绿的</span></div>
+      <div class="w" data-w="ill" data-zh="生病的"><span class="en">ill</span><span class="zh">生病的</span></div>
+      <div class="w" data-w="last" data-zh="最后的"><span class="en">last</span><span class="zh">最后的</span></div>
+      <div class="w" data-w="late" data-zh="迟的"><span class="en">late</span><span class="zh">迟的</span></div>
+      <div class="w" data-w="left" data-zh="左的"><span class="en">left</span><span class="zh">左的</span></div>
+      <div class="w" data-w="loose" data-zh="松的"><span class="en">loose</span><span class="zh">松的</span></div>
+      <div class="w" data-w="loud" data-zh="响的"><span class="en">loud</span><span class="zh">响的</span></div>
+      <div class="w" data-w="low" data-zh="低的"><span class="en">low</span><span class="zh">低的</span></div>
+      <div class="w" data-w="mixed" data-zh="混合的"><span class="en">mixed</span><span class="zh">混合的</span></div>
+      <div class="w" data-w="narrow" data-zh="窄的"><span class="en">narrow</span><span class="zh">窄的</span></div>
+      <div class="w" data-w="old" data-zh="老的"><span class="en">old</span><span class="zh">老的</span></div>
+      <div class="w" data-w="opposite" data-zh="相反的"><span class="en">opposite</span><span class="zh">相反的</span></div>
+      <div class="w" data-w="public" data-zh="公共的"><span class="en">public</span><span class="zh">公共的</span></div>
+      <div class="w" data-w="rough" data-zh="粗糙的"><span class="en">rough</span><span class="zh">粗糙的</span></div>
+      <div class="w" data-w="sad" data-zh="悲伤的"><span class="en">sad</span><span class="zh">悲伤的</span></div>
+      <div class="w" data-w="safe" data-zh="安全的"><span class="en">safe</span><span class="zh">安全的</span></div>
+      <div class="w" data-w="secret" data-zh="秘密的"><span class="en">secret</span><span class="zh">秘密的</span></div>
+      <div class="w" data-w="short" data-zh="短的"><span class="en">short</span><span class="zh">短的</span></div>
+      <div class="w" data-w="shut" data-zh="关着的"><span class="en">shut</span><span class="zh">关着的</span></div>
+      <div class="w" data-w="simple" data-zh="简单的"><span class="en">simple</span><span class="zh">简单的</span></div>
+      <div class="w" data-w="slow" data-zh="慢的"><span class="en">slow</span><span class="zh">慢的</span></div>
+      <div class="w" data-w="small" data-zh="小的"><span class="en">small</span><span class="zh">小的</span></div>
+      <div class="w" data-w="soft" data-zh="软的"><span class="en">soft</span><span class="zh">软的</span></div>
+      <div class="w" data-w="solid" data-zh="固体的"><span class="en">solid</span><span class="zh">固体的</span></div>
+      <div class="w" data-w="special" data-zh="特别的"><span class="en">special</span><span class="zh">特别的</span></div>
+      <div class="w" data-w="strange" data-zh="奇怪的"><span class="en">strange</span><span class="zh">奇怪的</span></div>
+      <div class="w" data-w="thin" data-zh="薄的／瘦的"><span class="en">thin</span><span class="zh">薄的／瘦的</span></div>
+      <div class="w" data-w="white" data-zh="白的"><span class="en">white</span><span class="zh">白的</span></div>
+      <div class="w" data-w="wrong" data-zh="错的"><span class="en">wrong</span><span class="zh">错的</span></div>
+    </div>
+  </section>
+  <div class="empty" id="empty">没有匹配的词</div>
+</main>
+<footer>
+  <div class="wrap">
+    <b>怎么用这 850 词：</b>Ogden 的核心不是背单词，而是用有限的词 + 规则去组合表达无限的意思。<br>
+    · 名词可加 -s / -es 变复数（feet、teeth 等不规则形也允许）；<br>
+    · 300 个名词可加 -er / -ing / -ed 造新词（如 work → worker、working）；<br>
+    · 形容词可加 -ly 变副词、-er / -est 变比较级与最高级；<br>
+    · 50 个反义形容词可用 un- 取反（如 happy → unhappy）；<br>
+    · 18 个操作动词可做时态变化（be / do / have / come / go / see / seem / give / take / make / get / keep / let / put / send / say / may / will）。<br>
+    <br>中文释义为便于理解的简要对应，实际词义随语境变化。
+  </div>
+</footer>
+<script>
+(function(){
+  var q = document.getElementById('q');
+  var secs = Array.prototype.slice.call(document.querySelectorAll('section'));
+  var words = Array.prototype.slice.call(document.querySelectorAll('.w'));
+  var empty = document.getElementById('empty');
+  function run(){
+    var v = q.value.trim().toLowerCase();
+    var any = false;
+    words.forEach(function(el){
+      var hit = !v || el.dataset.w.indexOf(v) > -1 || (el.dataset.zh||'').indexOf(v) > -1;
+      el.style.display = hit ? '' : 'none';
+      if(hit) any = true;
+    });
+    secs.forEach(function(sec){
+      var list = Array.prototype.slice.call(sec.querySelectorAll('.w'));
+      var n = list.filter(function(e){ return e.style.display !== 'none'; }).length;
+      sec.querySelector('.cnt').textContent = n + ' 词';
+      sec.style.display = n ? '' : 'none';
+    });
+    empty.style.display = any ? 'none' : 'block';
+  }
+  q.addEventListener('input', run);
+  q.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ q.value=''; run(); } });
+})();
+</script>
+</body>
+</html>
