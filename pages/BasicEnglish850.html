@@ -66,7 +66,7 @@
   }
   .grid{
     display:grid; gap:8px;
-    grid-template-columns:repeat(auto-fill, minmax(118px, 1fr));
+    grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
   }
   .w{
     background:var(--card); border:1px solid var(--line); border-radius:8px;
@@ -77,12 +77,12 @@
   .w .w-top{display:flex; align-items:center; gap:4px;}
   .w .en{
     font-size:13px; font-weight:600; letter-spacing:.2px; flex:1 1 auto; min-width:0;
-    cursor:pointer; line-height:1.25; word-break:break-word; overflow-wrap:anywhere;
+    cursor:pointer; line-height:1.25; white-space:nowrap; overflow:hidden;
   }
   .w .en:hover{color:#2563eb;}
   .w .w-act{display:flex; gap:1px; flex:0 0 auto; position:relative; z-index:1; background:var(--card);}
   .w .w-act button{
-    width:17px; height:17px; padding:0; border:0; background:transparent; cursor:pointer;
+    width:16px; height:16px; padding:0; border:0; background:transparent; cursor:pointer;
     color:#b6bcc6; border-radius:5px; display:flex; align-items:center; justify-content:center;
     transition:color .12s, background .12s; flex:0 0 auto;
   }
@@ -151,7 +151,7 @@
   @media (max-width:640px){
     .prog{gap:7px; padding:4px 9px;} .prog-num{font-size:11px;} .prog-num b{font-size:13px;}
     .prog-track{order:4; flex-basis:100%;} .prog-sub{font-size:10px;}
-    .grid{grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:7px;}
+    .grid{grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:7px;}
     .w .en{font-size:12.5px;}
   }
   footer{
@@ -163,7 +163,7 @@
   @media print{
     header{position:static;} #q{display:none;}
     body{background:#fff;} .w{break-inside:avoid;}
-    .grid{grid-template-columns:repeat(auto-fill, minmax(130px,1fr));}
+    .grid{grid-template-columns:repeat(auto-fill, minmax(150px,1fr));}
   }
 </style>
 </head>
@@ -1187,22 +1187,24 @@
   q.addEventListener('input', run);
   q.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ q.value=''; run(); } });
 
-  // ---------- 长单词自适应字号（防与右侧按钮重叠） ----------
+  // ---------- 长单词自适应字号（不换行，只缩字号） ----------
   function fitLongWords(){
     var ens = document.querySelectorAll('.w .en');
     for (var i = 0; i < ens.length; i++) {
       var el = ens[i];
       el.style.fontSize = '';                 // 先复位，再按实际溢出情况缩
-      var fs = 13;
+      var fs = parseFloat(getComputedStyle(el).fontSize) || 13;
+      var min = 9.5;
       var guard = 0;
-      while (el.scrollWidth > el.clientWidth + 1 && fs > 9.5 && guard++ < 12) {
-        fs -= 0.5;
+      while (el.scrollWidth > el.clientWidth + 1 && fs > min && guard++ < 20) {
+        fs -= 0.25;
         el.style.fontSize = fs + 'px';
       }
     }
   }
   fitLongWords();
   window.addEventListener('resize', function(){ clearTimeout(window.__fitT); window.__fitT = setTimeout(fitLongWords, 150); });
+  window.addEventListener('load', fitLongWords);
 
   // ---------- 释义显隐 ----------
   var KEY_HIDE = 'be850_hidezh_v1';
