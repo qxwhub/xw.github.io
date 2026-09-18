@@ -60,6 +60,8 @@
     .detail-body p { font-size:13px; color:#4b5563; line-height:1.9; margin:10px 0; }
     .detail-body ul { font-size:13px; color:#4b5563; line-height:2; margin:8px 0 10px; padding-left:20px; }
     .detail-body li::marker { color:#10b981; }
+    .detail-body li b { color:#111827; font-weight:600; }
+    .detail-body .dl-btn { margin:4px 8px 4px 0; }
 
     /* 资源下载卡（用于软件资源文章） */
     .blog-res { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-top:12px; }
@@ -138,16 +140,21 @@
       <div class="post-ico" style="background:#0ea5e91a"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-feather"></use></svg></div>
       <div class="post-txt">
         <div class="post-title">趣味页面 <span class="tag tag-t1">互动</span></div>
-        <div class="post-summary">点这里展开，进入「鹈鹕骑自行车」「山海经·异兽图鉴」等互动小页面。</div>
+        <div class="post-summary">点这里展开，进入「鹈鹕骑自行车」「Basic English 850 词表」「山海经·小地图」等互动小页面。</div>
         <div class="post-meta"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-clock"></use></svg> 2026-09-10</div>
       </div>
       <svg class="caret" viewBox="0 0 24 24"><use href="#icon-arrow-right"></use></svg>
     </div>
     <div class="detail-wrap"><div class="detail-inner"><div class="detail-body">
-      <p>一个可交互的小页面：鹈鹕骑自行车，页面内可拖动滑杆调整参数、切换姿势与音乐。</p>
+      <p>下面是几个互不相关的互动小页面，点按钮直接进入：</p>
+      <ul>
+        <li><b>鹈鹕骑自行车</b> —— 可拖动滑杆调整参数、切换姿势与音乐。</li>
+        <li><b>Basic English 850 核心词表</b> —— 850 核心词 ＋ 四级补充，共 4563 词；含音标、中英释义、发音朗读与「已记住」进度。</li>
+        <li><b>山海经·小地图版</b> —— 3D 山海世界＋小地图导航，进入地点探索发现异兽、异草、异木。</li>
+      </ul>
       <a class="dl-btn" href="pelican-bicycle.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-arrow-right"></use></svg> 鹈鹕骑自行车</a>
       <a class="dl-btn" href="BasicEnglish850.html"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-arrow-right"></use></svg> Basic English 850 核心词表</a>
-      <a class="dl-btn" href="shanhaijing-hud.html" style="background:#38e1ff;color:#04222e;margin-left:8px"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-arrow-right"></use></svg> 山海经·小地图版</a>
+      <a class="dl-btn" href="shanhaijing-hud.html" style="background:#38e1ff;color:#04222e"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-arrow-right"></use></svg> 山海经·小地图版</a>
     </div></div></div>
   </div>
 </div>
