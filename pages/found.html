@@ -36,7 +36,7 @@
     .topbar .search-box .search-btn svg { width:14px; height:14px; }
 
     /* 文章卡片流 */
-    .post-card { background:#ffffff; border:1px solid rgba(29,29,31,.06); border-radius:18px; margin-bottom:14px; box-shadow:0 4px 20px rgba(29,29,31,.05); overflow:hidden; overflow:clip; transition:border-color .2s; }
+    .post-card { background:#ffffff; border:1px solid rgba(29,29,31,.06); border-radius:18px; margin-bottom:14px; box-shadow:0 4px 20px rgba(29,29,31,.05); overflow:hidden; transition:border-color .2s; }
     .post-card.open { border-color:#10b981; }
     .post-head { display:flex; align-items:flex-start; gap:12px; padding:16px 20px; cursor:pointer; user-select:none; }
     .post-head:hover { background:#fafafa; }
@@ -53,9 +53,6 @@
     .post-meta svg { width:12px; height:12px; }
     .caret { width:18px; height:18px; flex-shrink:0; color:#9ca3af; transition:transform .2s ease; margin-top:8px; }
     .post-card.open .caret { transform:rotate(90deg); }
-    /* 展开后标题栏吸附在顶栏正下方：内容再长，标题和箭头也一直可见，随时能点收起 */
-    .post-card.open .post-head { position:sticky; top:52px; z-index:5; background:#fff; border-radius:17px 17px 0 0; box-shadow:0 10px 22px -14px rgba(29,29,31,.30); }
-    .post-card.open .post-head:hover { background:#fff; }
     .detail-wrap { display:grid; grid-template-rows:0fr; transition:grid-template-rows .25s ease; }
     .post-card.open .detail-wrap { grid-template-rows:1fr; }
     .detail-inner { overflow:hidden; min-height:0; }
@@ -223,26 +220,15 @@
     // 趣味页面卡固定插在列表第二位（置顶文章之后）
     var fun = document.getElementById('funCard');
     if (fun) list.insertBefore(fun, list.children[1] || null);
-    syncStickyTop();
-  }
-  // 展开后的标题栏吸附在顶栏正下方；顶栏高度会随屏幕宽度变化，用实测高度
-  function syncStickyTop(){
-    var tb = document.querySelector('.topbar');
-    var h = tb ? Math.round(tb.getBoundingClientRect().height) : 52;
-    var heads = document.querySelectorAll('.post-head');
-    for (var i = 0; i < heads.length; i++) { heads[i].style.top = h + 'px'; }
   }
   window.toggleFunCard = function(){
     var c = document.getElementById('funCard');
     if (c) c.classList.toggle('open');
-    syncStickyTop();
   };
   window.togglePost = function(i){
     var c = document.getElementById('post-' + i);
     if (c) c.classList.toggle('open');
-    syncStickyTop();
   };
-  window.addEventListener('resize', syncStickyTop);
 
   // 搜索
   var searchInput = document.getElementById('searchInput');
