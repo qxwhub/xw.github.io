@@ -257,6 +257,11 @@ body {
 .edit-fields .inp{margin:0}
 .add-dialog .inp{margin-bottom:8px}
 
+/* 网站快捷入口弹窗：标题栏（含 × 关闭按钮）固定不动，只让下面的内容滚动 */
+.add-dialog.short-panel{display:flex; flex-direction:column; overflow:hidden}
+.add-dialog.short-panel .modal-header{flex:0 0 auto; margin-bottom:11px}
+.add-dialog.short-panel .short-body{flex:1 1 auto; min-height:0; overflow-y:auto; overflow-x:hidden; padding-right:2px}
+
 .m-table {
   width:100%; border-collapse:collapse;
   font-size:13px; color:#4b5563;
