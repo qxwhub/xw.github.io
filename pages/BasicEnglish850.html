@@ -160,6 +160,47 @@
   }
   footer b{color:var(--ink);}
   .empty{color:var(--muted); font-size:13px; padding:30px 0; text-align:center; display:none;}
+
+  /* 导出未记住：右下角悬浮按钮 */
+  .expo-dock{
+    position:fixed; right:18px; bottom:18px; z-index:30;
+    display:flex; align-items:stretch; background:#111827; border-radius:9px;
+    box-shadow:0 8px 24px rgba(17,24,39,.28); overflow:hidden;
+  }
+  .expo-main{
+    font:inherit; font-size:12px; font-weight:600; color:#fff; background:transparent;
+    border:0; padding:8px 12px; cursor:pointer; white-space:nowrap;
+    transition:background .12s;
+  }
+  .expo-main:hover{background:#1f2937;}
+  .expo-main:disabled{opacity:.6; cursor:default;}
+  .expo-caret{
+    font:inherit; font-size:11px; color:#fff; background:transparent;
+    border:0; border-left:1px solid rgba(255,255,255,.18); padding:8px 9px; cursor:pointer;
+    transition:background .12s;
+  }
+  .expo-caret:hover{background:#1f2937;}
+  .expo-menu{
+    display:none; position:absolute; right:0; bottom:calc(100% + 7px);
+    background:#fff; border:1px solid var(--line); border-radius:9px;
+    box-shadow:0 10px 30px rgba(17,24,39,.16); padding:4px; min-width:196px;
+  }
+  .expo-menu.show{display:block;}
+  .expo-menu button{
+    display:block; width:100%; text-align:left; font:inherit; font-size:12px; color:var(--ink);
+    background:#fff; border:0; border-radius:6px; padding:7px 10px; cursor:pointer;
+    white-space:nowrap; transition:background .12s;
+  }
+  .expo-menu button:hover{background:#f2f4f7;}
+  .expo-sep{height:1px; background:var(--line); margin:4px 6px;}
+  .expo-menu .expo-tip{
+    display:block; font-size:10px; color:var(--muted); padding:2px 10px 6px; line-height:1.5;
+    white-space:normal;
+  }
+  @media (max-width:640px){
+    .expo-dock{right:10px; bottom:10px;}
+    .expo-main{font-size:11px; padding:7px 10px;}
+  }
   @media print{
     header{position:static;} #q{display:none;}
     body{background:#fff;} .w{break-inside:avoid;}
@@ -1084,6 +1125,19 @@
     </div>
   </section>
   <div class="empty" id="empty">没有匹配的词</div>
+  <div class="expo-dock" id="expoDock">
+    <button class="expo-main" id="expoBtn" type="button" title="导出还没记住的单词">导出未记住</button>
+    <button class="expo-caret" id="expoCaret" type="button" aria-label="更多导出选项" title="更多格式">▾</button>
+    <div class="expo-menu" id="expoMenu">
+      <button type="button" data-fmt="word">未记住 · 纯单词（一行一个）</button>
+      <button type="button" data-fmt="csv">未记住 · 单词,释义（CSV 表）</button>
+      <button type="button" data-fmt="md">未记住 · 音标+释义（文本卡片）</button>
+      <div class="expo-sep"></div>
+      <button type="button" data-act="save">导出进度备份（已记住的标记）</button>
+      <button type="button" data-act="load">从备份文件恢复进度</button>
+      <span class="expo-tip">备份文件发到手机，在手机上点"恢复进度"，标记就能接着用</span>
+    </div>
+  </div>
 
   <section data-i="5" id="cet4-section">
     <div class="sec-head" style="border-left-color:#7c3aed">
@@ -1298,6 +1352,133 @@
   }
   document.getElementById('resetDone').addEventListener('click', doReset);
   document.getElementById('resetDone2').addEventListener('click', doReset);
+
+  // ---------- 导出「还没记住」的词 ----------
+  function notRemembered(){
+    return words.filter(function(el){ return !done[el.dataset.w]; });
+  }
+  function buildText(fmt){
+    var list = notRemembered();
+    if (!list.length) return null;
+    if (fmt === 'word') {
+      return list.map(function(el){ return el.dataset.w; }).join('\r\n');
+    }
+    if (fmt === 'csv') {
+      return list.map(function(el){
+        var zh = (el.dataset.zh || '').replace(/"/g, '""');
+        return el.dataset.w + ',"' + zh + '"';
+      }).join('\r\n');
+    }
+    // md：音标 + 释义的文本卡片
+    return list.map(function(el, i){
+      var en = el.querySelector('.en'), ip = el.querySelector('.ipa');
+      return (i + 1) + '. ' + (en ? en.textContent : el.dataset.w)
+        + (ip ? '  ' + ip.textContent : '')
+        + '\r\n   ' + (el.dataset.zh || '');
+    }).join('\r\n\r\n');
+  }
+  function exportNotDone(fmt){
+    var sep = fmt === 'csv' ? ',' : '';
+    var text = buildText(fmt);
+    if (text === null) { alert('所有词都已标记为「已记住」，没有可导出的内容。'); return; }
+    // 带 BOM，Excel / 记事本打开中文不乱码
+    var blob = new Blob(['\uFEFF' + text], {type:'text/plain;charset=utf-8'});
+    var d = new Date();
+    var pad = function(x){ return (x < 10 ? '0' : '') + x; };
+    var name = '未记住单词_' + notRemembered().length + '个_'
+      + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '.txt';
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 5000);
+  }
+
+  var expoBtn = document.getElementById('expoBtn');
+  var expoCaret = document.getElementById('expoCaret');
+  var expoMenu = document.getElementById('expoMenu');
+  var expoDock = document.getElementById('expoDock');
+  expoBtn.addEventListener('click', function(){
+    expoBtn.disabled = true;
+    try { exportNotDone('word'); } finally { setTimeout(function(){ expoBtn.disabled = false; }, 400); }
+  });
+  expoCaret.addEventListener('click', function(e){ e.stopPropagation(); expoMenu.classList.toggle('show'); });
+  expoMenu.addEventListener('click', function(e){
+    var b = e.target.closest ? e.target.closest('button[data-fmt],button[data-act]') : null;
+    if (!b) return;
+    expoMenu.classList.remove('show');
+    if (b.dataset.fmt) { exportNotDone(b.dataset.fmt); return; }
+    if (b.dataset.act === 'save') saveProgress();
+    else if (b.dataset.act === 'load') loadProgress();
+  });
+  document.addEventListener('click', function(e){
+    if (!expoDock.contains(e.target)) expoMenu.classList.remove('show');
+  });
+
+  // ---------- 导出 / 恢复「已记住」进度（浏览器本地记录） ----------
+  function stamp(){
+    var d = new Date(), p = function(x){ return (x < 10 ? '0' : '') + x; };
+    return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate());
+  }
+  function saveProgress(){
+    var n = Object.keys(done).length;
+    if (!n) { alert('当前还没有标记任何「已记住」的词。'); return; }
+    var pack = {
+      app: 'BasicEnglish850',
+      ver: 1,
+      savedAt: new Date().toISOString(),
+      total: words.length,
+      doneCount: n,
+      done: Object.keys(done)
+    };
+    var blob = new Blob([JSON.stringify(pack, null, 2)], {type:'application/json;charset=utf-8'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '单词进度_' + n + '个_' + stamp() + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 5000);
+  }
+  function applyProgress(raw){
+    var hit = 0, miss = 0;
+    words.forEach(function(el){
+      if (raw[el.dataset.w]) { el.classList.add('done'); hit++; }
+      else { el.classList.remove('done'); miss++; }
+    });
+    done = {};
+    Object.keys(raw).forEach(function(k){ done[k] = 1; });
+    syncDone();
+    return hit;
+  }
+  function loadProgress(){
+    var f = document.createElement('input');
+    f.type = 'file';
+    f.accept = '.json,application/json';
+    f.onchange = function(){
+      var file = f.files && f.files[0];
+      if (!file) return;
+      var rd = new FileReader();
+      rd.onload = function(){
+        var pack;
+        try { pack = JSON.parse(rd.result); }
+        catch(err){ alert('这不是有效的进度备份文件。'); return; }
+        var list = pack && (Array.isArray(pack) ? pack : pack.done);
+        if (!Array.isArray(list)) { alert('备份文件格式不对，读不出「已记住」记录。'); return; }
+        var raw = {};
+        list.forEach(function(w){ if (w) raw[String(w).toLowerCase()] = 1; });
+        var cur = Object.keys(done).length;
+        if (cur && !confirm('恢复将用备份里的记录覆盖当前进度（当前 ' + cur + ' 个），继续？')) return;
+        var hit = applyProgress(raw);
+        alert('恢复完成：备份里 ' + list.length + ' 个词，本表中匹配上 ' + hit + ' 个。\n'
+          + (list.length - hit > 0 ? '（有 ' + (list.length - hit) + ' 个词不在当前词表中，已忽略）' : ''));
+      };
+      rd.readAsText(file);
+    };
+    f.click();
+  }
 
   // ---------- 发音朗读（浏览器自带 Web Speech API） ----------
   var synth = window.speechSynthesis || null;
