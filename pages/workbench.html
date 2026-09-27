@@ -625,7 +625,7 @@ function renderHome(){
   const dow = (now.getDay()+6)%7;               // 周一=0 … 周日=6
   const q = CONFIG.quotes[dow % CONFIG.quotes.length];
   const hour = now.getHours();
-  const hi = hour<5?"夜深啦，柯基也要睡觉了~":hour<11?"早安！柯基探员等你指令":hour<13?"中午好，该遛柯基啦":hour<18?"下午好，时间齿轮照常转动":hour<22?"晚上好，柯基陪你加班":hour<24?"晚安，汪汪~";
+  const hi = hour<5?"夜深啦，柯基也要睡觉了~":hour<11?"早安！柯基探员等你指令":hour<13?"中午好，该遛柯基啦":hour<18?"下午好，时间齿轮照常转动":hour<22?"晚上好，柯基陪你加班":"晚安，汪汪~";
 
   // overview rings
   const rings = CONFIG.overview.map(o=>{
