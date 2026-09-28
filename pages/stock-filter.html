@@ -3,11 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>股票条件筛选器</title>
+<title>行情接口连通性测试</title>
 <style>
   :root{
     --ink:#1d1d1f; --muted:#86868b; --line:#e5e7eb; --card:#fff; --bg:#f5f6f8;
-    --up:#d92b2b; --down:#0f9d58;
   }
   *{box-sizing:border-box}
   html,body{margin:0;background:var(--bg);color:var(--ink);
@@ -15,782 +14,194 @@
     -webkit-text-size-adjust:100%;}
   a{color:inherit;}
 
-  /* ---------- 顶栏 ---------- */
   header{
     position:sticky; top:0; z-index:20; background:#fff;
-    border-bottom:1px solid var(--line); padding:10px 16px;
+    border-bottom:1px solid var(--line); padding:12px 16px;
   }
-  .hd{max-width:1280px; margin:0 auto; display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .hd{max-width:760px; margin:0 auto; display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
   .hd h1{margin:0; font-size:15px; font-weight:700; letter-spacing:.2px; white-space:nowrap;}
   .hd .sp{flex:1;}
-  .statline{font-size:11px; color:var(--muted); white-space:nowrap;}
-  .statline b{color:var(--ink); font-variant-numeric:tabular-nums;}
 
   .tbtn{
-    font:inherit; font-size:12px; color:var(--ink); background:#fff;
-    border:1px solid var(--line); border-radius:7px; padding:5px 10px; cursor:pointer;
-    transition:border-color .12s, background .12s, color .12s; white-space:nowrap;
+    font:inherit; font-size:13px; color:#fff; background:#111827;
+    border:1px solid #111827; border-radius:7px; padding:7px 16px; cursor:pointer;
+    transition:background .12s; white-space:nowrap;
   }
-  .tbtn:hover{border-color:#c9ced6; background:#fafbfc;}
-  .tbtn:disabled{opacity:.5; cursor:default;}
-  .tbtn.primary{background:#111827; color:#fff; border-color:#111827;}
-  .tbtn.primary:hover{background:#1f2937;}
+  .tbtn:hover{background:#1f2937;}
+  .tbtn:disabled{opacity:.55; cursor:default; background:#6b7280; border-color:#6b7280;}
 
-  /* ---------- 加载条 ---------- */
-  .loadbar{display:none; max-width:1280px; margin:8px auto 0; font-size:12px; color:var(--muted);}
-  .loadbar.on{display:block;}
-  .loadbar .trk{height:5px; background:#e8eaee; border-radius:99px; overflow:hidden; margin-top:5px;}
-  .loadbar .fil{height:100%; width:0; background:linear-gradient(90deg,#34d399,#0f9d58);
-    border-radius:99px; transition:width .25s;}
-  .loadbar .msg{display:flex; justify-content:space-between; gap:10px;}
+  .wrap{max-width:760px; margin:0 auto; padding:16px;}
 
-  /* ---------- 免责声明 ---------- */
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:18px 20px; margin-bottom:14px;
+  }
+  .card h2{margin:0 0 10px; font-size:14px; font-weight:700;}
+
+  .big{
+    font-size:15px; font-weight:700; line-height:1.6; margin-bottom:6px;
+  }
+  .big.ok{color:#0f6e56;}
+  .big.bad{color:#a32d2d;}
+  .big.idle{color:#5f5e5a;}
+  .sub{font-size:12.5px; color:var(--muted); line-height:1.8;}
+
+  .kv{
+    display:flex; gap:8px; font-size:12.5px; padding:7px 0;
+    border-bottom:1px dashed var(--line); line-height:1.6;
+  }
+  .kv:last-child{border-bottom:0;}
+  .kv .k{color:var(--muted); min-width:76px; flex:0 0 auto;}
+  .kv .v{color:var(--ink); word-break:break-all;}
+
   .notice{
-    max-width:1280px; margin:10px auto 0; padding:8px 12px; border-radius:8px;
-    background:#fffbeb; border:1px solid #fde68a; color:#92400e; font-size:11.5px; line-height:1.6;
+    padding:9px 12px; border-radius:8px; background:#fffbeb; border:1px solid #fde68a;
+    color:#92400e; font-size:11.5px; line-height:1.7; margin-bottom:14px;
   }
-
-  /* ---------- 筛选条件 ---------- */
-  .filters{
-    max-width:1280px; margin:12px auto 0; background:var(--card);
-    border:1px solid var(--line); border-radius:10px; padding:12px 14px;
+  .safe{
+    padding:9px 12px; border-radius:8px; background:#e1f5ee; border:1px solid #9fe1cb;
+    color:#085041; font-size:11.5px; line-height:1.7; margin-bottom:14px;
   }
-  .frow{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:9px;}
-  .frow:last-child{margin-bottom:0;}
-  .flabel{font-size:12px; color:var(--muted); min-width:56px; flex:0 0 auto;}
-  .fin{display:flex; align-items:center; gap:5px;}
-  .fin input[type=number]{
-    width:82px; font:inherit; font-size:12px; padding:5px 7px;
-    border:1px solid var(--line); border-radius:6px; outline:none; background:#fff;
-    font-variant-numeric:tabular-nums;
-  }
-  .fin input[type=number]:focus{border-color:#9ca3af; box-shadow:0 0 0 3px rgba(17,24,39,.06);}
-  .fin .til{font-size:11px; color:var(--muted);}
-  select{
-    font:inherit; font-size:12px; padding:5px 7px; max-width:190px;
-    border:1px solid var(--line); border-radius:6px; background:#fff; outline:none; cursor:pointer;
-  }
-  select:focus{border-color:#9ca3af;}
-
-  .preset{
-    font-size:11.5px; color:#1d4ed8; background:#eef2ff; border:1px solid #c7d2fe;
-    border-radius:99px; padding:3px 10px; cursor:pointer; transition:background .12s;
-  }
-  .preset:hover{background:#e0e7ff;}
-
-  /* ---------- 结果表 ---------- */
-  .results{max-width:1280px; margin:12px auto 40px; background:var(--card);
-    border:1px solid var(--line); border-radius:10px; overflow:hidden;}
-  .rtop{display:flex; align-items:center; gap:10px; padding:10px 14px;
-    border-bottom:1px solid var(--line); flex-wrap:wrap;}
-  .rtop .cnt{font-size:12px; color:var(--muted);}
-  .rtop .cnt b{color:var(--ink); font-size:14px; font-variant-numeric:tabular-nums;}
-
-  .tscroll{overflow-x:auto; -webkit-overflow-scrolling:touch;}
-  table{width:100%; border-collapse:collapse; font-size:12.5px; min-width:880px;}
-  thead th{
-    position:sticky; top:0; background:#fafbfc; color:#4b5563; font-weight:600;
-    text-align:right; padding:9px 10px; border-bottom:1px solid var(--line);
-    white-space:nowrap; font-size:11.5px; cursor:pointer; user-select:none;
-  }
-  thead th:hover{background:#f2f4f7;}
-  thead th.l{text-align:left;}
-  thead th .ar{color:#9ca3af; font-size:9px; margin-left:3px;}
-  tbody td{padding:8px 10px; border-bottom:1px solid #f1f2f4;
-    text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
-  tbody td.l{text-align:left;}
-  tbody tr:hover{background:#fafbfc;}
-  tbody tr:last-child td{border-bottom:0;}
-  .code{color:var(--muted); font-size:11.5px; margin-left:5px;}
-  .nm{font-weight:600;}
-  .up{color:var(--up);} .dn{color:var(--down);} .fl{color:var(--muted);}
-  .ind{color:#4b5563; font-size:11.5px; background:#f3f4f6; border-radius:4px; padding:1px 6px;}
-  .go{font-size:11.5px; color:#1d4ed8; text-decoration:none;}
-  .go:hover{text-decoration:underline;}
-
-  .empty{text-align:center; color:var(--muted); font-size:13px; padding:44px 16px; line-height:1.9;}
-  .more{display:flex; justify-content:center; padding:12px;}
-  .more button{font:inherit; font-size:12px; padding:7px 18px; border:1px solid var(--line);
-    background:#fff; border-radius:7px; cursor:pointer;}
-  .more button:hover{background:#fafbfc;}
-  .more button:disabled{opacity:.5; cursor:default;}
-
-  @media (max-width:640px){
-    header{padding:8px 10px;}
-    .hd h1{font-size:13.5px;}
-    .filters,.notice,.results,.loadbar{margin-left:10px; margin-right:10px;}
-    .filters{padding:10px;}
-    .flabel{min-width:auto; width:100%; margin-bottom:-3px;}
-    .fin input[type=number]{width:74px;}
-    table{font-size:12px; min-width:820px;}
-  }
+  code{font-family:Consolas,Monaco,monospace; font-size:11.5px; background:#f3f4f6;
+    padding:1px 5px; border-radius:4px; color:#1f2937;}
 </style>
 </head>
 <body>
 
 <header>
   <div class="hd">
-    <h1>股票条件筛选器</h1>
-    <div class="statline" id="statline">等待加载数据…</div>
+    <h1>行情接口连通性测试</h1>
     <div class="sp"></div>
-    <button class="tbtn" id="ping" type="button" title="只发 1 个请求，探测接口是否可用">测连接</button>
-    <button class="tbtn" id="reload" type="button" title="拉取全市场约 5500 只，请求量较大，谨慎使用">加载全市场</button>
-    <button class="tbtn primary" id="toTop" type="button">回到顶部</button>
-  </div>
-  <div class="loadbar" id="loadbar">
-    <div class="msg"><span id="loadMsg">就绪</span><span id="loadPct">0%</span></div>
-    <div class="trk"><div class="fil" id="loadFil"></div></div>
+    <button class="tbtn" id="ping" type="button">测连接</button>
   </div>
 </header>
 
-<div class="notice">
-  本页数据取自公开行情接口，仅供参考与学习研究，<b>不构成任何投资建议</b>。数据可能存在延迟或错漏，请以交易所及券商公布信息为准。据此操作，风险自负。
-</div>
+<div class="wrap">
 
-<div class="filters">
-  <div class="frow">
-    <span class="flabel">总市值</span>
-    <span class="fin">
-      <input type="number" id="mcapMin" placeholder="不限" min="0" step="10">
-      <span class="til">~</span>
-      <input type="number" id="mcapMax" placeholder="不限" min="0" step="10">
-      <span class="til">亿元</span>
-    </span>
-    <span class="flabel" style="margin-left:8px">股息率</span>
-    <span class="fin">
-      <input type="number" id="divMin" placeholder="不限" min="0" step="0.5">
-      <span class="til">~</span>
-      <input type="number" id="divMax" placeholder="不限" min="0" step="0.5">
-      <span class="til">%</span>
-    </span>
+  <div class="safe">
+    <b>此页面每次点击只发送 1 个请求</b>（拉 5 条样本），页面上<b>没有任何</b>能批量抓取的按钮，不会加重接口风控。
   </div>
 
-  <div class="frow">
-    <span class="flabel">市盈率</span>
-    <span class="fin">
-      <input type="number" id="peMin" placeholder="不限" step="1">
-      <span class="til">~</span>
-      <input type="number" id="peMax" placeholder="不限" step="1">
-    </span>
-    <span class="flabel" style="margin-left:8px">市净率</span>
-    <span class="fin">
-      <input type="number" id="pbMin" placeholder="不限" min="0" step="0.5">
-      <span class="til">~</span>
-      <input type="number" id="pbMax" placeholder="不限" min="0" step="0.5">
-    </span>
+  <div class="notice">
+    本页仅用于检测公开行情接口是否可用，不提供任何投资建议。
   </div>
 
-  <div class="frow">
-    <span class="flabel">所属行业</span>
-    <select id="industry"><option value="">全部行业</option></select>
-    <span class="flabel" style="margin-left:8px">名称/代码</span>
-    <input type="text" id="kw" placeholder="如 银行 / 600519" style="font:inherit;font-size:12px;padding:5px 7px;width:150px;border:1px solid var(--line);border-radius:6px;outline:none" autocomplete="off">
+  <div class="card">
+    <h2>当前状态</h2>
+    <div class="big idle" id="state">尚未测试</div>
+    <div class="sub" id="stateSub">点右上角「测连接」按钮，发送 1 个请求检测接口是否恢复。</div>
   </div>
 
-  <div class="frow">
-    <span class="flabel">快捷条件</span>
-    <span class="preset" data-p="dividend">股息率 ≥ 3%</span>
-    <span class="preset" data-p="bigcap">市值 ≥ 500 亿</span>
-    <span class="preset" data-p="smallcap">市值 ≤ 50 亿</span>
-    <span class="preset" data-p="lowpe">PE 0 ~ 15</span>
-    <span class="preset" data-p="lowpb">PB 0 ~ 1</span>
-    <span class="preset" data-p="clear" style="color:#b91c1c;background:#fef2f2;border-color:#fecaca">清空条件</span>
+  <div class="card" id="detailCard" style="display:none">
+    <h2>返回详情</h2>
+    <div id="details"></div>
   </div>
-</div>
 
-<div class="results">
-  <div class="rtop">
-    <span class="cnt">符合条件：<b id="hitCnt">0</b> 只</span>
-    <div style="flex:1"></div>
-    <button class="tbtn" id="expBtn" type="button">导出结果 CSV</button>
+  <div class="card">
+    <h2>说明</h2>
+    <div class="sub">
+      · 检测目标：东方财富公开行情接口<br>
+      · 请求参数：只拉第 1 页、5 条记录（<code>pz=5</code>），请求量极小<br>
+      · 若显示「接口不可用」：说明当前 IP 仍被接口方限流，请稍后再试，<b>不要连续点击</b><br>
+      · 若显示「接口可用」：说明已恢复，可以进入下一步开发
+    </div>
   </div>
-  <div class="tscroll">
-    <table>
-      <thead>
-        <tr>
-          <th class="l" data-s="name">名称<span class="ar"></span></th>
-          <th data-s="price">现价<span class="ar"></span></th>
-          <th data-s="chg">涨跌幅<span class="ar"></span></th>
-          <th data-s="mcap">总市值<span class="ar"></span></th>
-          <th data-s="div">股息率<span class="ar"></span></th>
-          <th data-s="pe">市盈率<span class="ar"></span></th>
-          <th data-s="pb">市净率<span class="ar"></span></th>
-          <th class="l">行业</th>
-          <th class="l">行情</th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-  </div>
-  <div class="empty" id="empty" style="display:none">没有符合当前条件的股票，<br>试试放宽筛选范围。</div>
-  <div class="more" id="moreBox" style="display:none">
-    <button id="moreBtn" type="button">显示更多</button>
-  </div>
+
 </div>
 
 <script>
 (function(){
   'use strict';
 
-  // ============================================================
-  //  配置
-  // ============================================================
-  var FS_MARKET = 'm:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23';   // 沪深两市（不含北交所）
-  var FIELDS = 'f12,f14,f2,f3,f9,f20,f21,f23,f37,f100';
   var API = 'https://push2.eastmoney.com/api/qt/clist/get';
-  var CONCURRENCY = 4;          // 实测 4 并发最快（约 20 秒拉完 5500+ 只）
-  var PAGE_SIZE = 100;          // 接口单页上限就是 100，给再大也只返 100
-  var PAGE_LIMIT = 30;          // 一页最多渲染 30 只，避免手机卡
-  var CACHE_TTL = 30*60*1000;   // 缓存 30 分钟（拉全市场代价高，缓存久一点）
-  var CACHE_KEY = 'stock_filter_cache_v2';
-  var RETRIES = 1;              // 失败只重试 1 次。反复重试会加重接口风控
-  var MIN_GAP = 3000;           // 两次主动请求之间至少间隔 3 秒，防止手抖连点
-  var lastReqAt = 0;
+  var FS_MARKET = 'm:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23';   // 沪深两市（不含北交所）
 
-  var COLS = { name:'名称', code:'代码', price:'现价', chg:'涨跌幅', mcap:'总市值',
-               div:'股息率', pe:'市盈率', pb:'市净率', ind:'行业' };
+  var MIN_GAP = 5000;   // 两次点击至少间隔 5 秒，防手抖连点
+  var lastAt = 0;
 
-  // ============================================================
-  //  元素
-  // ============================================================
-  var $ = function(id){ return document.getElementById(id); };
-  var elStat = $('statline'), elBar = $('loadbar'), elMsg = $('loadMsg'),
-      elPct = $('loadPct'), elFil = $('loadFil');
-  var elTbody = $('tbody'), elEmpty = $('empty'), elHit = $('hitCnt'),
-      elMoreBox = $('moreBox'), elMoreBtn = $('moreBtn');
+  var elBtn = document.getElementById('ping');
+  var elState = document.getElementById('state');
+  var elSub = document.getElementById('stateSub');
+  var elCard = document.getElementById('detailCard');
+  var elDet = document.getElementById('details');
 
-  var INPUTS = ['mcapMin','mcapMax','divMin','divMax','peMin','peMax','pbMin','pbMax','kw'];
-  var ALL = [];
-
-  // ============================================================
-  //  数据拉取
-  // ============================================================
-  function apiUrl(pn){
+  function buildUrl(){
     return API + '?po=1&np=1&fltt=2&invt=2&fid=f20'
-      + '&fs=' + encodeURIComponent(FS_MARKET).replace(/%2C/g,',').replace(/%3A/g,':').replace(/%2B/g,'+')
-      + '&fields=' + FIELDS + '&pn=' + pn + '&pz=' + PAGE_SIZE;
+      + '&fs=' + encodeURIComponent(FS_MARKET)
+          .replace(/%2C/g,',').replace(/%3A/g,':').replace(/%2B/g,'+')
+      + '&fields=f12,f14,f2,f20,f37&pn=1&pz=5';
   }
 
-  function fetchPage(pn, retries){
-    retries = retries == null ? RETRIES : retries;
-    function once(n){
-      return fetch(apiUrl(pn), {mode:'cors', cache:'no-store'})
-        .then(function(r){
-          if (!r.ok) throw new Error('HTTP ' + r.status);
-          return r.json();
-        })
-        .then(function(j){
-          return (j && j.data && j.data.diff) ? j.data.diff : [];
-        })
-        .catch(function(err){
-          if (n <= 0) throw err;
-          // 指数退避后重试（接口有频率风控，但重试次数要克制）
-          return wait(600 * Math.pow(2, retries - n) + Math.random()*300)
-            .then(function(){ return once(n - 1); });
-        });
+  function setState(cls, text, sub){
+    elState.className = 'big ' + cls;
+    elState.textContent = text;
+    elSub.textContent = sub || '';
+  }
+
+  function kv(k, v){
+    return '<div class="kv"><span class="k">' + k + '</span><span class="v">' + v + '</span></div>';
+  }
+
+  function esc(s){
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  elBtn.addEventListener('click', function(){
+    var gap = Date.now() - lastAt;
+    if (gap < MIN_GAP){
+      setState('idle', '请稍等',
+        '距上次测试不足 ' + Math.ceil((MIN_GAP - gap)/1000) + ' 秒，请勿连续点击。');
+      return;
     }
-    return once(retries);
-  }
+    lastAt = Date.now();
 
-  // 轻量探测：只发 1 个请求，拉 5 条，用于判断接口是否可用（不触发风控）
-  function pingApi(){
-    var u = API + '?po=1&np=1&fltt=2&invt=2&fid=f20'
-      + '&fs=' + encodeURIComponent(FS_MARKET).replace(/%2C/g,',').replace(/%3A/g,':').replace(/%2B/g,'+')
-      + '&fields=f12,f14,f20&pn=1&pz=5';
-    return fetch(u, {mode:'cors', cache:'no-store'})
+    elBtn.disabled = true;
+    setState('idle', '正在测试…', '正在发送 1 个请求（仅 5 条样本）…');
+    elCard.style.display = 'none';
+
+    var t0 = Date.now();
+    fetch(buildUrl(), {mode:'cors', cache:'no-store'})
       .then(function(r){
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
       })
       .then(function(j){
         var d = j && j.data;
-        if (!d || !d.diff || !d.diff.length) throw new Error('返回空数据');
-        return { total: d.total, sample: d.diff };
+        if (!d || !d.diff || !d.diff.length){
+          throw new Error('返回数据为空');
+        }
+        var ms = Date.now() - t0;
+        setState('ok', '接口可用 ✓',
+          '耗时 ' + ms + ' ms　·　本次只发送了 1 个请求');
+        var rows = kv('沪深总数', '<b>' + d.total + '</b> 只');
+        for (var i = 0; i < d.diff.length; i++){
+          var s = d.diff[i];
+          rows += kv('样本 ' + (i+1),
+            esc(s.f14) + '　代码 ' + esc(s.f12)
+            + '　现价 ' + esc(s.f2)
+            + '　股息率 ' + esc(s.f37));
+        }
+        rows += kv('结论', '接口已恢复，可以进行下一步开发');
+        elDet.innerHTML = rows;
+        elCard.style.display = 'block';
+      })
+      .catch(function(err){
+        var ms = Date.now() - t0;
+        setState('bad', '接口不可用 ✗',
+          '耗时 ' + ms + ' ms　·　' + (err && err.message ? err.message : '网络错误'));
+        elDet.innerHTML =
+          kv('错误类型', esc(err && err.name ? err.name : 'Error'))
+          + kv('错误信息', esc(err && err.message ? err.message : '网络错误'))
+          + kv('可能原因', '当前 IP 仍被接口方限流（或网络异常）')
+          + kv('建议', '<b>不要连续点击</b>，过一段时间再试');
+        elCard.style.display = 'block';
+      })
+      .then(function(){
+        elBtn.disabled = false;
       });
-  }
-
-  function wait(ms){ return new Promise(function(res){ setTimeout(res, ms); }); }
-
-  function num(v){ return (typeof v === 'number' && isFinite(v)) ? v : null; }
-
-  // 股息率合理性上限：接口对「一次性大额分红 / 新股 / 数据异常」会给出 70%~95% 这种
-  // 明显失真的值（如长鑫科技 81%），放进结果会严重误导。超过 30% 一律视为异常，置空。
-  var DIV_MAX_OK = 30;
-
-  function normalize(raw){
-    var out = [];
-    for (var i = 0; i < raw.length; i++){
-      var r = raw[i];
-      if (!r || !r.f12 || !r.f14) continue;
-      var code = String(r.f12);
-      // 只要 A 股：沪 6xx / 深 000、001、002、003、300、301
-      if (!/^(60|68|00|30)/.test(code)) continue;
-      var div = num(r.f37);
-      if (div != null && (div < 0 || div > DIV_MAX_OK)) div = null;   // 异常/负值 → 视为无数据
-      var name = String(r.f14);
-      // 退市/PT 股不计入（名称含 PT 或退，且无市值）
-      var mcap = num(r.f20);
-      if (/^(PT|退)/.test(name) && mcap == null) continue;
-      out.push({
-        code: code,
-        name: name,
-        price: num(r.f2),
-        chg: num(r.f3),
-        mcap: mcap,                // 总市值（元）
-        fcap: num(r.f21),          // 流通市值（元）
-        pe: num(r.f9),
-        pb: num(r.f23),
-        div: div,                  // 股息率 %
-        ind: (r.f100 && r.f100 !== '-') ? String(r.f100) : ''
-      });
-    }
-    return out;
-  }
-
-  // 4 并发拉全量：用「队列 + 同时 N 个」的写法，边拉边更新进度
-  function fetchAll(onProgress){
-    return fetchPage(1).then(function(first){
-      var total = 5561;   // 首屏拿到 total 后下面会校正
-      return fetch(apiUrl(1), {mode:'cors', cache:'no-store'})
-        .then(function(r){ return r.json(); })
-        .then(function(j){
-          total = (j && j.data && j.data.total) ? j.data.total : 5500;
-          var pages = Math.ceil(total / PAGE_SIZE);
-          var results = new Array(pages + 1);
-          var done = 0, nextPage = 1, failed = [];
-
-          return new Promise(function(resolve){
-            var active = 0;
-            function pump(){
-              while (active < CONCURRENCY && nextPage <= pages){
-                (function(pn){
-                  active++;
-                  fetchPage(pn).then(function(rows){
-                    results[pn] = rows;
-                  }).catch(function(){
-                    failed.push(pn);
-                  }).then(function(){
-                    active--;
-                    done++;
-                    if (onProgress) onProgress(done, pages);
-                    if (done === pages){
-                      // 补拉失败页（串行 + 更长退避，避免再次触发风控）
-                      retryFailed(failed, results).then(function(){
-                        var all = [];
-                        for (var k = 1; k <= pages; k++) if (results[k]) all = all.concat(results[k]);
-                        resolve({rows: all, total: total, failed: failed.length});
-                      });
-                    } else {
-                      pump();
-                    }
-                  });
-                })(nextPage++);
-              }
-            }
-            pump();
-          });
-        });
-    });
-  }
-
-  function retryFailed(failed, results){
-    if (!failed.length) return Promise.resolve();
-    var i = 0;
-    return new Promise(function(resolve){
-      function step(){
-        if (i >= failed.length) return resolve();
-        var pn = failed[i++];
-        if (results[pn]) return step();
-        fetchPage(pn, 2).then(function(rows){
-          results[pn] = rows;
-        }).catch(function(){}).then(function(){
-          return wait(250);
-        }).then(step);
-      }
-      step();
-    });
-  }
-
-  // ============================================================
-  //  缓存
-  // ============================================================
-  function readCache(){
-    try{
-      var s = localStorage.getItem(CACHE_KEY);
-      if (!s) return null;
-      var o = JSON.parse(s);
-      if (!o || !o.t || !o.d || !o.d.length) return null;
-      if (Date.now() - o.t > CACHE_TTL) return null;
-      return o;
-    }catch(e){ return null; }
-  }
-  function writeCache(rows){
-    try{ localStorage.setItem(CACHE_KEY, JSON.stringify({t:Date.now(), d:rows})); }catch(e){}
-  }
-  function fmtTime(ts){
-    var d = new Date(ts), p = function(x){ return (x<10?'0':'')+x; };
-    return p(d.getMonth()+1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
-  }
-
-  // ============================================================
-  //  加载入口
-  // ============================================================
-  function setBar(pct, msg){
-    elBar.classList.add('on');
-    elFil.style.width = Math.max(0, Math.min(100, pct)) + '%';
-    elPct.textContent = Math.round(pct) + '%';
-    if (msg) elMsg.textContent = msg;
-  }
-  function hideBar(){ elBar.classList.remove('on'); }
-
-  function loadAll(force){
-    if (!force){
-      var c = readCache();
-      if (c){
-        ALL = c.d;
-        elStat.innerHTML = '共 <b>' + ALL.length + '</b> 只 · 数据 ' + fmtTime(c.t);
-        hideBar(); buildIndustry(); applyFilter();
-        return;
-      }
-    }
-    elStat.textContent = '正在获取行情数据…';
-    setBar(2, '正在获取行情数据…');
-    elEmpty.style.display = 'none';
-    fetchAll(function(done, pages){
-      setBar(done / pages * 96 + 2, '正在获取行情数据… ' + done + '/' + pages + ' 页');
-    }).then(function(res){
-      ALL = normalize(res.rows);
-      // 去重（同代码只留一条）
-      var seen = {}, uniq = [];
-      for (var i = 0; i < ALL.length; i++){
-        if (seen[ALL[i].code]) continue;
-        seen[ALL[i].code] = 1; uniq.push(ALL[i]);
-      }
-      ALL = uniq;
-      writeCache(ALL);
-      setBar(100, '加载完成');
-      elStat.innerHTML = '共 <b>' + ALL.length + '</b> 只 · 数据 ' + fmtTime(Date.now())
-        + (res.failed ? ' · 有 ' + res.failed + ' 页未取到' : '');
-      setTimeout(hideBar, 700);
-      buildIndustry(); applyFilter();
-    }).catch(function(err){
-      setBar(100, '加载失败');
-      elStat.textContent = '加载失败';
-      elEmpty.style.display = 'block';
-      elEmpty.innerHTML = '行情数据获取失败（' + (err && err.message ? err.message : '网络错误') + '）<br>'
-        + '可能是网络问题或接口限流。<b>请勿反复重试</b>，稍后再点「测连接」确认接口是否恢复。';
-    });
-  }
-
-  // ============================================================
-  //  行业下拉
-  // ============================================================
-  function buildIndustry(){
-    var sel = $('industry');
-    var have = {}, list = [];
-    for (var i = 0; i < ALL.length; i++){
-      var s = ALL[i].ind;
-      if (s && !have[s]){ have[s] = 1; list.push(s); }
-    }
-    list.sort(function(a,b){ return a.localeCompare(b, 'zh'); });
-    var html = '<option value="">全部行业</option>';
-    for (var k = 0; k < list.length; k++){
-      html += '<option value="' + esc(list[k]) + '">' + esc(list[k]) + '</option>';
-    }
-    sel.innerHTML = html;
-  }
-
-  function esc(s){
-    return String(s == null ? '' : s)
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  }
-
-  // ============================================================
-  //  筛选
-  // ============================================================
-  var sortKey = 'mcap', sortDir = -1, shown = PAGE_LIMIT, curList = [];
-
-  function v(id){
-    var s = $(id).value.trim();
-    if (s === '') return null;
-    var n = parseFloat(s);
-    return isFinite(n) ? n : null;
-  }
-  function inRange(x, lo, hi){
-    if (lo == null && hi == null) return true;
-    if (x == null) return false;                 // 该字段缺失 → 不算命中
-    if (lo != null && x < lo) return false;
-    if (hi != null && x > hi) return false;
-    return true;
-  }
-
-  function filterList(){
-    var mMin = v('mcapMin'), mMax = v('mcapMax');
-    var dMin = v('divMin'),  dMax = v('divMax');
-    var pMin = v('peMin'),   pMax = v('peMax');
-    var bMin = v('pbMin'),   bMax = v('pbMax');
-    var ind = $('industry').value;
-    var kw = $('kw').value.trim().toLowerCase();
-
-    var out = [];
-    for (var i = 0; i < ALL.length; i++){
-      var s = ALL[i];
-      if (mMin != null || mMax != null){
-        var cap = s.mcap == null ? null : s.mcap / 1e8;   // 元 → 亿
-        if (!inRange(cap, mMin, mMax)) continue;
-      }
-      if (!inRange(s.div, dMin, dMax)) continue;
-      if (!inRange(s.pe,  pMin, pMax)) continue;
-      if (!inRange(s.pb,  bMin, bMax)) continue;
-      if (ind && s.ind !== ind) continue;
-      if (kw && s.name.toLowerCase().indexOf(kw) < 0 && s.code.indexOf(kw) < 0) continue;
-      out.push(s);
-    }
-    return out;
-  }
-
-  function sortList(list){
-    var k = sortKey, d = sortDir;
-    return list.slice().sort(function(a, b){
-      var x = a[k], y = b[k];
-      if (k === 'name' || k === 'ind' || k === 'code'){
-        x = x == null ? '' : String(x); y = y == null ? '' : String(y);
-        return x.localeCompare(y, 'zh') * d;
-      }
-      // 数值：缺失值永远排最后
-      if (x == null && y == null) return 0;
-      if (x == null) return 1;
-      if (y == null) return -1;
-      return (x - y) * d;
-    });
-  }
-
-  function fmtCap(yuan){
-    if (yuan == null) return '<span class="fl">—</span>';
-    var y = yuan / 1e8;
-    if (y >= 10000) return (y / 10000).toFixed(2) + ' 万亿';
-    return y.toFixed(y >= 100 ? 0 : 1) + ' 亿';
-  }
-  function fmtNum(x, digits, unit){
-    if (x == null) return '<span class="fl">—</span>';
-    return x.toFixed(digits) + (unit || '');
-  }
-  function fmtChg(x){
-    if (x == null) return '<span class="fl">—</span>';
-    var cls = x > 0 ? 'up' : (x < 0 ? 'dn' : 'fl');
-    return '<span class="' + cls + '">' + (x > 0 ? '+' : '') + x.toFixed(2) + '%</span>';
-  }
-
-  function render(){
-    var list = curList;
-    elHit.textContent = list.length;
-    if (!list.length){
-      elTbody.innerHTML = '';
-      elEmpty.style.display = 'block';
-      elMoreBox.style.display = 'none';
-      return;
-    }
-    elEmpty.style.display = 'none';
-
-    var slice = list.slice(0, shown);
-    var buf = [];
-    for (var i = 0; i < slice.length; i++){
-      var s = slice[i];
-      var secid = (/^(6|9)/.test(s.code) ? '1.' : '0.') + s.code;
-      buf.push('<tr>'
-        + '<td class="l"><span class="nm">' + esc(s.name) + '</span>'
-        + '<span class="code">' + esc(s.code) + '</span></td>'
-        + '<td>' + fmtNum(s.price, 2) + '</td>'
-        + '<td>' + fmtChg(s.chg) + '</td>'
-        + '<td>' + fmtCap(s.mcap) + '</td>'
-        + '<td>' + fmtNum(s.div, 2, '%') + '</td>'
-        + '<td>' + fmtNum(s.pe, 2) + '</td>'
-        + '<td>' + fmtNum(s.pb, 2) + '</td>'
-        + '<td class="l">' + (s.ind ? '<span class="ind">' + esc(s.ind) + '</span>' : '<span class="fl">—</span>') + '</td>'
-        + '<td class="l"><a class="go" href="https://quote.eastmoney.com/unify/r/' + secid
-        + '" target="_blank" rel="noopener">查看</a></td>'
-        + '</tr>');
-    }
-    elTbody.innerHTML = buf.join('');
-    elMoreBox.style.display = list.length > shown ? 'flex' : 'none';
-    elMoreBtn.textContent = '显示更多（还有 ' + (list.length - shown) + ' 只）';
-  }
-
-  function applyFilter(reset){
-    if (reset) shown = PAGE_LIMIT;
-    curList = sortList(filterList());
-    render();
-    updateArrows();
-  }
-
-  function updateArrows(){
-    var ths = document.querySelectorAll('thead th');
-    for (var i = 0; i < ths.length; i++){
-      var th = ths[i], k = th.getAttribute('data-s'), ar = th.querySelector('.ar');
-      if (!ar) continue;
-      ar.textContent = (k === sortKey) ? (sortDir > 0 ? '▲' : '▼') : '';
-    }
-  }
-
-  // ============================================================
-  //  预设
-  // ============================================================
-  var PRESETS = {
-    dividend: {mcapMin:null,mcapMax:null,divMin:3,divMax:null,peMin:null,peMax:null,pbMin:null,pbMax:null,industry:'',kw:''},
-    bigcap:   {mcapMin:500,mcapMax:null,divMin:null,divMax:null,peMin:null,peMax:null,pbMin:null,pbMax:null,industry:'',kw:''},
-    smallcap: {mcapMin:null,mcapMax:50,divMin:null,divMax:null,peMin:null,peMax:null,pbMin:null,pbMax:null,industry:'',kw:''},
-    lowpe:    {mcapMin:null,mcapMax:null,divMin:null,divMax:null,peMin:0,peMax:15,pbMin:null,pbMax:null,industry:'',kw:''},
-    lowpb:    {mcapMin:null,mcapMax:null,divMin:null,divMax:null,peMin:null,peMax:null,pbMin:0,pbMax:1,industry:'',kw:''}
-  };
-  function setVal(id, x){ $(id).value = (x == null ? '' : x); }
-  function applyPreset(p){
-    if (p === 'clear'){
-      ['mcapMin','mcapMax','divMin','divMax','peMin','peMax','pbMin','pbMax','kw']
-        .forEach(function(id){ $(id).value = ''; });
-      $('industry').value = '';
-      applyFilter(true);
-      return;
-    }
-    var cfg = PRESETS[p];
-    if (!cfg) return;
-    setVal('mcapMin', cfg.mcapMin); setVal('mcapMax', cfg.mcapMax);
-    setVal('divMin', cfg.divMin);   setVal('divMax', cfg.divMax);
-    setVal('peMin', cfg.peMin);     setVal('peMax', cfg.peMax);
-    setVal('pbMin', cfg.pbMin);     setVal('pbMax', cfg.pbMax);
-    $('industry').value = cfg.industry; $('kw').value = cfg.kw;
-    applyFilter(true);
-  }
-
-  // ============================================================
-  //  导出 CSV
-  // ============================================================
-  function exportCsv(){
-    if (!curList.length){ alert('当前没有符合条件的结果可导出。'); return; }
-    var head = ['代码','名称','现价','涨跌幅%','总市值(亿)','股息率%','市盈率','市净率','行业'];
-    var lines = [head.join(',')];
-    for (var i = 0; i < curList.length; i++){
-      var s = curList[i];
-      lines.push([
-        s.code, '"' + s.name.replace(/"/g,'""') + '"',
-        s.price == null ? '' : s.price.toFixed(2),
-        s.chg == null ? '' : s.chg.toFixed(2),
-        s.mcap == null ? '' : (s.mcap / 1e8).toFixed(2),
-        s.div == null ? '' : s.div.toFixed(2),
-        s.pe == null ? '' : s.pe.toFixed(2),
-        s.pb == null ? '' : s.pb.toFixed(2),
-        '"' + (s.ind || '') + '"'
-      ].join(','));
-    }
-    var blob = new Blob(['\uFEFF' + lines.join('\r\n')], {type:'text/csv;charset=utf-8'});
-    var d = new Date(), p = function(x){ return (x<10?'0':'')+x; };
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = '筛选结果_' + curList.length + '只_' + d.getFullYear() + p(d.getMonth()+1) + p(d.getDate()) + '.csv';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 5000);
-  }
-
-  // ============================================================
-  //  事件绑定
-  // ============================================================
-  INPUTS.forEach(function(id){
-    $(id).addEventListener('input', function(){ applyFilter(true); });
-  });
-  $('industry').addEventListener('change', function(){ applyFilter(true); });
-
-  // 表头排序
-  var ths = document.querySelectorAll('thead th');
-  for (var t = 0; t < ths.length; t++){
-    (function(th){
-      var k = th.getAttribute('data-s');
-      if (!k) return;
-      th.addEventListener('click', function(){
-        if (sortKey === k) sortDir = -sortDir;
-        else { sortKey = k; sortDir = (k === 'name' ? 1 : -1); }
-        applyFilter(false);
-      });
-    })(ths[t]);
-  }
-
-  elMoreBtn.addEventListener('click', function(){ shown += 50; render(); });
-  $('reload').addEventListener('click', function(){
-    if (rateLimited()) return;
-    if (!confirm('「加载全市场」会向行情接口连续发送约 56 个请求，\n请求量较大、且可能触发接口风控。\n\n数据会缓存 30 分钟，期间无需重复加载。\n\n确定现在加载吗？')) return;
-    loadAll(true);
-  });
-  $('reload').setAttribute('title', '拉取全市场约 5500 只（约 56 个请求，谨慎使用）');
-
-  $('ping').addEventListener('click', function(){
-    if (rateLimited()) return;
-    doPing();
   });
 
-  $('expBtn').addEventListener('click', exportCsv);
-  $('toTop').addEventListener('click', function(){ window.scrollTo({top:0, behavior:'smooth'}); });
-
-  var presets = document.querySelectorAll('.preset');
-  for (var q = 0; q < presets.length; q++){
-    (function(el){
-      el.addEventListener('click', function(){ applyPreset(el.getAttribute('data-p')); });
-    })(presets[q]);
-  }
-
-  // ============================================================
-  //  频率保护：两次主动请求至少间隔 MIN_GAP，防止手抖连点
-  // ============================================================
-  function rateLimited(){
-    var gap = Date.now() - lastReqAt;
-    if (gap < MIN_GAP){
-      setBar(0, '请求太频繁，请 ' + Math.ceil((MIN_GAP - gap) / 1000) + ' 秒后再试');
-      setTimeout(hideBar, 1800);
-      return true;
-    }
-    lastReqAt = Date.now();
-    return false;
-  }
-
-  // ============================================================
-  //  测连接：只发 1 个请求，判断接口是否可用
-  // ============================================================
-  function doPing(){
-    elStat.innerHTML = '正在测试接口连通性…';
-    setBar(40, '正在发送 1 个测试请求…');
-    pingApi().then(function(r){
-      setBar(100, '接口可用');
-      elStat.innerHTML = '接口可用 ✓ 全市场共 <b>' + r.total + '</b> 只 · '
-        + (r.sample[0] ? ('样本：' + (r.sample[0].f14 || '') ) : '');
-      elEmpty.style.display = 'block';
-      elEmpty.innerHTML = '接口正常。<br>已确认可以拉取数据。'
-        + '如需完整数据，请点右上角「加载全市场」（约 56 个请求）。';
-      setTimeout(hideBar, 900);
-    }).catch(function(err){
-      setBar(100, '接口不可用');
-      elStat.textContent = '接口不可用';
-      elEmpty.style.display = 'block';
-      elEmpty.innerHTML = '接口无法访问（' + (err && err.message ? err.message : '网络错误') + '）<br>'
-        + '说明当前 IP 仍被接口方限流，或网络异常。请稍后再试，<b>不要反复点</b>。';
-      setTimeout(hideBar, 900);
-    });
-  }
-
-  // ============================================================
-  //  启动：默认不发任何请求，等用户主动操作
-  // ============================================================
-  (function init(){
-    var c = readCache();
-    if (c){
-      ALL = c.d;
-      elStat.innerHTML = '共 <b>' + ALL.length + '</b> 只（本地缓存）· 数据 ' + fmtTime(c.t);
-      hideBar(); buildIndustry(); applyFilter();
-      return;
-    }
-    elStat.textContent = '尚未加载数据';
-    setBar(0, '就绪 · 请点「测连接」检查接口，或点「加载全市场」拉取数据');
-    elEmpty.style.display = 'block';
-    elEmpty.innerHTML = '还没加载数据。<br>'
-      + '建议先点右上角 <b>「测连接」</b>（只发 1 个请求，很轻），确认接口可用后再点 <b>「加载全市场」</b>。';
-  })();
 })();
 </script>
 </body>
