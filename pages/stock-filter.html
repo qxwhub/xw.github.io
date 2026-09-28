@@ -133,11 +133,12 @@
     <h1>股票条件筛选器</h1>
     <div class="statline" id="statline">等待加载数据…</div>
     <div class="sp"></div>
-    <button class="tbtn" id="reload" type="button">重新加载数据</button>
+    <button class="tbtn" id="ping" type="button" title="只发 1 个请求，探测接口是否可用">测连接</button>
+    <button class="tbtn" id="reload" type="button" title="拉取全市场约 5500 只，请求量较大，谨慎使用">加载全市场</button>
     <button class="tbtn primary" id="toTop" type="button">回到顶部</button>
   </div>
   <div class="loadbar" id="loadbar">
-    <div class="msg"><span id="loadMsg">正在获取行情数据…</span><span id="loadPct">0%</span></div>
+    <div class="msg"><span id="loadMsg">就绪</span><span id="loadPct">0%</span></div>
     <div class="trk"><div class="fil" id="loadFil"></div></div>
   </div>
 </header>
@@ -240,8 +241,11 @@
   var CONCURRENCY = 4;          // 实测 4 并发最快（约 20 秒拉完 5500+ 只）
   var PAGE_SIZE = 100;          // 接口单页上限就是 100，给再大也只返 100
   var PAGE_LIMIT = 30;          // 一页最多渲染 30 只，避免手机卡
-  var CACHE_TTL = 10*60*1000;   // 缓存 10 分钟，避免反复拉被风控
-  var CACHE_KEY = 'stock_filter_cache_v1';
+  var CACHE_TTL = 30*60*1000;   // 缓存 30 分钟（拉全市场代价高，缓存久一点）
+  var CACHE_KEY = 'stock_filter_cache_v2';
+  var RETRIES = 1;              // 失败只重试 1 次。反复重试会加重接口风控
+  var MIN_GAP = 3000;           // 两次主动请求之间至少间隔 3 秒，防止手抖连点
+  var lastReqAt = 0;
 
   var COLS = { name:'名称', code:'代码', price:'现价', chg:'涨跌幅', mcap:'总市值',
                div:'股息率', pe:'市盈率', pb:'市净率', ind:'行业' };
@@ -268,7 +272,7 @@
   }
 
   function fetchPage(pn, retries){
-    retries = retries == null ? 3 : retries;
+    retries = retries == null ? RETRIES : retries;
     function once(n){
       return fetch(apiUrl(pn), {mode:'cors', cache:'no-store'})
         .then(function(r){
@@ -280,12 +284,29 @@
         })
         .catch(function(err){
           if (n <= 0) throw err;
-          // 指数退避后重试（实测接口有频率风控，必须重试）
-          return wait(400 * Math.pow(2, retries - n) + Math.random()*300)
+          // 指数退避后重试（接口有频率风控，但重试次数要克制）
+          return wait(600 * Math.pow(2, retries - n) + Math.random()*300)
             .then(function(){ return once(n - 1); });
         });
     }
     return once(retries);
+  }
+
+  // 轻量探测：只发 1 个请求，拉 5 条，用于判断接口是否可用（不触发风控）
+  function pingApi(){
+    var u = API + '?po=1&np=1&fltt=2&invt=2&fid=f20'
+      + '&fs=' + encodeURIComponent(FS_MARKET).replace(/%2C/g,',').replace(/%3A/g,':').replace(/%2B/g,'+')
+      + '&fields=f12,f14,f20&pn=1&pz=5';
+    return fetch(u, {mode:'cors', cache:'no-store'})
+      .then(function(r){
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function(j){
+        var d = j && j.data;
+        if (!d || !d.diff || !d.diff.length) throw new Error('返回空数据');
+        return { total: d.total, sample: d.diff };
+      });
   }
 
   function wait(ms){ return new Promise(function(res){ setTimeout(res, ms); }); }
@@ -380,7 +401,7 @@
         if (i >= failed.length) return resolve();
         var pn = failed[i++];
         if (results[pn]) return step();
-        fetchPage(pn, 4).then(function(rows){
+        fetchPage(pn, 2).then(function(rows){
           results[pn] = rows;
         }).catch(function(){}).then(function(){
           return wait(250);
@@ -434,6 +455,7 @@
     }
     elStat.textContent = '正在获取行情数据…';
     setBar(2, '正在获取行情数据…');
+    elEmpty.style.display = 'none';
     fetchAll(function(done, pages){
       setBar(done / pages * 96 + 2, '正在获取行情数据… ' + done + '/' + pages + ' 页');
     }).then(function(res){
@@ -452,11 +474,11 @@
       setTimeout(hideBar, 700);
       buildIndustry(); applyFilter();
     }).catch(function(err){
-      setBar(100, '加载失败，请点右上角「重新加载数据」重试');
+      setBar(100, '加载失败');
       elStat.textContent = '加载失败';
       elEmpty.style.display = 'block';
       elEmpty.innerHTML = '行情数据获取失败（' + (err && err.message ? err.message : '网络错误') + '）<br>'
-        + '可能是网络或接口限流，请稍后点右上角「重新加载数据」重试。';
+        + '可能是网络问题或接口限流。<b>请勿反复重试</b>，稍后再点「测连接」确认接口是否恢复。';
     });
   }
 
@@ -692,7 +714,18 @@
   }
 
   elMoreBtn.addEventListener('click', function(){ shown += 50; render(); });
-  $('reload').addEventListener('click', function(){ loadAll(true); });
+  $('reload').addEventListener('click', function(){
+    if (rateLimited()) return;
+    if (!confirm('「加载全市场」会向行情接口连续发送约 56 个请求，\n请求量较大、且可能触发接口风控。\n\n数据会缓存 30 分钟，期间无需重复加载。\n\n确定现在加载吗？')) return;
+    loadAll(true);
+  });
+  $('reload').setAttribute('title', '拉取全市场约 5500 只（约 56 个请求，谨慎使用）');
+
+  $('ping').addEventListener('click', function(){
+    if (rateLimited()) return;
+    doPing();
+  });
+
   $('expBtn').addEventListener('click', exportCsv);
   $('toTop').addEventListener('click', function(){ window.scrollTo({top:0, behavior:'smooth'}); });
 
@@ -704,9 +737,60 @@
   }
 
   // ============================================================
-  //  启动
+  //  频率保护：两次主动请求至少间隔 MIN_GAP，防止手抖连点
   // ============================================================
-  loadAll(false);
+  function rateLimited(){
+    var gap = Date.now() - lastReqAt;
+    if (gap < MIN_GAP){
+      setBar(0, '请求太频繁，请 ' + Math.ceil((MIN_GAP - gap) / 1000) + ' 秒后再试');
+      setTimeout(hideBar, 1800);
+      return true;
+    }
+    lastReqAt = Date.now();
+    return false;
+  }
+
+  // ============================================================
+  //  测连接：只发 1 个请求，判断接口是否可用
+  // ============================================================
+  function doPing(){
+    elStat.innerHTML = '正在测试接口连通性…';
+    setBar(40, '正在发送 1 个测试请求…');
+    pingApi().then(function(r){
+      setBar(100, '接口可用');
+      elStat.innerHTML = '接口可用 ✓ 全市场共 <b>' + r.total + '</b> 只 · '
+        + (r.sample[0] ? ('样本：' + (r.sample[0].f14 || '') ) : '');
+      elEmpty.style.display = 'block';
+      elEmpty.innerHTML = '接口正常。<br>已确认可以拉取数据。'
+        + '如需完整数据，请点右上角「加载全市场」（约 56 个请求）。';
+      setTimeout(hideBar, 900);
+    }).catch(function(err){
+      setBar(100, '接口不可用');
+      elStat.textContent = '接口不可用';
+      elEmpty.style.display = 'block';
+      elEmpty.innerHTML = '接口无法访问（' + (err && err.message ? err.message : '网络错误') + '）<br>'
+        + '说明当前 IP 仍被接口方限流，或网络异常。请稍后再试，<b>不要反复点</b>。';
+      setTimeout(hideBar, 900);
+    });
+  }
+
+  // ============================================================
+  //  启动：默认不发任何请求，等用户主动操作
+  // ============================================================
+  (function init(){
+    var c = readCache();
+    if (c){
+      ALL = c.d;
+      elStat.innerHTML = '共 <b>' + ALL.length + '</b> 只（本地缓存）· 数据 ' + fmtTime(c.t);
+      hideBar(); buildIndustry(); applyFilter();
+      return;
+    }
+    elStat.textContent = '尚未加载数据';
+    setBar(0, '就绪 · 请点「测连接」检查接口，或点「加载全市场」拉取数据');
+    elEmpty.style.display = 'block';
+    elEmpty.innerHTML = '还没加载数据。<br>'
+      + '建议先点右上角 <b>「测连接」</b>（只发 1 个请求，很轻），确认接口可用后再点 <b>「加载全市场」</b>。';
+  })();
 })();
 </script>
 </body>
