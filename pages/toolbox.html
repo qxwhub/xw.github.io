@@ -59,10 +59,6 @@
     .recv-join-slot:hover { border-color:#10b981; background:#f0fdf4; color:#059669; }
     .recv-join-slot .recv-join-sub { font-size:11.5px; color:#9ca3af; margin-top:4px; }
     .recv-join-slot img { max-width:100%; border-radius:8px; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.08); }
-    .recv-join-row { display:flex; gap:8px; margin-top:10px; }
-    .recv-join-row input { flex:1; min-width:0; padding:10px 12px; border:1.5px solid #d1d5db; border-radius:10px; font-size:14px; letter-spacing:3px; text-align:center; text-transform:uppercase; outline:none; transition:border-color .18s; }
-    .recv-join-row input:focus { border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,.12); }
-    .recv-join-row .btn { flex-shrink:0; }
 
     /* 信令连接失败：引导切到免服务器配对 */
     .fallback-tip { margin:0 0 12px; padding:11px 13px; border:1px solid #fcd34d; border-radius:10px; background:#fffbeb; font-size:12.5px; color:#92400e; line-height:1.6; }
@@ -434,6 +430,12 @@
 
     <div class="state-line" id="lanState">未连接</div>
 
+    <!-- 信令连不上的提示（发送方/接收方都要能看到，故放在两个视图之外） -->
+    <div class="fallback-tip" id="lanFallbackTip" style="display:none">
+      <span id="lanFallbackMsg"></span>
+      <div><button class="btn" type="button" onclick="lanFallbackRetry()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-refresh"></use></svg> 重新连接</button></div>
+    </div>
+
     <!-- 发送方视图 -->
     <div id="lanSendView">
       <input type="file" id="lanFileInput" multiple style="display:none">
@@ -444,10 +446,6 @@
         <div class="file-list" id="lanFileList" style="display:none"></div>
       </div>
       <div class="hint" id="lanSendHint" style="margin-bottom:8px"></div>
-      <div class="fallback-tip" id="lanFallbackTip" style="display:none">
-        <b>信令服务器连不上</b>：公共信令服务在境外，国内网络时常不稳定。<br>可以改用「<b>免服务器配对</b>」——手动交换二维码，不依赖任何服务器，更稳，只是步骤稍麻烦一些。
-        <div><button class="btn" type="button" onclick="switchLanMode('sdp')"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-link"></use></svg> 改用免服务器配对</button></div>
-      </div>
       <div class="btn-row">
         <button class="btn primary blue" id="lanSdpSendBtn" onclick="lanSdpSend()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-link"></use></svg> 发送</button>
       </div>
@@ -460,13 +458,11 @@
 
       <!-- 即时传输：只生成 1 个二维码，对方扫一下即可 -->
       <div class="pair-box" id="lanPeerBox" style="display:none">
-        <label>配对码二维码</label>
         <div class="hint" id="lanPeerGuide"></div>
         <div class="sdp-slot" id="lanPeerSlot">
           <span class="sdp-slot-empty" id="lanPeerEmpty">点上方「发送」自动生成</span>
           <canvas id="lanPeerQr" style="display:none"></canvas>
         </div>
-        <div class="relay-code-big" id="lanPeerCodeBig" style="display:none"></div>
         <button class="btn dl-btn" id="lanPeerDlBtn" onclick="downloadLanQr()" style="display:none"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-download"></use></svg> 下载二维码</button>
       </div>
       <div class="prog-wrap" id="lanSendProg" style="display:none">
@@ -477,19 +473,15 @@
 
     <!-- 接收方视图 -->
     <div id="lanRecvView" style="display:none">
-      <!-- 即时传输：只需扫码 / 输入配对码一次 -->
+      <!-- 即时传输：只需扫一次码 -->
       <div class="recv-join" id="lanRecvJoin">
         <div class="recv-join-slot clickable" id="lanRecvJoinSlot" onclick="lanRecvPickImage()">
           <svg class="icon" viewBox="0 0 24 24" style="width:30px;height:30px;margin-bottom:6px"><use href="#icon-scan"></use></svg>
-          <div>点这里选择对方的二维码</div>
-          <span class="recv-join-sub">或直接把配对码粘在下面</span>
+          <div>点这里选择发送方的二维码</div>
+          <span class="recv-join-sub">也可以用手机扫一扫直接打开</span>
           <img id="lanRecvJoinImg" alt="对方二维码" style="display:none">
         </div>
-        <div class="recv-join-row">
-          <input type="text" id="lanRecvCodeInput" placeholder="输入 6 位配对码" maxlength="6" autocomplete="off" spellcheck="false">
-          <button class="btn primary blue" type="button" onclick="lanRecvJoinByCode()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-link"></use></svg> 连接</button>
-        </div>
-        <div class="hint">扫一次码即可，无需再回传任何二维码。</div>
+        <div class="hint">扫一次码即可自动连接，无需回传任何二维码。</div>
       </div>
       <input type="file" id="lanRecvFileInput" accept="image/*" style="display:none" onchange="lanRecvFileChanged(this)">
 
@@ -774,7 +766,7 @@
   <div class="tips-box">
     <h3><svg class="icon" viewBox="0 0 24 24"><use href="#icon-info"></use></svg> 使用须知
     </h3>
-    <p><b>文件传输</b>：无需安装，浏览器直连（P2P）。点「发送」生成配对码二维码，对方识别后即可直连传文件，全程不走服务器。</p>
+    <p><b>文件传输</b>：无需安装，浏览器直连（P2P）。点「发送」生成二维码，对方扫一下即可直连传文件；也可切换「免服务器配对」手动换码，全程不走服务器。</p>
     <p><b>多媒体工具</b>：本地视频/B站/直链提取音频；网页录音录屏（任意网页正在播放的声音/画面）。</p>
     <p><b>图片工具</b>：压缩、背景更换、水印去除，均在本地处理，不会上传任何数据。</p>
     <p><b>PDF 工具</b>：合并、拆分、加水印，全部在浏览器本地完成，不会上传文件。</p>
@@ -897,7 +889,7 @@
     if (document.hidden) { pageWasHidden = true; }
     else if (pageWasHidden) {
       pageWasHidden = false;
-      if (lanConnected) lanState(icon('alert') + ' 刚才切到了后台，连接可能已中断，请重新点「发送」生成配对码，或让对方重新发来配对码。', '#d97706');
+      if (lanConnected) lanState(icon('alert') + ' 刚才切到了后台，连接可能已中断，请重新点「发送」，或让对方重新扫码。', '#d97706');
     }
   });
 
@@ -950,7 +942,7 @@
   var sdpPcs = []; // 免服务器配对（SDP 直连）的 RTCPeerConnection 列表，支持多台设备分别配对
   var peer = null;  // 即时传输用的 PeerJS 实例
   var peerJoinTries = 0; // 接收方连公共信令的重试计数（公共信令不稳，失败自动重试）
-  var lanCode = ''; // 即时传输的 6 位配对码
+  var lanCode = ''; // 即时传输的房间标识（仅用于二维码链接，界面不再展示 6 位码）
   // 接收完成回执（ACK）统计
   var lanTargetCount = 0, lanAckOk = 0, lanAckFail = 0, lanAckTimer = null;
   var lanSendCancelled = false;
@@ -1036,9 +1028,21 @@
     if (sdpBox) sdpBox.style.display = 'none';
     // 接收方扫码入口：仅即时传输显示
     if (recvJoin) recvJoin.style.display = isP2p ? '' : 'none';
+    // 注意：不要在这里强制隐藏 #lanFallbackTip —— 它的显隐由 lanShowFallback() 掌控，
+    // 每次刷新都隐藏会导致「信令连不上」的提示永远弹不出来。
+  }
+
+  // 信令连不上时的兜底提示：显示在发送方/接收方共用的位置，并给出「重新连接」按钮
+  window.lanFallbackRetry = function() {
     var ft = document.getElementById('lanFallbackTip');
     if (ft) ft.style.display = 'none';
-  }
+    peerJoinTries = 0;
+    if (lanRole === 'sender') {
+      document.getElementById('lanSdpSendBtn').click();
+    } else if (lanCode) {
+      lanPeerJoin(lanCode);
+    }
+  };
 
   // ==================== 即时传输：PeerJS 公共信令服务器 ====================
   // 说明：0.peerjs.com 是 PeerJS 官方免费公共信令服务，无需自建、无需账号。
@@ -1087,10 +1091,13 @@
   // 显示"改用免服务器配对"的引导（信令连不上时）
   function lanShowFallback(msg) {
     var ft = document.getElementById('lanFallbackTip');
-    if (ft) {
-      if (msg) ft.insertAdjacentHTML('afterbegin', '');
-      ft.style.display = '';
+    var span = document.getElementById('lanFallbackMsg');
+    if (span) {
+      span.innerHTML = '<b>信令服务器连不上</b>：' + (msg || '公共信令服务在境外，国内网络时常不稳定。') +
+        '<br>可以点「重新连接」再试一次；若一直不行，就改用「<b>免服务器配对</b>」' +
+        '——手动交换两次二维码，不依赖任何服务器，更稳，只是步骤稍麻烦一些（左上角切换传输方式）。';
     }
+    if (ft) ft.style.display = '';
     lanState(icon('alert') + ' ' + msg, '#d97706');
   }
 
@@ -1291,8 +1298,6 @@
   function peerCleanup() {
     if (peer) { try { peer.destroy(); } catch(e) {} peer = null; }
     lanCode = '';
-    var big = document.getElementById('lanPeerCodeBig');
-    if (big) { big.style.display = 'none'; big.textContent = ''; }
     var cv = document.getElementById('lanPeerQr');
     if (cv) cv.style.display = 'none';
     var emp = document.getElementById('lanPeerEmpty');
@@ -1514,14 +1519,11 @@
         var cv = document.getElementById('lanPeerQr');
         cv.style.display = '';
         drawQr(lanLink(lanCode), cv);
-        var big = document.getElementById('lanPeerCodeBig');
-        big.textContent = lanCode;
-        big.style.display = '';
         document.getElementById('lanPeerDlBtn').style.display = '';
         document.getElementById('lanPeerGuide').innerHTML =
-          '把二维码（或配对码 <b>' + lanCode + '</b>）发给对方，对方扫码即自动连接并接收文件。<br>' +
-          '<span style="color:#9ca3af">信令服务由公共服务器提供，国内偶尔不稳定；若长时间连不上，请改用「免服务器配对」。</span>';
-        lanState(icon('check-circle') + ' 配对码已生成，等对方扫码连接…（约 5 分钟内有效）', '#059669');
+          '把二维码发给对方，对方扫一下即自动连接并接收文件（只需扫一次）。<br>' +
+          '<span style="color:#9ca3af">信令服务由公共服务器提供，国内偶尔不稳定；若长时间连不上，可点「重新连接」，或改用「免服务器配对」。</span>';
+        lanState(icon('check-circle') + ' 二维码已生成，等对方扫码连接…（约 5 分钟内有效）', '#059669');
 
         // 信令中断自动重连（公共服务器不稳定是已知情况）
         var rc = 0;
@@ -1593,16 +1595,6 @@
     }).catch(function(e) {
       lanState(icon('x-circle') + ' 二维码识别失败：' + (e && e.message ? e.message : '图片不清晰'), '#ef4444');
     });
-  };
-
-  // 接收方手输配对码后点「连接」
-  window.lanRecvJoinByCode = function() {
-    var el = document.getElementById('lanRecvCodeInput');
-    var code = String(el && el.value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-    if (code.length !== 6) { lanState(icon('alert') + ' 配对码是 6 位，请检查后重新输入', '#d97706'); return; }
-    var slot = document.getElementById('lanRecvJoinSlot');
-    if (slot) slot.style.display = 'none';
-    lanPeerJoin(code);
   };
 
   // 接收方拿别人扫来的配对码（?r=CODE 进入页面时）
@@ -1874,6 +1866,8 @@
     }
     peerJoinTries++;
     var isRetry = peerJoinTries > 1;
+    var ftEl = document.getElementById('lanFallbackTip');
+    if (ftEl) ftEl.style.display = 'none';   // 开始新一次尝试：先收起兜底提示
     if (!isRetry) lanClose();
     else { if (peer) { try { peer.destroy(); } catch(e) {} peer = null; } }
 
