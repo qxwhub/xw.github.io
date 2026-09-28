@@ -44,6 +44,27 @@
     /* 本地播放器小按钮（前进/后退/播放暂停均为纯图标圆形按钮） */
     .btn-row .btn.icon-only { min-width:0; width:36px; height:36px; padding:0; border-radius:50%; }
 
+    /* 文件传输：传输方式切换（即时传输 / 免服务器配对） */
+    .mode-switch { display:flex; gap:10px; margin:2px 0 14px; }
+    .mode-item { flex:1; min-width:0; display:flex; align-items:flex-start; gap:9px; padding:11px 13px; border:1.5px solid #e5e7eb; border-radius:11px; background:#fff; cursor:pointer; transition:all .18s; user-select:none; }
+    .mode-item:hover { border-color:#a7f3d0; background:#f0fdf4; }
+    .mode-item.active { border-color:#10b981; background:#f0fdf4; box-shadow:0 0 0 2px rgba(16,185,129,.1); }
+    .mode-item .icon { width:20px; height:20px; flex-shrink:0; margin-top:1px; color:#9ca3af; }
+    .mode-item.active .icon { color:#10b981; }
+    .mode-item .mode-txt { display:flex; flex-direction:column; gap:3px; min-width:0; }
+    .mode-item .mode-txt b { font-size:13px; color:#374151; font-weight:700; }
+    .mode-item.active .mode-txt b { color:#059669; }
+    .mode-item .mode-txt span { font-size:11px; color:#9ca3af; line-height:1.45; }
+    @media (max-width:560px) {
+      .mode-switch { flex-direction:column; gap:8px; }
+      .mode-item .mode-txt span { font-size:10.5px; }
+    }
+
+    /* 信令连接失败：引导切到免服务器配对 */
+    .fallback-tip { margin:0 0 12px; padding:11px 13px; border:1px solid #fcd34d; border-radius:10px; background:#fffbeb; font-size:12.5px; color:#92400e; line-height:1.6; }
+    .fallback-tip b { color:#b45309; }
+    .fallback-tip .btn { margin-top:9px; }
+
     /* 格式转换：目标格式选择行 */
     .fmt-row { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:12px 0 14px; }
     .fmt-label { font-size:13px; color:#6b7280; font-weight:600; margin-right:2px; }
@@ -389,6 +410,25 @@
       <div class="sub-tab active" id="lanTabSend" onclick="switchLanRole('sender')"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-send"></use></svg> 我是发送方</div>
       <div class="sub-tab" id="lanTabRecv" onclick="switchLanRole('receiver')"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-receive"></use></svg> 我是接收方</div>
     </div>
+
+    <!-- 传输方式切换：即时传输（公共信令，扫码即连）/ 免服务器配对（手动换码，零服务器） -->
+    <div class="mode-switch" id="lanModeSwitch">
+      <div class="mode-item active" id="lanModeP2p" onclick="switchLanMode('p2p')">
+        <svg class="icon" viewBox="0 0 24 24"><use href="#icon-signal"></use></svg>
+        <div class="mode-txt">
+          <b>即时传输</b>
+          <span>扫码即连，最省事（依赖公共信令服务）</span>
+        </div>
+      </div>
+      <div class="mode-item" id="lanModeSdp" onclick="switchLanMode('sdp')">
+        <svg class="icon" viewBox="0 0 24 24"><use href="#icon-link"></use></svg>
+        <div class="mode-txt">
+          <b>免服务器配对</b>
+          <span>手动交换二维码，零服务器，更稳</span>
+        </div>
+      </div>
+    </div>
+
     <div class="state-line" id="lanState">未连接</div>
 
     <!-- 发送方视图 -->
@@ -400,11 +440,32 @@
         <span id="lanDropHint"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-folder-open"></use></svg> 点击选择文件/文件夹，或拖到这里</span>
         <div class="file-list" id="lanFileList" style="display:none"></div>
       </div>
-      <div class="hint" style="margin-bottom:8px">选好文件后点「发送」，自动生成配对码二维码发给对方，对方识别后即可直连传输。<br>适用：同一 Wi-Fi、家庭宽带之间直连传大文件，数据不经任何服务器（双方需同时在线）。企业网、校园网、部分手机流量可能连接失败。</div>
+      <div class="hint" id="lanSendHint" style="margin-bottom:8px">选好文件后点「发送」，自动生成配对码二维码发给对方，对方识别后即可直连传输。<br>适用：同一 Wi-Fi、家庭宽带之间直连传大文件，数据不经任何服务器（双方需同时在线）。企业网、校园网、部分手机流量可能连接失败。</div>
+      <div class="fallback-tip" id="lanFallbackTip" style="display:none">
+        <b>信令服务器连不上</b>：公共信令服务在境外，国内网络时常不稳定。<br>可以改用「<b>免服务器配对</b>」——手动交换二维码，不依赖任何服务器，更稳，只是步骤稍麻烦一些。
+        <div><button class="btn" type="button" onclick="switchLanMode('sdp')"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-link"></use></svg> 改用免服务器配对</button></div>
+      </div>
       <div class="btn-row">
         <button class="btn primary blue" id="lanSdpSendBtn" onclick="lanSdpSend()"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-link"></use></svg> 发送</button>
       </div>
-      <!-- 线上存取已移除（GitHub Pages 版无服务器存储） -->
+
+      <!-- 发送方生成进度（即时传输：连信令服务器） -->
+      <div class="prog-wrap" id="lanGenProg" style="display:none">
+        <div class="prog-bar"><div class="prog-fill" id="lanGenFill"></div></div>
+        <div class="prog-txt" id="lanGenTxt"></div>
+      </div>
+
+      <!-- 即时传输：配对码二维码 + 配对码文本 -->
+      <div class="pair-box" id="lanPeerBox" style="display:none">
+        <label>配对码（即时传输）</label>
+        <div class="hint" id="lanPeerGuide"></div>
+        <div class="sdp-slot" id="lanPeerSlot">
+          <span class="sdp-slot-empty" id="lanPeerEmpty">点上方「发送」自动生成</span>
+          <canvas id="lanPeerQr" style="display:none"></canvas>
+        </div>
+        <div class="relay-code-big" id="lanPeerCodeBig" style="display:none"></div>
+        <button class="btn dl-btn" id="lanPeerDlBtn" onclick="downloadLanQr()" style="display:none"><svg class="icon" viewBox="0 0 24 24"><use href="#icon-download"></use></svg> 下载二维码</button>
+      </div>
       <div class="prog-wrap" id="lanSendProg" style="display:none">
         <div class="prog-bar"><div class="prog-fill" id="lanSendFill"></div></div>
         <div class="prog-txt" id="lanSendTxt"></div>
@@ -741,6 +802,7 @@
 
 <script src="../js/qrcode.min.js?v=170c5297"></script>
 <script src="../js/jsqr.min.js?v=eb173922"></script>
+<script src="../assets/vendor/peerjs.min.js?v=1e5f4a01" onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';s.onerror=function(){var t=document.createElement('script');t.src='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';document.head.appendChild(t);};document.head.appendChild(s);"></script>
 <script src="../assets/vendor/hls.min.js?v=b0e74c4a"></script>
 <script src="../assets/music-decrypt.js?v=1983cd84"></script>
 <script>
@@ -857,15 +919,18 @@
     }
   }
 
-  // ===================== 文件传输（P2P · 免服务器） =====================
-  // 原理：交换 SDP 配对码/接收码二维码完成信令（全程不走任何服务器），数据 WebRTC 直连。
-  // 局域网/热点/完全断网都能用；同一局域网/跨网络都支持（只要双方能互相访问）。
+  // ===================== 文件传输（两种方式） =====================
+  // ① 即时传输：PeerJS 公共信令服务器（0.peerjs.com）配对，扫码即连；信令只负责"找到对方"，数据仍走 WebRTC 直连。
+  // ② 免服务器配对：手动交换 SDP 二维码完成信令，全程零服务器，局域网/断网都能用。
   var LAN_CHUNK = 65536;              // 数据分块 64KB
   var LARGE_FILE = 500 * 1024 * 1024; // 单个文件 ≥500MB 视为大文件，传输耗时较长需提醒
   var lanRole = 'sender';
+  var lanMode = 'p2p';  // 'p2p' = 即时传输（公共信令）｜'sdp' = 免服务器配对（手动换码）
   var MAX_LAN_RECEIVERS = 10; // 单个二维码最多同时接收设备数（避免连接过多导致浏览器卡顿）
   var conn = null, conns = [], lanConnected = false, lanSending = false;
   var sdpPcs = []; // 免服务器配对（SDP 直连）的 RTCPeerConnection 列表，支持多台设备分别配对
+  var peer = null;  // 即时传输用的 PeerJS 实例
+  var lanCode = ''; // 即时传输的 6 位配对码
   // 接收完成回执（ACK）统计
   var lanTargetCount = 0, lanAckOk = 0, lanAckFail = 0, lanAckTimer = null;
   var lanSendCancelled = false;
@@ -905,10 +970,113 @@
     document.getElementById('lanSendView').style.display = r === 'sender' ? '' : 'none';
     document.getElementById('lanRecvView').style.display = r === 'receiver' ? '' : 'none';
     lanClose();
-    // 接收方直接显示两个框（粘贴对方配对码自动生成接收码）；发送方点「发送」再打开
-    if (r === 'receiver') lanOpenSdp();
+    lanRenderMode();
+    // 即时传输：接收方只要输入配对码即可；免服务器配对：接收方直接显示两个空位
+    if (r === 'receiver') {
+      if (lanMode === 'p2p') lanOpenPeerRecv();
+      else lanOpenSdp();
+    }
     lanState('未连接');
   };
+
+  // ==================== 传输方式切换（即时传输 / 免服务器配对） ====================
+  window.switchLanMode = function(m) {
+    if (m === lanMode) return;
+    lanMode = m;
+    lanClose();
+    lanRenderMode();
+    if (lanRole === 'receiver') {
+      if (m === 'p2p') lanOpenPeerRecv();
+      else lanOpenSdp();
+    }
+    lanState('未连接');
+  };
+
+  // 按当前方式与角色刷新界面：切换卡高亮、说明文字、显隐对应面板
+  function lanRenderMode() {
+    var isP2p = lanMode === 'p2p';
+    var isSender = lanRole === 'sender';
+    var mp = document.getElementById('lanModeP2p');
+    var ms = document.getElementById('lanModeSdp');
+    if (mp) mp.classList.toggle('active', isP2p);
+    if (ms) ms.classList.toggle('active', !isP2p);
+
+    // 发送方说明文字
+    var hint = document.getElementById('lanSendHint');
+    if (hint) {
+      hint.innerHTML = isP2p
+        ? '选好文件后点「发送」，自动生成配对码二维码发给对方，对方扫码即自动连接并接收。<br>适用：同一 Wi-Fi、家庭宽带之间直连传大文件，数据不经服务器（双方需同时在线）。企业网、校园网、部分手机流量可能连接失败。'
+        : '选好文件后点「发送」，自动生成配对码二维码发给对方，对方识别后回发接收码，你再识别一次即可直连传输。<br>全程不依赖任何服务器，局域网内、甚至断网环境都能用，只是需要多交换一次二维码。';
+    }
+
+    // 发送按钮文案随方式变化
+    var sb = document.getElementById('lanSdpSendBtn');
+    if (sb && !sb.disabled) {
+      sb.innerHTML = icon('link') + (isP2p ? ' 发送' : ' 发送');
+    }
+
+    // 面板显隐：即时传输用配对码框，免服务器配对用双栏框
+    var peerBox = document.getElementById('lanPeerBox');
+    var sdpBox = document.getElementById('lanSdpBox');
+    if (peerBox) peerBox.style.display = 'none';
+    if (sdpBox) sdpBox.style.display = 'none';
+    var ft = document.getElementById('lanFallbackTip');
+    if (ft) ft.style.display = 'none';
+  }
+
+  // ==================== 即时传输：PeerJS 公共信令服务器 ====================
+  // 说明：0.peerjs.com 是 PeerJS 官方免费公共信令服务，无需自建、无需账号。
+  // 它只负责帮双方互相"找到对方"（交换连接信息），文件数据始终走 WebRTC 点对点直连，不经过它。
+  var PEER_HOST = '0.peerjs.com';
+  var PEER_PORT = 443;
+  var PEER_PATH = '/';
+  var PEER_SECURE = true;
+  var PEER_PREFIX = 'lime-';   // 房间 ID 前缀，避免与公共服务器上其他人的 ID 撞车
+
+  function peerOptions() {
+    return {
+      host: PEER_HOST,
+      port: PEER_PORT,
+      path: PEER_PATH,
+      secure: PEER_SECURE,
+      debug: 0,
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' },
+          { urls: 'stun:stun.qq.com:3478' },
+          { urls: 'stun:stun.miwifi.com:3478' },
+          { urls: 'stun:stun.chat.bilibili.com:3478' }
+        ]
+      }
+    };
+  }
+
+  function genCode() {
+    var alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 去掉 I/O/0/1 等易混字符
+    var s = '';
+    for (var i = 0; i < 6; i++) s += alphabet[Math.floor(Math.random() * alphabet.length)];
+    return s;
+  }
+
+  // 二维码内容 = 本站链接 + ?r=配对码；对方扫码即打开本页并自动连上
+  function lanLink(code) {
+    return location.href.split('?')[0].split('#')[0] + '?r=' + code;
+  }
+
+  function peerReady() {
+    return typeof window.Peer === 'function';
+  }
+
+  // 显示"改用免服务器配对"的引导（信令连不上时）
+  function lanShowFallback(msg) {
+    var ft = document.getElementById('lanFallbackTip');
+    if (ft) {
+      if (msg) ft.insertAdjacentHTML('afterbegin', '');
+      ft.style.display = '';
+    }
+    lanState(icon('alert') + ' ' + msg, '#d97706');
+  }
 
   function lanState(msg, color) {
     var el = document.getElementById('lanState');
@@ -1092,10 +1260,26 @@
     conns = [];
     if (conn) { try { conn.close(); } catch(e) {} conn = null; }
     sdpCleanup();
+    peerCleanup();
     lanConnected = false;
     lanSending = false;
     document.getElementById('lanSendProg').style.display = 'none';
     document.getElementById('lanRecvProg').style.display = 'none';
+    document.getElementById('lanGenProg').style.display = 'none';
+  }
+
+  // 销毁 PeerJS 实例并复位即时传输界面
+  function peerCleanup() {
+    if (peer) { try { peer.destroy(); } catch(e) {} peer = null; }
+    lanCode = '';
+    var big = document.getElementById('lanPeerCodeBig');
+    if (big) { big.style.display = 'none'; big.textContent = ''; }
+    var cv = document.getElementById('lanPeerQr');
+    if (cv) cv.style.display = 'none';
+    var emp = document.getElementById('lanPeerEmpty');
+    if (emp) emp.style.display = '';
+    var dl = document.getElementById('lanPeerDlBtn');
+    if (dl) dl.style.display = 'none';
   }
 
   // ==================== 免服务器配对（SDP 直连，零服务器） ====================
@@ -1248,15 +1432,159 @@
     if (box.scrollIntoView) box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   };
 
-  // 发送方：点「发送」→ 打开配对面板并自动生成配对码二维码，按钮实时显示生成进度
+  // 发送方：点「发送」→ 按当前传输方式分流
   window.lanSdpSend = function() {
     if (!lanFiles.length) { lanState('请先选择文件或文件夹，再点「发送」', '#d97706'); return; }
     if (!lanCheckedCount()) { lanState('请先勾选要传输的文件（默认为全选）', '#d97706'); return; }
-    lanOpenSdp();
     var sendBtn = document.getElementById('lanSdpSendBtn');
+    if (lanMode === 'p2p') { lanPeerSend(); return; }
+    lanOpenSdp();
     if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = icon('link') + ' 正在生成配对码…'; }
     lanSdpCreateOffer();
   };
+
+  // ==================== 即时传输：发送方 ====================
+  // 连公共信令服务器 → 拿到 6 位配对码 → 生成二维码给对方扫 → 对方扫码后自动连上并接收文件
+  window.lanPeerSend = function() {
+    var sendBtn = document.getElementById('lanSdpSendBtn');
+    var prog = document.getElementById('lanGenProg');
+    var fill = document.getElementById('lanGenFill');
+    var txt = document.getElementById('lanGenTxt');
+    var ft = document.getElementById('lanFallbackTip');
+    if (ft) ft.style.display = 'none';
+    if (!peerReady()) {
+      lanShowFallback('信令组件加载失败（多为网络问题），可改用免服务器配对。');
+      return;
+    }
+    lanClose();
+    peerCleanup();
+
+    // 打开配对面板
+    var box = document.getElementById('lanPeerBox');
+    box.style.display = '';
+    var emp = document.getElementById('lanPeerEmpty');
+    emp.style.display = '';
+    emp.textContent = '正在连接信令服务器…';
+    document.getElementById('lanPeerSlot').style.display = '';
+    if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = icon('signal') + ' 正在连接…'; }
+
+    prog.style.display = '';
+    fill.style.width = '0%';
+    txt.textContent = '正在连接信令服务器…';
+    lanState('正在连接信令服务器…');
+
+    var tries = 0;
+    var build = function() {
+      try {
+        peer = new Peer(PEER_PREFIX + genCode(), peerOptions());
+      } catch(e) {
+        prog.style.display = 'none';
+        if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = icon('link') + ' 发送'; }
+        lanShowFallback('信令初始化失败：' + (e.message || '浏览器不支持 WebRTC') + '，可改用免服务器配对。');
+        return;
+      }
+
+      // 连接成功：显示配对码二维码
+      peer.on('open', function(id) {
+        lanCode = String(id).replace(PEER_PREFIX, '');
+        fill.style.width = '100%';
+        txt.innerHTML = icon('check-circle') + ' 配对码已生成';
+        setTimeout(function() { prog.style.display = 'none'; }, 1500);
+        if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = icon('link') + ' 发送'; }
+        emp.style.display = 'none';
+        var cv = document.getElementById('lanPeerQr');
+        cv.style.display = '';
+        drawQr(lanLink(lanCode), cv);
+        var big = document.getElementById('lanPeerCodeBig');
+        big.textContent = lanCode;
+        big.style.display = '';
+        document.getElementById('lanPeerDlBtn').style.display = '';
+        document.getElementById('lanPeerGuide').innerHTML =
+          '把二维码（或配对码 <b>' + lanCode + '</b>）发给对方，对方扫码即自动连接并接收文件。<br>' +
+          '<span style="color:#9ca3af">信令服务由公共服务器提供，国内偶尔不稳定；若长时间连不上，请改用「免服务器配对」。</span>';
+        lanState(icon('check-circle') + ' 配对码已生成，等对方扫码连接…（约 5 分钟内有效）', '#059669');
+
+        // 信令中断自动重连（公共服务器不稳定是已知情况）
+        var rc = 0;
+        peer.on('disconnected', function() {
+          if (lanConnected || box.style.display === 'none') return;
+          if (rc < 3) {
+            rc++;
+            lanState(icon('alert') + ' 信令连接中断，正在自动重连（' + rc + '/3）…', '#d97706');
+            try { peer.reconnect(); } catch(e) {}
+          } else {
+            lanShowFallback('信令连接多次断开，配对码可能已失效，请重新点「发送」；或改用免服务器配对。');
+          }
+        });
+        peer.on('reconnected', function() {
+          if (lanConnected) return;
+          lanState(icon('check-circle') + ' 已自动重连，配对码仍然有效，等对方扫码连接…', '#059669');
+        });
+      });
+
+      // 对方连上来了（扫码方发起连接）
+      peer.on('connection', function(c) { setupConn(c); });
+
+      peer.on('error', function(e) {
+        if (lanConnected) return; // 通道已建立，信令报错不影响传输
+        var msg = e && (e.message || e.type) ? (e.message || e.type) : '网络问题';
+        // 配对码被占用（极小概率）：换一个重试
+        if (e && e.type === 'unavailable-id' && tries < 3 && !lanCode) {
+          tries++;
+          try { peer.destroy(); } catch(_) {}
+          setTimeout(build, 300);
+          return;
+        }
+        if (lanCode) {
+          // 配对码已生成：信令抖动，尝试恢复，不销毁
+          lanState(icon('alert') + ' 信令连接异常（' + msg + '），正在尝试恢复…', '#d97706');
+          if (peer && peer.disconnected) { try { peer.reconnect(); } catch(e2) {} }
+          return;
+        }
+        prog.style.display = 'none';
+        if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = icon('link') + ' 发送'; }
+        lanShowFallback('连不上信令服务器（' + msg + '），可改用免服务器配对。');
+      });
+    };
+    build();
+  };
+
+  // ==================== 即时传输：接收方 ====================
+  // 输入/扫码得到配对码 → 连公共信令 → 找到发送方 → 自动接收文件
+  window.lanOpenPeerRecv = function() {
+    lanClose();
+    document.getElementById('lanPeerBox').style.display = 'none';
+    // 接收方复用双栏面板的"对方输入位"，扫码/粘图识别
+    var sdpBox = document.getElementById('lanSdpBox');
+    sdpBox.style.display = '';
+    sdpCurrentCode = '';
+    sdpState = 'idle';
+    lanSdpRender();
+  };
+
+  // 接收方拿别人扫来的配对码（?r=CODE 进入页面时）
+  window.lanSdpSubmitJoinCode = function(code) {
+    // 由接手方（toolbox 初始化）处理：按当前方式决定用 Peer 还是用 SDP
+  };
+
+  // 页面带 ?r=CODE 打开时（扫码进入）：自动切到接收方并按当前传输方式连接
+  function lanHandleJoinCode() {
+    var code = '';
+    try { code = new URLSearchParams(location.search).get('r') || ''; }
+    catch(e) { code = (location.search.match(/[?&]r=([^&]+)/) || [])[1] || ''; }
+    if (!code) return;
+    code = decodeURIComponent(code).trim();
+    // 免服务器配对码以 LIME1: 开头；否则视为即时传输的 6 位配对码
+    switchLanRole('receiver');
+    if (code.indexOf('LIME1:') === 0) {
+      switchLanMode('sdp');
+      setTimeout(function() { lanSdpFillCode(code); }, 60);
+    } else {
+      switchLanMode('p2p');
+      setTimeout(function() { lanSdpFillCode(code); }, 60);
+    }
+  }
+
 
   function lanSdpRender() {
     var guide = document.getElementById('lanSdpGuide');
@@ -1284,7 +1612,8 @@
       if (mineEmpty) mineEmpty.textContent = isSender ? '点上方「发送」自动生成' : '粘贴对方配对码后自动生成';
       if (isSender) {
         guide.innerHTML = '全程不走任何服务器，断网也能传。<br>点上方「发送」自动生成配对码，下载二维码发给对方；对方识别后会回发接收码，点右侧空位选图/粘贴识别即可直连。';
-        if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = icon('link') + ' 发送'; }
+        // 即时传输模式下按钮状态由 lanPeerSend 掌控，这里不要覆盖
+        if (sendBtn && lanMode !== 'p2p') { sendBtn.disabled = false; sendBtn.innerHTML = icon('link') + ' 发送'; }
       } else {
         guide.innerHTML = '';
       }
@@ -1451,8 +1780,20 @@
     }
   }
 
-  // 识别到配对码/接收码后自动处理：接收方自动生成接收码（弹窗提示），发送方自动提交应答码完成直连
+  // 识别到配对码/接收码后自动处理
   function lanSdpFillCode(text) {
+    // 即时传输模式：二维码里是"本站链接?r=配对码"，接收方拿到配对码后直接连公共信令找发送方
+    if (lanMode === 'p2p') {
+      var code = parsePeerCode(text);
+      if (!code) {
+        lanState(icon('x-circle') + ' 未识别到有效的配对码，请确认二维码内容正确（应为配对链接或 6 位配对码）', '#ef4444');
+        return;
+      }
+      if (lanRole === 'receiver') { lanPeerJoin(code); return; }
+      lanState(icon('alert') + ' 即时传输模式下不需要再提交配对码：请让对方扫码接收即可', '#d97706');
+      return;
+    }
+    // 免服务器配对模式：走原 SDP 流程
     sdpCurrentCode = text;
     if (lanRole === 'receiver') {
       sdpState = 'answer-input';
@@ -1465,6 +1806,75 @@
     } else {
       lanState('当前无法识别该二维码：发送方请先点「发送」生成配对码，接收方请粘贴对方发来的配对码', '#ef4444');
     }
+  }
+
+  // 从链接或纯配对码里抽出 6 位配对码
+  function parsePeerCode(text) {
+    var raw = String(text || '').trim();
+    if (!raw || raw.indexOf('LIME1:') === 0) return ''; // 免服务器配对的 SDP 码，不是配对码
+    var c = '';
+    try { c = new URL(raw).searchParams.get('r') || ''; }
+    catch(e) { c = (raw.match(/[?&]r=([^&]+)/) || [])[1] || raw; }
+    c = String(c).toUpperCase().replace(/[^A-Z0-9]/g, '');
+    return c.length === 6 ? c : '';
+  }
+
+  // ==================== 即时传输：接收方连接发送方 ====================
+  function lanPeerJoin(code) {
+    if (!peerReady()) {
+      lanShowFallback('信令组件加载失败（多为网络问题），可改用免服务器配对。');
+      return;
+    }
+    lanClose();
+    document.getElementById('lanPeerBox').style.display = 'none';
+    var prog = document.getElementById('lanGenProg');
+    var fill = document.getElementById('lanGenFill');
+    var txt = document.getElementById('lanGenTxt');
+    prog.style.display = '';
+    fill.style.width = '0%';
+    txt.textContent = '正在连接信令服务器…';
+    lanState('正在连接信令服务器…');
+
+    var joined = false;
+    try {
+      peer = new Peer(null, peerOptions());
+    } catch(e) {
+      prog.style.display = 'none';
+      lanShowFallback('信令初始化失败：' + (e.message || '浏览器不支持 WebRTC') + '，可改用免服务器配对。');
+      return;
+    }
+    peer.on('open', function() {
+      joined = true;
+      fill.style.width = '100%';
+      txt.textContent = '正在连接对方…';
+      lanState('正在连接对方（配对码 ' + code + '）…');
+      var c = peer.connect(PEER_PREFIX + code, { reliable: true });
+      setupConn(c);
+    });
+    peer.on('error', function(e) {
+      if (lanConnected) return;
+      var msg = e && (e.message || e.type) ? (e.message || e.type) : '网络问题';
+      prog.style.display = 'none';
+      if (e && e.type === 'peer-unavailable') {
+        lanState(icon('x-circle') + ' 找不到对方（配对码 ' + code + '）：请确认发送方页面仍开着、配对码没过期（约 5 分钟有效）', '#ef4444');
+      } else {
+        lanShowFallback('连不上信令服务器（' + msg + '），可改用免服务器配对。');
+      }
+      lanClose();
+    });
+    // 超时兜底：一直没连上给出明确提示，避免卡在"正在连接…"
+    setTimeout(function() {
+      if (lanConnected) return;
+      if (!joined) {
+        prog.style.display = 'none';
+        lanShowFallback('连接信令服务器超时，可改用免服务器配对。');
+        lanClose();
+      } else if (!conn || !conn.open) {
+        prog.style.display = 'none';
+        lanState(icon('x-circle') + ' 未连上对方，请确认发送方页面仍开着、双方都在线', '#ef4444');
+        lanClose();
+      }
+    }, 15000);
   }
 
   // 接收码已生成弹窗：下载接收码 或 关闭
@@ -4094,6 +4504,12 @@
     var ts = now.getFullYear() + '' + ('0' + (now.getMonth() + 1)).slice(-2) + ('0' + now.getDate()).slice(-2) + '-' + ('0' + now.getHours()).slice(-2) + ('0' + now.getMinutes()).slice(-2);
     downloadBlob(wrBlob, prefix + '-' + ts + '.' + fmt.ext);
   };
+
+  // ===================== 初始化 =====================
+  // 按当前传输方式刷新界面（默认「即时传输」）
+  lanRenderMode();
+  // 扫码进入（URL 带 ?r=配对码）时，自动切接收方并连接
+  lanHandleJoinCode();
 
 })();
 </script>
