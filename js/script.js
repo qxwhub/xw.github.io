@@ -750,7 +750,8 @@ function renderDock() {
       + '<svg class="dock-icon" viewBox="0 0 24 24"><use href="' + icon + '"></use></svg></button>';
   };
   dock.innerHTML =
-    btn('网站', 'toggleShortPanel()', '', '#icon-grid')
+    btn('工具箱', 'goPage.call(this)', ' data-u="pages/toolbox.html"', '#icon-toolbox')
+    + btn('网站', 'toggleShortPanel()', '', '#icon-grid')
     + btn('发现', 'goPage.call(this)', ' data-u="pages/found.html"', '#icon-lightbulb')
     + btn('设置', 'toggleSettings()', '', '#icon-gear');
 }
