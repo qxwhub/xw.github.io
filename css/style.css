@@ -167,6 +167,7 @@ body {
 }
 .corner-dock button:hover { background:rgba(255,255,255,.78); transform:translateY(-2px); }
 .corner-dock .dock-icon{width:18px;height:18px;display:block;color:rgba(29,29,31,.72)}
+.corner-dock svg use[href="#icon-toolbox"]{color:#0ea5e9}
 .corner-dock svg use[href="#icon-grid"]{color:#8b5cf6}
 .corner-dock svg use[href="#icon-lightbulb"]{color:#f59e0b}
 .corner-dock svg use[href="#icon-gear"]{color:#64748b}
