@@ -206,7 +206,18 @@
     body{background:#fff;} .w{break-inside:avoid;}
     .grid{grid-template-columns:repeat(auto-fill, minmax(150px,1fr));}
   }
-</style>
+  .root-banner{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;
+    background:#eef4ff;border:1px solid #c7dcff;border-radius:10px;padding:10px 14px;margin:0 0 16px;}
+  .root-banner[hidden]{display:none;}
+  .root-banner .rb-main{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .root-banner .rb-tag{font-size:11px;font-weight:700;color:#1d4ed8;background:#dbe7ff;border-radius:6px;padding:2px 8px;flex:0 0 auto;}
+  .root-banner .rb-text{font-size:13px;color:#1f2d3d;line-height:1.5;}
+  .root-banner .rb-actions{display:flex;gap:10px;align-items:center;flex:0 0 auto;}
+  .root-banner .rb-back{font-size:12.5px;color:#1d4ed8;text-decoration:none;font-weight:600;}
+  .root-banner .rb-back:hover{text-decoration:underline;}
+  .root-banner .rb-clear{font:inherit;font-size:12px;color:#475569;background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:4px 10px;cursor:pointer;}
+  .root-banner .rb-clear:hover{border-color:#94a3b8;}
+  </style>
 </head>
 <body>
 <header>
@@ -220,6 +231,7 @@
         <span class="eyeall-txt">显示释义</span>
       </button>
       <input id="q" type="search" placeholder="搜索：输入英文或中文，如 water / 水 / qual" autocomplete="off">
+      <a class="tbtn" id="rootsLink" href="english-word-roots.html" style="text-decoration:none;font-weight:600;color:#1d4ed8;border-color:#b9d3fb;background:#eef4ff;margin-left:2px;white-space:nowrap;">词根速查 ↔</a>
       <button class="tbtn" id="voiceBtn" type="button" title="切换朗读口音">口音：美</button>
       <button class="tbtn" id="rateBtn" type="button" title="切换朗读速度">语速：正常</button>
       <button class="tbtn" id="hideDone" type="button" aria-pressed="false">隐藏已记住</button>
@@ -239,6 +251,10 @@
 </header>
 <nav id="azRail" aria-label="字母跳转"></nav>
 <main>
+  <div id="rootBanner" class="root-banner" hidden>
+    <div class="rb-main"><span class="rb-tag">词根联动</span><span class="rb-text"></span></div>
+    <div class="rb-actions"><a class="rb-back" href="english-word-roots.html">← 返回词根表</a><button class="rb-clear" type="button">清除筛选</button></div>
+  </div>
   <section data-i="0">
     <div class="sec-head" style="border-left-color:#2563eb">
       <h2>操作词 · Operations</h2><span class="sub">表达&quot;做、是、有、去、来&quot;等基本动作与语法关系，是 850 词的核心骨架</span><span class="cnt">100 词</span>
@@ -1239,6 +1255,31 @@
     empty.style.display = any ? 'none' : 'block';
   }
   q.addEventListener('input', run);
+
+  // ---------- 词根速查联动：从词根表跳过来时，自动按词素筛选 ----------
+  (function(){
+    try {
+      var ps = new URLSearchParams(location.search);
+      if (ps.get('from') !== 'roots') return;
+      var token = ps.get('q');
+      var label = ps.get('label') || '';
+      var anchor = ps.get('anchor') || 'root';
+      if (!token) return;
+      q.value = token;
+      run();
+      var banner = document.getElementById('rootBanner');
+      if (banner) {
+        banner.querySelector('.rb-text').innerHTML =
+          '你从《词根速查》点了 <b>' + label + '</b>，已按拼写筛选出相关词。可修改上方搜索框细化；结果可能含少量近似词，以词根表为准。';
+        banner.querySelector('.rb-back').setAttribute('href', 'english-word-roots.html#' + anchor);
+        banner.hidden = false;
+        banner.querySelector('.rb-clear').addEventListener('click', function(){
+          q.value = ''; run(); banner.hidden = true;
+          try { history.replaceState(null, '', location.pathname); } catch(e){}
+        });
+      }
+    } catch(e){}
+  })();
   q.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ q.value=''; run(); } });
 
   // ---------- 长单词自适应字号（不换行，只缩字号） ----------

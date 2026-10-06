@@ -439,6 +439,13 @@
       thead { display: table-header-group; }
     }
   </style>
+  <style>
+    .link-hint{font-size:13px;color:var(--page-text-muted);background:var(--page-surface);border:1px solid var(--page-border);border-radius:var(--radius-md);padding:10px 14px;margin:0 0 var(--space-6);}
+    .link-hint b{color:var(--page-brand-active);}
+    th[scope="row"].root-token{cursor:pointer;transition:background .12s,color .12s;}
+    th[scope="row"].root-token:hover{background:var(--page-brand-soft);color:var(--page-brand-active);}
+    th[scope="row"].root-token::after{content:" \2197";font-size:11px;color:var(--page-brand);opacity:.55;}
+  </style>
 </head>
 <body>
   <article class="page">
@@ -471,6 +478,8 @@
             <li><a href="#tips">记忆建议</a></li>
           </ul>
         </nav>
+
+        <p class="link-hint">💡 表格里的每个<b>词素</b>（前缀 / 词根 / 后缀）都能点：点一下会跳到《850 核心词表》，自动筛出拼写中包含它的真实单词，可听发音、可标记「已记住」。先看词根，再去看词，记得更牢。</p>
 
         <section id="method">
           <h2>一、拆词三步法</h2>
@@ -714,6 +723,50 @@
             <li><b>接受例外。</b>英语经过上千年层积，不是每个词都能干净拆开。拆不动的词，直接当整体记就好。</li>
           </ul>
         </section>
+
+        <section id="origin">
+          <h2>八、底层原理：语言拿身体动作描述整个世界（记单词的钥匙）</h2>
+          <p class="lede">你前面发现的规律，就是语言学里的「具身认知」：人类先有几十个最原始的身体动作和感官——看、听、走、生、抓、站、流、烧……后来全都拿这些具体经验去比喻抽象世界。英语里绝大部分抽象词，都能拆回一个「身体动作」。</p>
+
+          <div class="callout">
+            <h3>为什么词根这么少，却够用？</h3>
+            <p>因为人类原始动作就那么几十个。语言像乐高：几十个根 + 几十个前后缀，拼出几十万词。你掌握根上的「那个动作」，就能反推一串词，而不是一个一个背。</p>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <caption>表 4 · 原始动作根 → 抽象延伸（记单词的钥匙）</caption>
+              <thead>
+                <tr><th scope="col">原始动作根</th><th scope="col">本意（身体动作）</th><th scope="col">抽象延伸 + 例词</th></tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">vis- / vid-</th><td class="meaning" data-label="本意">看</td><td class="examples" data-label="延伸">看见=知道 → <span class="en">evident</span> 明显；<span class="en">vision</span> 远见；<span class="en">visit</span> 拜访（去看）</td></tr>
+                <tr><th scope="row">gen-</th><td class="meaning" data-label="本意">生、种</td><td class="examples" data-label="延伸">出生、种族 → <span class="en">generate</span> 生成；<span class="en">gene</span> 基因；<span class="en">genius</span> 天赋（天生的）</td></tr>
+                <tr><th scope="row">prehend- / prehens-</th><td class="meaning" data-label="本意">抓、握</td><td class="examples" data-label="延伸">用手抓 → <span class="en">comprehend</span> 理解（抓住全貌）；<span class="en">apprehend</span> 领会、逮捕（抓住）</td></tr>
+                <tr><th scope="row">sta- / sist-</th><td class="meaning" data-label="本意">站、立</td><td class="examples" data-label="延伸">站立 → <span class="en">assist</span> 帮助（站一起）；<span class="en">constant</span> 恒定；<span class="en">understand</span> 理解（站在下撑住）</td></tr>
+                <tr><th scope="row">flu- / flux-</th><td class="meaning" data-label="本意">流</td><td class="examples" data-label="延伸">流动 → <span class="en">influence</span> 影响（流入）；<span class="en">fluent</span> 流利；<span class="en">fluid</span> 流体</td></tr>
+                <tr><th scope="row">port-</th><td class="meaning" data-label="本意">搬、运</td><td class="examples" data-label="延伸">搬运 → <span class="en">transport</span> 运输（跨过去搬）；<span class="en">import</span> 进口；<span class="en">report</span> 报告（搬回来）</td></tr>
+                <tr><th scope="row">grad- / gress-</th><td class="meaning" data-label="本意">走、步</td><td class="examples" data-label="延伸">行走 → <span class="en">progress</span> 进步（向前走）；<span class="en">aggress</span> 进攻；<span class="en">congress</span> 代表大会</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <ul class="checklist">
+            <li><b>第一步：找到根上的「那个动作」。</b>看到 <span class="mono">transport</span>，先拆 trans（跨）＋ port（搬）→「把东西搬过去」→ 运输。</li>
+            <li><b>第二步：想这个动作怎么「搬」到抽象义。</b><span class="mono">understand</span> = under（下）＋ stand（站）→「站在下面撑住」→ 撑住就是理解。</li>
+            <li><b>第三步：一串词只记一个根。</b>记熟 port（搬），export / import / transport / report / support 一次全通。</li>
+          </ul>
+
+          <div class="callout">
+            <h3>英语描述世界的 3 个套路</h3>
+            <ul>
+              <li><b>空间 → 时间：</b>before / after 本是「前 / 后」；morning / evening 本是方位。</li>
+              <li><b>身体 → 抽象：</b>grasp 本意「用手抓」→ 引申「理解、掌握」；see 本意「看」→ 引申「明白」（I see）。</li>
+              <li><b>容器 → 范围：</b>in / out 本是「里 / 外」→ 引申「包含 / 排除」（included / excluded）。</li>
+            </ul>
+          </div>
+          <p style="margin-top:12px;color:#6b7280">掌握这套「从动作到延伸」的推导，比背任何词表都耐用——因为你在用语言自己的逻辑记语言。</p>
+        </section>
       </main>
 
       <footer>
@@ -721,5 +774,24 @@
       </footer>
     </div>
   </article>
+  <script>
+  (function(){
+    var rows = document.querySelectorAll('.table-wrap tbody th[scope="row"]');
+    Array.prototype.forEach.call(rows, function(th){
+      var tr = th.closest('tr'); if(!tr) return;
+      var sec = tr.closest('section');
+      var secId = sec ? sec.id : 'root';
+      var raw = th.textContent.trim();
+      var first = raw.split(',')[0].replace(/[^a-zA-Z]/g,'').toLowerCase();
+      th.classList.add('root-token');
+      th.title = '点击：在 850 词表里看含「' + raw + '」的单词';
+      th.addEventListener('click', function(){
+        var u = 'BasicEnglish850.html?from=roots&q=' + encodeURIComponent(first)
+              + '&label=' + encodeURIComponent(raw) + '&anchor=' + encodeURIComponent(secId);
+        location.href = u;
+      });
+    });
+  })();
+  </script>
 </body>
 </html>
