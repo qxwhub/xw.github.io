@@ -112,6 +112,16 @@
   .w.done{background:#f2fbf5; border-color:#9fdcb4;}
   .w.done .star{color:#16a34a; background:#dcfce7;}
   .w.done .en{color:#15803d;}
+  /* 词根反查小标签：850 词卡底部挂「根:xxx / 缀:xxx」，点开跳词根速查表 */
+  .w .root-tags{display:flex; flex-wrap:wrap; gap:4px; margin-top:5px;}
+  .w .root-tag{
+    display:inline-block; font-size:11px; line-height:1; padding:3px 6px; border-radius:6px;
+    background:#eef2ff; color:#4338ca; text-decoration:none; cursor:pointer;
+    border:1px solid #c7d2fe; transition:background .15s;
+  }
+  .w .root-tag:hover{background:#c7d2fe;}
+  .w .root-tag.c-prefix, .w .root-tag.c-suffix{background:#ecfdf5; color:#047857; border-color:#a7f3d0;}
+  .w .root-tag.c-prefix:hover, .w .root-tag.c-suffix:hover{background:#a7f3d0;}
   body.hide-done .w.done{display:none;}
   #azRail{
     position:fixed; right:8px; top:50%; transform:translateY(-50%); z-index:30;
@@ -1173,8 +1183,9 @@
     <br>中文释义为便于理解的简要对应，实际词义随语境变化。
   </div>
 </footer>
-<script src="basic-english-cet4-data.js?v=1"></script>
-<script>
+  <script src="basic-english-cet4-data.js?v=1"></script>
+  <script src="root-map.js?v=1"></script>
+  <script>
 (function(){
   var q = document.getElementById('q');
   var empty = document.getElementById('empty');
@@ -1281,6 +1292,32 @@
     } catch(e){}
   })();
   q.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ q.value=''; run(); } });
+
+  // ---------- 词根反查：给命中的单词卡片挂「根/缀」小标签，点开跳回词根速查表 ----------
+  (function tagRoots(){
+    try {
+      var map = window.ROOT_MAP;
+      if (!map || !words.length) return;
+      words.forEach(function(el){
+        if (el.querySelector('.root-tags')) return;       // 防止重复挂
+        var list = map[el.dataset.w];
+        if (!list || !list.length) return;
+        var box = document.createElement('span');
+        box.className = 'root-tags';
+        list.forEach(function(e){
+          var a = document.createElement('a');
+          a.className = 'root-tag' + (e.cat === '前缀' || e.cat === '后缀' ? ' c-' + (e.cat === '前缀' ? 'prefix' : 'suffix') : '');
+          a.href = 'english-word-roots.html#' + e.anchor;
+          a.target = '_blank';
+          a.rel = 'noopener';
+          a.textContent = (e.cat === '前缀' ? '缀:' : e.cat === '后缀' ? '缀:' : '根:') + e.m;
+          a.title = e.cat + ' ' + e.full + '｜' + e.label + '（新标签打开《词根速查》对应表）';
+          box.appendChild(a);
+        });
+        el.appendChild(box);
+      });
+    } catch(e){}
+  })();
 
   // ---------- 长单词自适应字号（不换行，只缩字号） ----------
   function fitLongWords(){
