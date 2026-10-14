@@ -1420,7 +1420,9 @@
 
   // ---------- 已记住 ----------
   var KEY = KEY_DONE;
+  var KEY_DEL = 'be850_del_v1';   // 本地「取消标记」名单（待同步给云端）
   var done = {};
+  var delSet = STORE.get(KEY_DEL, {}) || {};   // {单词:1} 表示「我主动取消过」
   var raw = STORE.get(KEY, {});
   for (var i = 0; i < words.length; i++) {
     var w = words[i].dataset.w;
@@ -1449,7 +1451,14 @@
     el.querySelector('.star').addEventListener('click', function(ev){
       ev.stopPropagation();
       var w = el.dataset.w;
-      if (el.classList.toggle('done')) done[w] = 1; else delete done[w];
+      if (el.classList.toggle('done')) {
+        done[w] = 1;
+        delete delSet[w];          // 重新标记 → 撤销此前的删除
+      } else {
+        delete done[w];
+        delSet[w] = 1;             // 取消标记 → 记入删除名单，待云端同步
+      }
+      STORE.set(KEY_DEL, delSet);
       syncDone();
       schedulePush();
     });
@@ -1470,9 +1479,12 @@
   function doReset(){
     if (!Object.keys(done).length) return;
     if (!confirm('清空全部「已记住」标记？')) return;
+    Object.keys(done).forEach(function(k){ delSet[k] = 1; });   // 全部取消 → 记入删除名单
     done = {};
     words.forEach(function(el){ el.classList.remove('done'); });
+    STORE.set(KEY_DEL, delSet);
     syncDone();
+    schedulePush();
   }
   document.getElementById('resetDone').addEventListener('click', doReset);
   document.getElementById('resetDone2').addEventListener('click', doReset);
@@ -1566,7 +1578,14 @@
     document.body.removeChild(a);
     setTimeout(function(){ URL.revokeObjectURL(a.href); }, 5000);
   }
-  function applyProgress(raw){
+  function applyProgress(raw, serverDel){
+    // 先应用云端返回的删除名单（另一端取消的，本地也删）
+    if (serverDel && typeof serverDel === 'object'){
+      Object.keys(serverDel).forEach(function(k){ delete raw[k]; delSet[k] = 1; });
+      STORE.set(KEY_DEL, delSet);
+    }
+    // 本地待同步的删除名单，优先级最高：云端就算还有也强制剔除
+    Object.keys(delSet).forEach(function(k){ delete raw[k]; });
     var hit = 0, miss = 0;
     words.forEach(function(el){
       if (raw[el.dataset.w]) { el.classList.add('done'); hit++; }
@@ -1595,6 +1614,7 @@
         list.forEach(function(w){ if (w) raw[String(w).toLowerCase()] = 1; });
         var cur = Object.keys(done).length;
         if (cur && !confirm('恢复将用备份里的记录覆盖当前进度（当前 ' + cur + ' 个），继续？')) return;
+        delSet = {}; STORE.set(KEY_DEL, delSet);   // 恢复备份＝以备份为准，清空待删除名单
         var hit = applyProgress(raw);
         schedulePush();
         alert('恢复完成：备份里 ' + list.length + ' 个词，本表中匹配上 ' + hit + ' 个。\n'
@@ -1723,10 +1743,12 @@
     if (!syncCred || !syncCred.user){ setStatus('未登录', false); return; }
     setStatus('同步中…');
     syncBtn.disabled = true; syncLogin.disabled = true;
+    var delPayload = {};
+    Object.keys(delSet).forEach(function(k){ delPayload[k] = 1; });
     fetch(SYNC_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user: syncCred.user, pass: syncCred.pass, done: done })
+      body: JSON.stringify({ user: syncCred.user, pass: syncCred.pass, done: done, del: delPayload })
     }).then(function(r){
       return r.json().then(function(j){ return { ok: r.ok, j: j }; });
     }).then(function(res){
@@ -1734,9 +1756,15 @@
         setStatus(res.j && res.j.error === 'auth' ? '账号或密码错误' : '同步失败', false);
         return;
       }
-      // 云端返回的是并集（server ∪ 本地），合并不覆盖本地已标记的
+      // 云端回传：完整已标记 done + 完整删除名单 del（两端据此对齐）
       if (res.j.done && typeof res.j.done === 'object'){
-        applyProgress(res.j.done);
+        applyProgress(res.j.done, res.j.del);
+        // 删除名单与云端保持一致（云端是权威删除集合），本地保存备用
+        if (res.j.del && typeof res.j.del === 'object'){
+          delSet = {};
+          Object.keys(res.j.del).forEach(function(k){ if (res.j.del[k]) delSet[k] = 1; });
+        } else { delSet = {}; }
+        STORE.set(KEY_DEL, delSet);
         setStatus('已同步 · 云端 ' + Object.keys(res.j.done).length + ' 个标记', true);
       } else { setStatus('已同步', true); }
     }).catch(function(){
