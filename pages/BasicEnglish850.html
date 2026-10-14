@@ -257,6 +257,29 @@
       <button class="tbtn prog-reset" id="resetDone2" type="button">清空记录</button>
       <span class="hint">Ogden：这 850 词 + 简单规则，可替代约 2 万词</span>
     </div>
+    <div class="sync-dock" id="syncDock">
+      <style>
+        .sync-dock{display:flex;justify-content:center;align-items:center;gap:8px;background:#0f172a;color:#e2e8f0;padding:8px 12px;border-radius:12px;font-size:13px;max-width:100%;margin:10px auto 0;flex-wrap:wrap}
+        .sync-dock input{width:86px;padding:5px 8px;border:1px solid #334155;border-radius:8px;background:#1e293b;color:#e2e8f0;font-size:13px}
+        .sync-dock button{padding:5px 10px;border:0;border-radius:8px;background:#0ea5e9;color:#fff;cursor:pointer;font-size:13px}
+        .sync-dock button.link{background:transparent;color:#94a3b8;text-decoration:underline;padding:5px 4px}
+        .sync-dock .sync-status{color:#94a3b8}
+        .sync-dock .sync-status.ok{color:#4ade80}
+        .sync-dock .sync-status.err{color:#f87171}
+        @media(max-width:560px){ .sync-dock{font-size:12px} .sync-dock input{width:72px} }
+      </style>
+      <div class="sync-form" id="syncForm">
+        <input type="text" id="syncUser" placeholder="账号" autocomplete="off">
+        <input type="password" id="syncPass" placeholder="密码" autocomplete="off">
+        <button type="button" id="syncLogin">登录并同步</button>
+      </div>
+      <div class="sync-on" id="syncOn" hidden>
+        <span id="syncUserLbl"></span>
+        <button type="button" id="syncBtn">同步</button>
+        <button type="button" id="syncLogout" class="link">退出</button>
+      </div>
+      <span class="sync-status" id="syncStatus"></span>
+    </div>
   </div>
 </header>
 <nav id="azRail" aria-label="字母跳转"></nav>
@@ -1163,30 +1186,6 @@
       <button type="button" data-act="load">从备份文件恢复进度</button>
       <span class="expo-tip">备份文件发到手机，在手机上点"恢复进度"，标记就能接着用</span>
     </div>
-  </div>
-
-  <div class="sync-dock" id="syncDock">
-    <style>
-      .sync-dock{position:fixed;left:50%;top:72px;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:8px;background:#0f172a;color:#e2e8f0;padding:8px 12px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.35);font-size:13px;max-width:94vw;flex-wrap:wrap}
-      .sync-dock input{width:86px;padding:5px 8px;border:1px solid #334155;border-radius:8px;background:#1e293b;color:#e2e8f0;font-size:13px}
-      .sync-dock button{padding:5px 10px;border:0;border-radius:8px;background:#0ea5e9;color:#fff;cursor:pointer;font-size:13px}
-      .sync-dock button.link{background:transparent;color:#94a3b8;text-decoration:underline;padding:5px 4px}
-      .sync-dock .sync-status{color:#94a3b8}
-      .sync-dock .sync-status.ok{color:#4ade80}
-      .sync-dock .sync-status.err{color:#f87171}
-      @media(max-width:560px){ .sync-dock{top:10px;font-size:12px} .sync-dock input{width:72px} }
-    </style>
-    <div class="sync-form" id="syncForm">
-      <input type="text" id="syncUser" placeholder="账号" autocomplete="off">
-      <input type="password" id="syncPass" placeholder="密码" autocomplete="off">
-      <button type="button" id="syncLogin">登录并同步</button>
-    </div>
-    <div class="sync-on" id="syncOn" hidden>
-      <span id="syncUserLbl"></span>
-      <button type="button" id="syncBtn">同步</button>
-      <button type="button" id="syncLogout" class="link">退出</button>
-    </div>
-    <span class="sync-status" id="syncStatus"></span>
   </div>
 
   <section data-i="5" id="cet4-section">
