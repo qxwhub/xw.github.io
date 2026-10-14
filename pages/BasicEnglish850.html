@@ -1419,14 +1419,19 @@
   });
 
   // ---------- 已记住 ----------
+  // 值的语义：done[w] = 标记时间戳(ms)；delSet[w] = 取消时间戳(ms)
+  // 同词两端比较时间戳，新者胜（LWW），彻底避免"取消被复活"/"多端打架"
   var KEY = KEY_DONE;
-  var KEY_DEL = 'be850_del_v1';   // 本地「取消标记」名单（待同步给云端）
+  var KEY_DEL = 'be850_del_v1';
   var done = {};
-  var delSet = STORE.get(KEY_DEL, {}) || {};   // {单词:1} 表示「我主动取消过」
+  var delSet = STORE.get(KEY_DEL, {}) || {};
   var raw = STORE.get(KEY, {});
   for (var i = 0; i < words.length; i++) {
     var w = words[i].dataset.w;
-    if (raw[w]) { done[w] = 1; words[i].classList.add('done'); }
+    // 值语义：0/缺失=无记录；1=旧格式「已标记」；>1=毫秒时间戳
+    var dts = (typeof raw[w] === 'number' && raw[w] >= 1) ? raw[w] : 0;
+    var xts = (typeof delSet[w] === 'number' && delSet[w] >= 1) ? delSet[w] : 0;
+    if (dts >= xts && dts > 0) { done[w] = dts; words[i].classList.add('done'); }
   }
 
   var doneN = document.getElementById('doneN');
@@ -1451,12 +1456,13 @@
     el.querySelector('.star').addEventListener('click', function(ev){
       ev.stopPropagation();
       var w = el.dataset.w;
+      var ts = Date.now();
       if (el.classList.toggle('done')) {
-        done[w] = 1;
-        delete delSet[w];          // 重新标记 → 撤销此前的删除
+        done[w] = ts;              // 标记时间
+        delSet[w] = 0;             // 撤销此前删除（按时间戳规则：标记更新即删除失效）
       } else {
         delete done[w];
-        delSet[w] = 1;             // 取消标记 → 记入删除名单，待云端同步
+        delSet[w] = ts;            // 取消时间（比标记新 → 保持删除）
       }
       STORE.set(KEY_DEL, delSet);
       syncDone();
@@ -1479,7 +1485,8 @@
   function doReset(){
     if (!Object.keys(done).length) return;
     if (!confirm('清空全部「已记住」标记？')) return;
-    Object.keys(done).forEach(function(k){ delSet[k] = 1; });   // 全部取消 → 记入删除名单
+    var ts = Date.now();
+    Object.keys(done).forEach(function(k){ delSet[k] = ts; });   // 全部写入取消时间戳
     done = {};
     words.forEach(function(el){ el.classList.remove('done'); });
     STORE.set(KEY_DEL, delSet);
@@ -1578,23 +1585,43 @@
     document.body.removeChild(a);
     setTimeout(function(){ URL.revokeObjectURL(a.href); }, 5000);
   }
+  // 合并云端结果 + 本地状态（逐词时间戳 LWW：新者胜）
+  // raw: 云端 done {word:ts}；serverDel: 云端 del {word:ts}
+  // 本地 done/delSet 为当前值。合并后回写本地并刷新 UI。
   function applyProgress(raw, serverDel){
-    // 先应用云端返回的删除名单（另一端取消的，本地也删）
-    if (serverDel && typeof serverDel === 'object'){
-      Object.keys(serverDel).forEach(function(k){ delete raw[k]; delSet[k] = 1; });
-      STORE.set(KEY_DEL, delSet);
-    }
-    // 本地待同步的删除名单，优先级最高：云端就算还有也强制剔除
-    Object.keys(delSet).forEach(function(k){ delete raw[k]; });
-    var hit = 0, miss = 0;
-    words.forEach(function(el){
-      if (raw[el.dataset.w]) { el.classList.add('done'); hit++; }
-      else { el.classList.remove('done'); miss++; }
+    raw = raw || {};
+    serverDel = serverDel || {};
+    var merged = {}, mergedDel = {};
+    // 收集所有出现过的词
+    var allW = {};
+    [raw, serverDel, done, delSet].forEach(function(obj){
+      Object.keys(obj || {}).forEach(function(k){ allW[k] = 1; });
     });
-    done = {};
-    Object.keys(raw).forEach(function(k){ done[k] = 1; });
+    Object.keys(allW).forEach(function(w){
+      var tsDone = numTs(raw[w], done[w]);      // 云端标记时间 / 本地标记时间
+      var tsDel  = numTs(serverDel[w], delSet[w]); // 云端取消时间 / 本地取消时间
+      // 标记时间 vs 取消时间，取较大者决定最终状态（>= 时标记胜，避免同刻误删）
+      if (tsDone >= tsDel && tsDone > 0) { merged[w] = tsDone; }
+      else if (tsDel > 0) { mergedDel[w] = tsDel; }
+    });
+    done = merged;
+    delSet = mergedDel;
+    STORE.set(KEY_DONE, done);
+    STORE.set(KEY_DEL, delSet);
+    var hit = 0;
+    words.forEach(function(el){
+      if (done[el.dataset.w]) { el.classList.add('done'); hit++; }
+      else { el.classList.remove('done'); }
+    });
     syncDone();
     return hit;
+  }
+  // 取两个时间戳里较大的。
+  // 语义：0 / 缺失 = 无记录；1 = 旧格式遗留的「已标记」（视为极早的有效标记时间）；>1 = 毫秒时间戳
+  function numTs(a, b){
+    var x = (typeof a === 'number' && a >= 1) ? a : 0;
+    var y = (typeof b === 'number' && b >= 1) ? b : 0;
+    return x > y ? x : y;
   }
   function loadProgress(){
     var f = document.createElement('input');
@@ -1610,12 +1637,24 @@
         catch(err){ alert('这不是有效的进度备份文件。'); return; }
         var list = pack && (Array.isArray(pack) ? pack : pack.done);
         if (!Array.isArray(list)) { alert('备份文件格式不对，读不出「已记住」记录。'); return; }
-        var raw = {};
-        list.forEach(function(w){ if (w) raw[String(w).toLowerCase()] = 1; });
         var cur = Object.keys(done).length;
         if (cur && !confirm('恢复将用备份里的记录覆盖当前进度（当前 ' + cur + ' 个），继续？')) return;
-        delSet = {}; STORE.set(KEY_DEL, delSet);   // 恢复备份＝以备份为准，清空待删除名单
-        var hit = applyProgress(raw);
+        // 恢复＝以备份为准：备份里的词写标记时间，备份里没有的词写取消时间（覆盖当前）
+        var ts = Date.now();
+        var inBackup = {};
+        list.forEach(function(w){ if (w) inBackup[String(w).toLowerCase()] = 1; });
+        var nd = {}, ndel = {};
+        Object.keys(inBackup).forEach(function(w){ nd[w] = ts; });
+        // 当前已标记但备份里没有 → 视为取消
+        Object.keys(done).forEach(function(w){ if (!inBackup[w]) ndel[w] = ts; });
+        done = nd; delSet = ndel;
+        STORE.set(KEY_DONE, done); STORE.set(KEY_DEL, delSet);
+        var hit = 0;
+        words.forEach(function(el){
+          if (done[el.dataset.w]) { el.classList.add('done'); hit++; }
+          else { el.classList.remove('done'); }
+        });
+        syncDone();
         schedulePush();
         alert('恢复完成：备份里 ' + list.length + ' 个词，本表中匹配上 ' + hit + ' 个。\n'
           + (list.length - hit > 0 ? '（有 ' + (list.length - hit) + ' 个词不在当前词表中，已忽略）' : ''));
@@ -1743,12 +1782,10 @@
     if (!syncCred || !syncCred.user){ setStatus('未登录', false); return; }
     setStatus('同步中…');
     syncBtn.disabled = true; syncLogin.disabled = true;
-    var delPayload = {};
-    Object.keys(delSet).forEach(function(k){ delPayload[k] = 1; });
     fetch(SYNC_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user: syncCred.user, pass: syncCred.pass, done: done, del: delPayload })
+      body: JSON.stringify({ user: syncCred.user, pass: syncCred.pass, done: done, del: delSet })
     }).then(function(r){
       return r.json().then(function(j){ return { ok: r.ok, j: j }; });
     }).then(function(res){
@@ -1756,15 +1793,9 @@
         setStatus(res.j && res.j.error === 'auth' ? '账号或密码错误' : '同步失败', false);
         return;
       }
-      // 云端回传：完整已标记 done + 完整删除名单 del（两端据此对齐）
+      // 云端回传已合并结果（done/del 均为 {word:ts}）→ 本地按 LWW 再合并一次
       if (res.j.done && typeof res.j.done === 'object'){
         applyProgress(res.j.done, res.j.del);
-        // 删除名单与云端保持一致（云端是权威删除集合），本地保存备用
-        if (res.j.del && typeof res.j.del === 'object'){
-          delSet = {};
-          Object.keys(res.j.del).forEach(function(k){ if (res.j.del[k]) delSet[k] = 1; });
-        } else { delSet = {}; }
-        STORE.set(KEY_DEL, delSet);
         setStatus('已同步 · 云端 ' + Object.keys(res.j.done).length + ' 个标记', true);
       } else { setStatus('已同步', true); }
     }).catch(function(){
