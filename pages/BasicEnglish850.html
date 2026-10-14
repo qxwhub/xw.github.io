@@ -231,12 +231,27 @@
   .root-banner .rb-back:hover{text-decoration:underline;}
   .root-banner .rb-clear{font:inherit;font-size:12px;color:#475569;background:#fff;border:1px solid #cbd5e1;border-radius:6px;padding:4px 10px;cursor:pointer;}
   .root-banner .rb-clear:hover{border-color:#94a3b8;}
+  /* 顶栏折叠 */
+  .hd-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .hd-top h1{flex:1 1 auto;min-width:0;}
+  .hd-toggle{
+    flex:0 0 auto; font:inherit; font-size:12px; color:var(--muted);
+    background:#fff; border:1px solid var(--line); border-radius:7px;
+    padding:6px 10px; cursor:pointer; white-space:nowrap; margin-top:2px;
+    transition:background .12s, color .12s;
+  }
+  .hd-toggle:hover{background:#f2f4f7; color:var(--ink);}
+  header.collapsed .hd-body{display:none;}
   </style>
 </head>
 <body>
 <header>
   <div class="wrap">
-    <h1>C.K. Ogden · Basic English 850 核心词表 <small>Basic English: A General Introduction with Rules and Grammar, 1930</small></h1>
+    <div class="hd-top">
+      <h1>C.K. Ogden · Basic English 850 核心词表 <small>Basic English: A General Introduction with Rules and Grammar, 1930</small></h1>
+      <button class="hd-toggle" id="hdToggle" type="button" title="折叠/展开工具栏">收起 ▴</button>
+    </div>
+    <div class="hd-body">
     <div class="meta"><b>Basic English 850</b> ＝ 操作词 <b>100</b> ＋ 通用名词 <b>400</b> ＋ 具体名词 <b>200</b> ＋ 性质词 <b>100</b> ＋ 反义性质词 <b>50</b>（Ogden 原表，依据 Wiktionary “Basic English word list” 核校）　＋　四级补充 <b>3713</b> 词　｜　共 <b>4563</b> 词，达到大学英语四级水平</div>
     <div class="bar">
       <button class="eyeall" id="eyeAll" type="button" aria-pressed="false">
@@ -297,6 +312,7 @@
         <button type="button" id="syncLogout" class="link">退出</button>
       </div>
       <span class="sync-status" id="syncStatus"></span>
+    </div>
     </div>
     </div>
   </div>
@@ -1753,6 +1769,26 @@
   // 已登录则每次打开自动同步一次（先上传本地，再拉回并集，本地标记不丢）
   showSyncState();
   if (syncCred && syncCred.user){ pushSync(); }
+})();
+
+// 顶栏折叠（纯本地偏好，不发任何请求）
+(function(){
+  var KEY = 'be850_hd_v1';
+  var header = document.querySelector('header');
+  var btn = document.getElementById('hdToggle');
+  if (!header || !btn) return;
+  function apply(collapsed){
+    header.classList.toggle('collapsed', collapsed);
+    btn.textContent = collapsed ? '展开工具栏 ▾' : '收起 ▴';
+  }
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch(_){}
+  apply(saved === '1');
+  btn.addEventListener('click', function(){
+    var collapsed = !header.classList.contains('collapsed');
+    apply(collapsed);
+    try { localStorage.setItem(KEY, collapsed ? '1' : '0'); } catch(_){}
+  });
 })();
 </script>
 </body>
