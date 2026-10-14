@@ -1165,6 +1165,30 @@
     </div>
   </div>
 
+  <div class="sync-dock" id="syncDock">
+    <style>
+      .sync-dock{position:fixed;left:50%;bottom:72px;transform:translateX(-50%);z-index:60;display:flex;align-items:center;gap:8px;background:#0f172a;color:#e2e8f0;padding:8px 12px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.35);font-size:13px;max-width:94vw;flex-wrap:wrap}
+      .sync-dock input{width:86px;padding:5px 8px;border:1px solid #334155;border-radius:8px;background:#1e293b;color:#e2e8f0;font-size:13px}
+      .sync-dock button{padding:5px 10px;border:0;border-radius:8px;background:#0ea5e9;color:#fff;cursor:pointer;font-size:13px}
+      .sync-dock button.link{background:transparent;color:#94a3b8;text-decoration:underline;padding:5px 4px}
+      .sync-dock .sync-status{color:#94a3b8}
+      .sync-dock .sync-status.ok{color:#4ade80}
+      .sync-dock .sync-status.err{color:#f87171}
+      @media(max-width:560px){ .sync-dock{bottom:10px;font-size:12px} .sync-dock input{width:72px} }
+    </style>
+    <div class="sync-form" id="syncForm">
+      <input type="text" id="syncUser" placeholder="账号" autocomplete="off">
+      <input type="password" id="syncPass" placeholder="密码" autocomplete="off">
+      <button type="button" id="syncLogin">登录并同步</button>
+    </div>
+    <div class="sync-on" id="syncOn" hidden>
+      <span id="syncUserLbl"></span>
+      <button type="button" id="syncBtn">同步</button>
+      <button type="button" id="syncLogout" class="link">退出</button>
+    </div>
+    <span class="sync-status" id="syncStatus"></span>
+  </div>
+
   <section data-i="5" id="cet4-section">
     <div class="sec-head" style="border-left-color:#7c3aed">
       <h2>四级补充词汇 · CET-4</h2><span class="sub">大学英语四级大纲词汇（与上面 850 词不重复），按 A–Z 排列；释义音标整理自公开词表，仅供学习参考</span><span class="cnt">3713 词</span>
@@ -1406,6 +1430,7 @@
       var w = el.dataset.w;
       if (el.classList.toggle('done')) done[w] = 1; else delete done[w];
       syncDone();
+      schedulePush();
     });
   });
 
@@ -1550,6 +1575,7 @@
         var cur = Object.keys(done).length;
         if (cur && !confirm('恢复将用备份里的记录覆盖当前进度（当前 ' + cur + ' 个），继续？')) return;
         var hit = applyProgress(raw);
+        schedulePush();
         alert('恢复完成：备份里 ' + list.length + ' 个词，本表中匹配上 ' + hit + ' 个。\n'
           + (list.length - hit > 0 ? '（有 ' + (list.length - hit) + ' 个词不在当前词表中，已忽略）' : ''));
       };
@@ -1651,6 +1677,77 @@
     if (vb) vb.style.display = 'none';
     if (rb) rb.style.display = 'none';
   }
+
+  // ---------- 云端同步（手机/电脑共用同一份「已记住」进度） ----------
+  var KEY_SYNC = 'be850_sync_v1';
+  var SYNC_URL = 'https://houduanai.top/sync';
+  var syncCred = STORE.get(KEY_SYNC, null);
+  var syncForm = document.getElementById('syncForm');
+  var syncOn = document.getElementById('syncOn');
+  var syncUserEl = document.getElementById('syncUser');
+  var syncPassEl = document.getElementById('syncPass');
+  var syncUserLbl = document.getElementById('syncUserLbl');
+  var syncStatus = document.getElementById('syncStatus');
+  var syncBtn = document.getElementById('syncBtn');
+  var syncLogin = document.getElementById('syncLogin');
+  var syncLogout = document.getElementById('syncLogout');
+
+  function showSyncState(){
+    if (syncCred && syncCred.user){ syncForm.hidden = true; syncOn.hidden = false; syncUserLbl.textContent = '已登录：' + syncCred.user; }
+    else { syncForm.hidden = false; syncOn.hidden = true; }
+  }
+  function setStatus(t, ok){ syncStatus.textContent = t || ''; syncStatus.className = 'sync-status' + (ok === true ? ' ok' : ok === false ? ' err' : ''); }
+
+  function pushSync(){
+    if (!syncCred || !syncCred.user){ setStatus('未登录', false); return; }
+    setStatus('同步中…');
+    syncBtn.disabled = true; syncLogin.disabled = true;
+    fetch(SYNC_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user: syncCred.user, pass: syncCred.pass, done: done })
+    }).then(function(r){
+      return r.json().then(function(j){ return { ok: r.ok, j: j }; });
+    }).then(function(res){
+      if (!res.ok || !res.j || res.j.ok !== true){
+        setStatus(res.j && res.j.error === 'auth' ? '账号或密码错误' : '同步失败', false);
+        return;
+      }
+      // 云端返回的是并集（server ∪ 本地），合并不覆盖本地已标记的
+      if (res.j.done && typeof res.j.done === 'object'){
+        applyProgress(res.j.done);
+        setStatus('已同步 · 云端 ' + Object.keys(res.j.done).length + ' 个标记', true);
+      } else { setStatus('已同步', true); }
+    }).catch(function(){
+      setStatus('同步失败（网络错误）', false);
+    }).then(function(){
+      syncBtn.disabled = false; syncLogin.disabled = false;
+    });
+  }
+
+  var _pushTimer = null;
+  function schedulePush(){
+    if (!syncCred || !syncCred.user) return;
+    if (_pushTimer) clearTimeout(_pushTimer);
+    _pushTimer = setTimeout(pushSync, 800);
+  }
+
+  syncLogin.addEventListener('click', function(){
+    var u = syncUserEl.value.trim(), p = syncPassEl.value;
+    if (!u || !p){ setStatus('请填账号和密码', false); return; }
+    syncCred = { user: u, pass: p };
+    STORE.set(KEY_SYNC, syncCred);
+    showSyncState();
+    pushSync();
+  });
+  syncBtn.addEventListener('click', pushSync);
+  syncLogout.addEventListener('click', function(){
+    syncCred = null; STORE.set(KEY_SYNC, null); showSyncState(); setStatus('');
+  });
+
+  // 已登录则每次打开自动同步一次（先上传本地，再拉回并集，本地标记不丢）
+  showSyncState();
+  if (syncCred && syncCred.user){ pushSync(); }
 })();
 </script>
 </body>
