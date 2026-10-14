@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>C.K. Ogden Basic English · 850 核心词表</title>
+    <link rel="icon" href="data:,">
 <style>
   :root{
     --bg:#f6f7f9; --card:#ffffff; --ink:#1a1d21; --muted:#6b7280;
@@ -171,27 +172,27 @@
   footer b{color:var(--ink);}
   .empty{color:var(--muted); font-size:13px; padding:30px 0; text-align:center; display:none;}
 
-  /* 导出未记住：右下角悬浮按钮 */
+  /* 导出未记住：顶栏内嵌条 */
   .expo-dock{
-    position:fixed; right:18px; bottom:18px; z-index:30;
-    display:flex; align-items:stretch; background:#111827; border-radius:9px;
-    box-shadow:0 8px 24px rgba(17,24,39,.28); overflow:hidden;
+    position:relative; display:flex; align-items:stretch; background:#eef2f7;
+    border:1px solid var(--line); border-radius:9px; overflow:visible;
+    width:max-content; max-width:100%; margin:10px auto 0;
   }
   .expo-main{
-    font:inherit; font-size:12px; font-weight:600; color:#fff; background:transparent;
+    font:inherit; font-size:12px; font-weight:600; color:#1e293b; background:transparent;
     border:0; padding:8px 12px; cursor:pointer; white-space:nowrap;
     transition:background .12s;
   }
-  .expo-main:hover{background:#1f2937;}
+  .expo-main:hover{background:#e2e8f0;}
   .expo-main:disabled{opacity:.6; cursor:default;}
   .expo-caret{
-    font:inherit; font-size:11px; color:#fff; background:transparent;
-    border:0; border-left:1px solid rgba(255,255,255,.18); padding:8px 9px; cursor:pointer;
+    font:inherit; font-size:11px; color:#1e293b; background:transparent;
+    border:0; border-left:1px solid #cbd5e1; padding:8px 9px; cursor:pointer;
     transition:background .12s;
   }
-  .expo-caret:hover{background:#1f2937;}
+  .expo-caret:hover{background:#e2e8f0;}
   .expo-menu{
-    display:none; position:absolute; right:0; bottom:calc(100% + 7px);
+    display:none; position:absolute; left:0; top:calc(100% + 7px); z-index:40;
     background:#fff; border:1px solid var(--line); border-radius:9px;
     box-shadow:0 10px 30px rgba(17,24,39,.16); padding:4px; min-width:196px;
   }
@@ -208,7 +209,6 @@
     white-space:normal;
   }
   @media (max-width:640px){
-    .expo-dock{right:10px; bottom:10px;}
     .expo-main{font-size:11px; padding:7px 10px;}
   }
   @media print{
@@ -257,15 +257,28 @@
       <button class="tbtn prog-reset" id="resetDone2" type="button">清空记录</button>
       <span class="hint">Ogden：这 850 词 + 简单规则，可替代约 2 万词</span>
     </div>
+    <div class="expo-dock" id="expoDock">
+      <button class="expo-main" id="expoBtn" type="button" title="导出还没记住的单词">导出未记住</button>
+      <button class="expo-caret" id="expoCaret" type="button" aria-label="更多导出选项" title="更多格式">▾</button>
+      <div class="expo-menu" id="expoMenu">
+        <button type="button" data-fmt="word">未记住 · 纯单词（一行一个）</button>
+        <button type="button" data-fmt="csv">未记住 · 单词,释义（CSV 表）</button>
+        <button type="button" data-fmt="md">未记住 · 音标+释义（文本卡片）</button>
+        <div class="expo-sep"></div>
+        <button type="button" data-act="save">导出进度备份（已记住的标记）</button>
+        <button type="button" data-act="load">从备份文件恢复进度</button>
+        <span class="expo-tip">备份文件发到手机，在手机上点"恢复进度"，标记就能接着用</span>
+      </div>
+    </div>
     <div class="sync-dock" id="syncDock">
       <style>
-        .sync-dock{display:flex;justify-content:center;align-items:center;gap:8px;background:#0f172a;color:#e2e8f0;padding:8px 12px;border-radius:12px;font-size:13px;max-width:100%;margin:10px auto 0;flex-wrap:wrap}
-        .sync-dock input{width:86px;padding:5px 8px;border:1px solid #334155;border-radius:8px;background:#1e293b;color:#e2e8f0;font-size:13px}
+        .sync-dock{display:flex;justify-content:center;align-items:center;gap:8px;background:#eef2f7;border:1px solid var(--line);color:#1e293b;padding:8px 12px;border-radius:12px;font-size:13px;max-width:100%;margin:10px auto 0;flex-wrap:wrap}
+        .sync-dock input{width:86px;padding:5px 8px;border:1px solid #cbd5e1;border-radius:8px;background:#ffffff;color:#1e293b;font-size:13px}
         .sync-dock button{padding:5px 10px;border:0;border-radius:8px;background:#0ea5e9;color:#fff;cursor:pointer;font-size:13px}
-        .sync-dock button.link{background:transparent;color:#94a3b8;text-decoration:underline;padding:5px 4px}
-        .sync-dock .sync-status{color:#94a3b8}
-        .sync-dock .sync-status.ok{color:#4ade80}
-        .sync-dock .sync-status.err{color:#f87171}
+        .sync-dock button.link{background:transparent;color:#64748b;text-decoration:underline;padding:5px 4px}
+        .sync-dock .sync-status{color:#64748b}
+        .sync-dock .sync-status.ok{color:#16a34a}
+        .sync-dock .sync-status.err{color:#dc2626}
         @media(max-width:560px){ .sync-dock{font-size:12px} .sync-dock input{width:72px} }
       </style>
       <div class="sync-form" id="syncForm">
@@ -1174,19 +1187,6 @@
     </div>
   </section>
   <div class="empty" id="empty">没有匹配的词</div>
-  <div class="expo-dock" id="expoDock">
-    <button class="expo-main" id="expoBtn" type="button" title="导出还没记住的单词">导出未记住</button>
-    <button class="expo-caret" id="expoCaret" type="button" aria-label="更多导出选项" title="更多格式">▾</button>
-    <div class="expo-menu" id="expoMenu">
-      <button type="button" data-fmt="word">未记住 · 纯单词（一行一个）</button>
-      <button type="button" data-fmt="csv">未记住 · 单词,释义（CSV 表）</button>
-      <button type="button" data-fmt="md">未记住 · 音标+释义（文本卡片）</button>
-      <div class="expo-sep"></div>
-      <button type="button" data-act="save">导出进度备份（已记住的标记）</button>
-      <button type="button" data-act="load">从备份文件恢复进度</button>
-      <span class="expo-tip">备份文件发到手机，在手机上点"恢复进度"，标记就能接着用</span>
-    </div>
-  </div>
 
   <section data-i="5" id="cet4-section">
     <div class="sec-head" style="border-left-color:#7c3aed">
