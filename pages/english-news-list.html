@@ -30,6 +30,7 @@
   .item a:hover{color:var(--linkhover);border-bottom-color:var(--linkhover)}
   .item span{display:block;font-size:12.5px;color:#5b6167;line-height:1.55;margin-top:3px}
   .item .url{display:block;font-size:11.5px;color:#9aa0a6;font-family:Consolas,Monaco,monospace;margin-top:2px;word-break:break-all}
+  .item span.u-warn{color:#b45309;font-weight:600}
   .steps{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-top:16px}
   .step{display:flex;gap:12px;margin-bottom:14px;font-size:14px;line-height:1.75}
   .step:last-child{margin-bottom:0}
@@ -45,7 +46,7 @@
 
   <header>
     <h1>每天看什么英文</h1>
-    <p class="lead">两块用途分开：<b>上面</b>是「学得动」的站点，<b>下面</b>是「实时知道世界上发生了什么」的渠道。不要两边同时开。站点名都是链接，点开即走。</p>
+    <p class="lead">分四节：<b>一、二</b>是「学得动」和「知道世界发生了什么」；<b>三</b>是换口味 —— 科学、娱乐、英语世界真实的生活，目的是<b>让你偶尔泡进英文环境里</b>；<b>四</b>是怎么每天用 15 分钟。站点名都是链接，点开即走。不要同时全开。</p>
   </header>
 
   <h2>一、按水平读 <small>从能读懂开始，别一上来读原版</small></h2>
@@ -67,7 +68,6 @@
       <div class="item"><a href="https://www.reuters.com/" target="_blank" rel="noopener">Reuters</a><span>只讲事实，句子最短，几乎不带评论</span></div>
       <div class="item"><a href="https://apnews.com/" target="_blank" rel="noopener">AP News</a><span>美联社，短讯为主</span></div>
       <div class="item"><a href="https://www.bbc.com/news" target="_blank" rel="noopener">BBC News</a><span>覆盖面最广，英式表达标准</span></div>
-      <div class="item"><a href="https://www.npr.org/" target="_blank" rel="noopener">NPR</a><span>广播稿风格，读完能直接听</span></div>
       <div class="item"><a href="https://www.theguardian.com/" target="_blank" rel="noopener">The Guardian</a><span>全文免费，英国视角</span></div>
       <div class="item"><a href="https://theconversation.com/" target="_blank" rel="noopener">The Conversation</a><span>学者写的解读，逻辑清楚不绕弯</span></div>
     </div>
@@ -128,26 +128,120 @@
       <div class="note">真实口语、俚语、不同口音</div>
       <div class="item"><a href="https://www.reddit.com/r/worldnews/" target="_blank" rel="noopener">Reddit · r/worldnews</a><span>新闻下面的评论区才是精华</span></div>
       <div class="item"><a href="https://news.ycombinator.com/" target="_blank" rel="noopener">Hacker News</a><span>科技圈每天在聊什么</span></div>
+    </div>
+
+  </div>
+
+  <h2>三、换口味：科学 / 娱乐 / 英语世界真实的生活 <small>不为了学，单纯想知道外面在发生什么</small></h2>
+  <p class="lead" style="margin:0 0 2px">这一节的目的只有一个：<b>让你偶尔泡在英文环境里，而不是天天只泡在中文里。</b>挑你真正好奇的那一类看，不用全看。</p>
+  <div class="grid">
+
+    <div class="card">
+      <div class="tag"><i style="background:#378ADD"></i>科学 · 先从好读的开始</div>
+      <div class="note">句子短、不装专家，适合入门</div>
+      <div class="item"><a href="https://www.snexplores.org/" target="_blank" rel="noopener">Science News Explores</a><span>专为学生写的科学新闻，句子短、有生词解释 —— 最推荐从这里开始</span></div>
+      <div class="item"><a href="https://www.sciencefocus.com/" target="_blank" rel="noopener">BBC Science Focus</a><span>「为什么会这样」式的问题解答，一篇几分钟</span></div>
+      <div class="item"><a href="https://www.livescience.com/" target="_blank" rel="noopener">Live Science</a><span>太空、自然、健康，标题直白，不堆术语</span></div>
+      <div class="item"><a href="https://www.smithsonianmag.com/" target="_blank" rel="noopener">Smithsonian Magazine</a><span>科学＋历史＋人文，故事性强，读着不累</span></div>
+      <div class="item"><a href="https://knowablemagazine.org/" target="_blank" rel="noopener">Knowable Magazine</a><span>把学术论文翻成人话，讲得比新闻更透</span></div>
+    </div>
+
+    <div class="card">
+      <div class="tag"><i style="background:#1D9E75"></i>科学 · 想读深一点时</div>
+      <div class="note">用词更硬，但内容值得</div>
+      <div class="item"><a href="https://www.quantamagazine.org/" target="_blank" rel="noopener">Quanta Magazine</a><span>数学、物理、生物，公认「写得漂亮」的科学媒体</span></div>
+      <div class="item"><a href="https://www.scientificamerican.com/" target="_blank" rel="noopener">Scientific American</a><span>老牌科普，各领域都有</span></div>
+      <div class="item"><a href="https://www.nature.com/news" target="_blank" rel="noopener">Nature · News</a><span>顶级期刊的新闻栏目，比论文好读得多</span></div>
+      <div class="item"><a href="https://www.newscientist.com/" target="_blank" rel="noopener">New Scientist</a><span>短篇科技新闻，更新快</span></div>
+      <div class="item"><a href="https://www.technologyreview.com/" target="_blank" rel="noopener">MIT Technology Review</a><span>技术怎么改变社会，篇幅适中</span></div>
+      <div class="item"><a href="https://www.sciencedaily.com/" target="_blank" rel="noopener">ScienceDaily</a><span>各大学新闻稿汇总，一条一段，最容易读</span></div>
+    </div>
+
+    <div class="card">
+      <div class="tag"><i style="background:#BA7517"></i>娱乐 · 影视 / 音乐 / 文化</div>
+      <div class="note">八卦和评论，读起来最不费劲</div>
+      <div class="item"><a href="https://www.bbc.com/culture" target="_blank" rel="noopener">BBC Culture</a><span>影评、书评、艺术，英文最规范，首选</span></div>
+      <div class="item"><a href="https://variety.com/" target="_blank" rel="noopener">Variety</a><span>好莱坞行业新闻，圈内人看的那种</span></div>
+      <div class="item"><a href="https://www.vulture.com/" target="_blank" rel="noopener">Vulture</a><span>剧集吐槽和追剧指南，口语化、很皮</span></div>
+      <div class="item"><a href="https://pitchfork.com/" target="_blank" rel="noopener">Pitchfork</a><span>音乐评论，乐评人用词夸张好记</span></div>
+      <div class="item"><a href="https://www.billboard.com/" target="_blank" rel="noopener">Billboard</a><span>榜单与流行乐动态</span></div>
+      <div class="item"><a href="https://www.rollingstone.com/" target="_blank" rel="noopener">Rolling Stone</a><span>音乐与文化长文，采访多</span></div>
+    </div>
+
+    <div class="card">
+      <div class="tag"><i style="background:#7F77DD"></i>英语世界真实发生的怪事</div>
+      <div class="note">都是真的，只是听着不像真的</div>
+      <div class="item"><a href="https://www.atlasobscura.com/" target="_blank" rel="noopener">Atlas Obscura</a><span>世界冷门奇观与怪历史，写得好、图也好看</span></div>
+      <div class="item"><a href="https://www.mentalfloss.com/" target="_blank" rel="noopener">Mental Floss</a><span>冷知识短篇，最适合碎片时间</span></div>
+      <div class="item"><a href="https://www.damninteresting.com/" target="_blank" rel="noopener">Damn Interesting</a><span>真实但离奇的长文，英文写得很讲究</span></div>
+      <div class="item"><a href="https://www.futilitycloset.com/" target="_blank" rel="noopener">Futility Closet</a><span>工作日每天一条历史奇闻，很短</span></div>
+      <div class="item"><a href="https://www.roadsideamerica.com/" target="_blank" rel="noopener">Roadside America</a><span>美国路边那些莫名其妙的怪景点</span></div>
+      <div class="item"><a href="https://www.reddit.com/r/nottheonion/" target="_blank" rel="noopener">Reddit · r/nottheonion</a><span>真新闻，但标题像段子</span></div>
+    </div>
+
+    <div class="card">
+      <div class="tag"><i style="background:#c2410c"></i>好消息 & 英式幽默</div>
+      <div class="note">看腻了坏消息，来这里换气</div>
+      <div class="item"><a href="https://www.goodnewsnetwork.org/" target="_blank" rel="noopener">Good News Network</a><span>只报好消息，句子简单</span></div>
+      <div class="item"><a href="https://www.positive.news/" target="_blank" rel="noopener">Positive News</a><span>英国「建设性新闻」，讲事情怎么被解决的</span></div>
+      <div class="item"><a href="https://www.sunnyskyz.com/" target="_blank" rel="noopener">Sunny Skyz</a><span>暖心小故事，一两段读完</span></div>
+      <div class="item"><a href="https://www.theonion.com/" target="_blank" rel="noopener">The Onion</a><span class="u-warn">美国讽刺新闻 —— 全是编的，当笑话读</span></div>
+      <div class="item"><a href="https://www.thedailymash.co.uk/" target="_blank" rel="noopener">The Daily Mash</a><span>英式讽刺，学英式阴阳怪气</span></div>
+      <div class="item"><a href="https://www.nosuchthingasafish.com/" target="_blank" rel="noopener">No Such Thing as a Fish</a><span>BBC 智力竞赛团队聊冷知识，播客＋文字稿</span></div>
+    </div>
+
+    <div class="card">
+      <div class="tag"><i style="background:#2F6FED"></i>美国：普通人的日常</div>
+      <div class="note">不是国际大新闻，是生活本身</div>
+      <div class="item"><a href="https://www.npr.org/" target="_blank" rel="noopener">NPR</a><span>广播稿风格，写的是美国人自己的事，读完还能直接听</span></div>
+      <div class="item"><a href="https://www.onlyinyourstate.com/" target="_blank" rel="noopener">Only In Your State</a><span>各州的怪景点、小地方冷知识</span></div>
+      <div class="item"><a href="https://www.axios.com/local" target="_blank" rel="noopener">Axios Local</a><span>城市本地新闻，每条三句话</span></div>
+      <div class="item"><a href="https://www.patch.com/" target="_blank" rel="noopener">Patch</a><span>美国社区新闻，邻里级别的小事</span></div>
+      <div class="item"><a href="https://www.newyorker.com/culture" target="_blank" rel="noopener">The New Yorker · Culture</a><span>美国都市生活的观察，英文最好也最难</span></div>
+    </div>
+
+    <div class="card">
+      <div class="tag"><i style="background:#0D9488"></i>英国 / 澳洲 / 加拿大 / 新西兰 / 爱尔兰</div>
+      <div class="note">同一个词，不同国家说法不一样</div>
+      <div class="item"><a href="https://www.bbc.com/news/uk" target="_blank" rel="noopener">BBC News · UK</a><span>英国本土视角</span></div>
+      <div class="item"><a href="https://metro.co.uk/" target="_blank" rel="noopener">Metro (UK)</a><span>英国免费报，短、口语、爱玩梗</span></div>
+      <div class="item"><a href="https://www.theguardian.com/au" target="_blank" rel="noopener">The Guardian Australia</a><span>澳洲版卫报</span></div>
+      <div class="item"><a href="https://www.abc.net.au/news" target="_blank" rel="noopener">ABC News (Australia)</a><span>澳洲公共广播，本地大事最全</span></div>
+      <div class="item"><a href="https://www.sbs.com.au/news" target="_blank" rel="noopener">SBS News</a><span>澳洲多元文化视角，适合了解移民社会</span></div>
+      <div class="item"><a href="https://www.cbc.ca/news" target="_blank" rel="noopener">CBC News</a><span>加拿大公共广播</span></div>
+      <div class="item"><a href="https://www.rnz.co.nz/" target="_blank" rel="noopener">RNZ</a><span>新西兰国家广播</span></div>
+      <div class="item"><a href="https://www.rte.ie/news/" target="_blank" rel="noopener">RTÉ News</a><span>爱尔兰国家广播</span></div>
+    </div>
+
+    <div class="card">
+      <div class="tag"><i style="background:#DB2777"></i>直接和母语者唠嗑</div>
+      <div class="note">看真人怎么说话，比读新闻更「进环境」</div>
+      <div class="item"><a href="https://www.reddit.com/r/AskAnAmerican/" target="_blank" rel="noopener">Reddit · r/AskAnAmerican</a><span>问美国人任何事，回答很实在</span></div>
+      <div class="item"><a href="https://www.reddit.com/r/CasualUK/" target="_blank" rel="noopener">Reddit · r/CasualUK</a><span>英国人闲聊，英式幽默现场教学</span></div>
+      <div class="item"><a href="https://www.reddit.com/r/australia/" target="_blank" rel="noopener">Reddit · r/australia</a><span>澳洲人日常与吐槽</span></div>
+      <div class="item"><a href="https://www.reddit.com/r/explainlikeimfive/" target="_blank" rel="noopener">Reddit · r/explainlikeimfive</a><span>把复杂的事用大白话讲清楚，最适合学表达</span></div>
       <div class="item"><a href="https://www.quora.com/" target="_blank" rel="noopener">Quora</a><span>长回答，接近书面口语</span></div>
     </div>
 
   </div>
 
-  <h2>三、每天具体怎么用 <small>15 分钟，一个固定动作</small></h2>
+  <h2>四、每天具体怎么用 <small>15 分钟，一个固定动作</small></h2>
   <div class="steps">
     <div class="step"><em>1</em><div>打开 <b>News in Levels</b>（<a href="https://www.newsinlevels.com/" target="_blank" rel="noopener" style="color:#1d4ed8">newsinlevels.com</a>），挑当天一条，先读 Level 1。</div></div>
     <div class="step"><em>2</em><div>同一条再读 Level 2 和 Level 3 —— <b>同一条新闻换三个难度读</b>，这是性价比最高的动作，你会亲眼看到自己「读得懂」的边界在哪。</div></div>
     <div class="step"><em>3</em><div>挑 3–5 个反复出现的词，抄下来，扔进你的背单词页面。</div></div>
     <div class="step"><em>4</em><div>第二天先复习昨天那 3–5 个词，再读新的。</div></div>
+    <div class="step"><em>5</em><div><b>每周留一天换口味</b>：打开第三节，只看你真的好奇的那一类（科学 / 娱乐 / 英语世界的怪事）。这一天的目的不是背词，是<b>让英文变成你待着的环境</b>，而不是一门要考的科目。</div></div>
   </div>
 
   <div class="warn">
     <b>挑一条新闻跟一周</b>（一场选举、一个案子、一支球队）。同一批人名、地名、术语每天重复出现，词汇自己就记牢了 —— 比每天读五条不同的新闻有效得多。<br>
-    <b>别刷信息流。</b>定死「一个站点 + 每天一篇」，读完就关。15 分钟变一小时刷新闻，词汇没涨、焦虑涨了。
+    <b>别刷信息流。</b>定死「一个站点 + 每天一篇」，读完就关。15 分钟变一小时刷新闻，词汇没涨、焦虑涨了。<br>
+    <b>想有「环境感」就固定几个网站。</b>第三节那么多站，别全开 —— 挑 2 个当常驻（比如 NPR + Atlas Obscura），每天各看一篇，一个月后你会对它们的版式和语气熟到像自己家。这就是「泡在英文里」最省力的版本。
   </div>
 
-  <footer>建议先只挑两个：一个学（News in Levels），一个用来看世界（Reuters 或 DW）。跑顺了再往上加。<br>
-  链接均为各站官方域名；实际能否打开取决于你的网络环境，本地直连不稳定的站点多试几次或换网络。</footer>
+  <footer>建议先只挑两个：一个学（News in Levels），一个用来看世界（Reuters 或 DW）。跑顺了，再从第三节里挑 2 个当常驻。<br>
+  链接均为各站官方域名；部分站点（纽约时报、经济学人等）有付费墙，看免费的即可；实际能否打开取决于你的网络环境。</footer>
 
 </div>
 </body>
