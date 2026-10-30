@@ -34,6 +34,9 @@
   .tbtn:hover{border-color:#c9ced6; background:#fafbfc;}
   .tbtn[aria-pressed="true"]{background:#e8f1fe; border-color:#b9d3fb; color:var(--blue); font-weight:600;}
   .tbtn svg{width:14px; height:14px;}
+  #shuffleBtn .ico-restore{display:none;}
+  #shuffleBtn[aria-pressed="true"] .ico-shuffle{display:none;}
+  #shuffleBtn[aria-pressed="true"] .ico-restore{display:inline-block;}
   .spacer{flex:1;}
   .stat{font-size:11.5px; color:var(--muted);}
   .stat b{color:var(--ink);}
@@ -97,9 +100,10 @@
   <div class="wrap">
     <h1>四级单词卡片 <small>乱序记忆 · 点卡片看释义</small></h1>
     <div class="bar">
-      <button class="tbtn" id="shuffleBtn" title="打乱顺序 (S)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/></svg>
-        打乱顺序
+      <button class="tbtn" id="shuffleBtn" aria-pressed="false" title="打乱顺序 (S)">
+        <svg class="ico-shuffle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/></svg>
+        <svg class="ico-restore" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+        <span id="shuffleLbl">打乱顺序</span>
       </button>
       <button class="tbtn" id="hideBtn" aria-pressed="false" title="遮盖释义自测">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -153,7 +157,7 @@
   var DATA = (window.BE_CET4 || []).filter(function(d){ return d && d.w; });
   var N = DATA.length;
 
-  var K_IDX='cet4fc_idx', K_ORD='cet4fc_order', K_DONE='cet4fc_done', K_HIDE='cet4fc_hide';
+  var K_IDX='cet4fc_idx', K_ORD='cet4fc_order', K_DONE='cet4fc_done', K_HIDE='cet4fc_hide', K_SHUF='cet4fc_shuffled';
   function load(k,def){ try{ var v=localStorage.getItem(k); return v==null?def:JSON.parse(v);}catch(e){return def;} }
   function save(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 
@@ -167,6 +171,13 @@
   var done = load(K_DONE, {});          // {word:true}
   var hideMode = load(K_HIDE, false);
 
+  // 是否处于乱序：优先读存档；旧数据没有标记时，按当前顺序是否等于原序推断
+  var shuffled = load(K_SHUF, null);
+  if(shuffled===null){
+    shuffled=false;
+    for(var _i=0;_i<order.length;_i++){ if(order[_i]!==_i){ shuffled=true; break; } }
+  }
+
   // elements
   var elWord=document.getElementById('word'), elIpa=document.getElementById('ipa'),
       elMean=document.getElementById('mean'), elCur=document.getElementById('curIdx'),
@@ -177,9 +188,11 @@
       btnPrev=document.getElementById('prevBtn'), btnNext=document.getElementById('nextBtn'),
       btnShuffle=document.getElementById('shuffleBtn'), btnHide=document.getElementById('hideBtn'),
       btnStar=document.getElementById('starBtn');
+  var elShuffleLbl=document.getElementById('shuffleLbl');
 
   elTotal.textContent=N; elTotal2.textContent=N;
   btnHide.setAttribute('aria-pressed', hideMode?'true':'false');
+  updateShuffleBtn();
 
   var revealed=false; // for current card when hideMode on
 
@@ -234,15 +247,39 @@
     }catch(e){}
   }
 
+  function updateShuffleBtn(){
+    btnShuffle.setAttribute('aria-pressed', shuffled?'true':'false');
+    btnShuffle.title = shuffled ? '当前乱序，点击恢复原顺序 (S)' : '打乱顺序 (S)';
+    if(elShuffleLbl) elShuffleLbl.textContent = shuffled ? '已打乱 · 恢复' : '打乱顺序';
+  }
+
   function shuffle(){
+    var ci = order[pos];                     // 记住当前词，打乱后仍停在它上面
     for(var i=order.length-1;i>0;i--){
       var j=Math.floor(Math.random()*(i+1));
       var t=order[i]; order[i]=order[j]; order[j]=t;
     }
     save(K_ORD, order);
-    pos=0; revealed=false;
+    pos = order.indexOf(ci); if(pos<0) pos=0;
+    shuffled=true; save(K_SHUF, true);
+    revealed=false;
+    updateShuffleBtn();
     render();
   }
+
+  function restoreOrder(){
+    var w = curWord() ? curWord().w : null;
+    order = DATA.map(function(_,i){return i;});
+    save(K_ORD, order);
+    pos=0;
+    if(w){ for(var i=0;i<DATA.length;i++){ if(DATA[i].w===w){ pos=i; break; } } }
+    shuffled=false; save(K_SHUF, false);
+    revealed=false;
+    updateShuffleBtn();
+    render();
+  }
+
+  function toggleShuffle(){ if(shuffled){ restoreOrder(); } else { shuffle(); } }
 
   function toggleHide(){
     hideMode=!hideMode; revealed=false;
@@ -265,7 +302,7 @@
   // events
   btnPrev.onclick=function(){ goto(pos-1); };
   btnNext.onclick=function(){ goto(pos+1); };
-  btnShuffle.onclick=shuffle;
+  btnShuffle.onclick=toggleShuffle;
   btnHide.onclick=toggleHide;
   btnStar.onclick=toggleStar;
 
@@ -344,7 +381,7 @@
     if(e.key==='ArrowLeft'){ goto(pos-1); }
     else if(e.key==='ArrowRight'){ goto(pos+1); }
     else if(e.key===' '){ e.preventDefault(); reveal(); }
-    else if(e.key==='s'||e.key==='S'){ shuffle(); }
+    else if(e.key==='s'||e.key==='S'){ toggleShuffle(); }
     else if(e.key==='m'||e.key==='M'){ toggleStar(); }
   });
 
