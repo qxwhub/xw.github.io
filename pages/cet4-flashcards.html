@@ -10,7 +10,7 @@
     --bg:#f6f7f9; --card:#ffffff; --ink:#1a1d21; --muted:#6b7280;
     --line:#e5e7eb; --accent:#111827; --blue:#2563eb; --green:#16a34a;
   }
-  *{box-sizing:border-box;}
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   html,body{height:100%;}
   body{
     margin:0; background:var(--bg); color:var(--ink);
@@ -46,8 +46,9 @@
     padding:26px 26px 22px; box-shadow:0 10px 30px rgba(17,24,39,.06);
     cursor:pointer; user-select:none; transition:transform .12s, box-shadow .12s;
     position:relative; min-height:300px; display:flex; flex-direction:column;
+    touch-action:pan-y; will-change:transform;
+    -webkit-tap-highlight-color:transparent;
   }
-  .card:active{transform:scale(.992);}
   .card-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;}
   .progress{font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums;}
   .progress b{color:var(--ink); font-size:15px;}
@@ -66,6 +67,7 @@
     transition:color .12s, border-color .12s, background .12s; flex:0 0 auto;
   }
   .spk:hover{color:var(--blue); border-color:#b9d3fb;}
+  .spk:active{transform:scale(.9); background:#e8f1fe; border-color:#b9d3fb; color:var(--blue);}
   .spk svg{width:15px; height:15px;}
   .spk.on{color:var(--blue); background:#e8f1fe; border-color:#b9d3fb;}
   @keyframes spkPulse{0%{transform:scale(1)}45%{transform:scale(1.18)}100%{transform:scale(1)}}
@@ -142,7 +144,7 @@
 </main>
 
 <div class="tips">
-  快捷键：<kbd>←</kbd> 上一张 · <kbd>→</kbd> 下一张 · <kbd>空格</kbd> 显示释义 · <kbd>S</kbd> 打乱顺序 · <kbd>M</kbd> 标记已掌握 · 发音用浏览器语音合成（无需音频文件）
+  手机上：轻点卡片看释义，<b>左右滑动换词</b>；点话筒只朗读、不会翻页。电脑快捷键：<kbd>←</kbd> 上一张 · <kbd>→</kbd> 下一张 · <kbd>空格</kbd> 显示释义 · <kbd>S</kbd> 打乱顺序 · <kbd>M</kbd> 标记已掌握
 </div>
 
 <script src="basic-english-cet4-data.js"></script>
@@ -266,8 +268,76 @@
   btnShuffle.onclick=shuffle;
   btnHide.onclick=toggleHide;
   btnStar.onclick=toggleStar;
+
+  // 发音按钮：事件不冒泡到卡片，只有话筒自己有反馈
+  function stopEv(e){ e.stopPropagation(); }
+  ['touchstart','touchmove','touchend','pointerdown','pointerup'].forEach(function(t){
+    elSpk.addEventListener(t, stopEv, {passive:true});
+  });
   elSpk.onclick=function(e){ e.stopPropagation(); speak(); };
-  elCard.onclick=function(){ reveal(); };
+
+  // 卡片：轻点看释义；左右滑动换词
+  var swipeX=0, swipeY=0, swiping=false, swiped=false, slideBusy=false;
+  elCard.onclick=function(){
+    if(swiped){ swiped=false; return; }
+    reveal();
+  };
+  elCard.addEventListener('touchstart', function(e){
+    if(e.touches.length!==1 || slideBusy) return;
+    swipeX=e.touches[0].clientX; swipeY=e.touches[0].clientY;
+    swiping=true; swiped=false;
+  }, {passive:true});
+  elCard.addEventListener('touchmove', function(e){
+    if(!swiping) return;
+    var dx=e.touches[0].clientX-swipeX, dy=e.touches[0].clientY-swipeY;
+    if(Math.abs(dx)>Math.abs(dy)) swiped=true;
+    if(Math.abs(dx)>6){
+      var pull=Math.max(-70, Math.min(70, dx*0.45));
+      elCard.style.transition='none';
+      elCard.style.transform='translateX('+pull+'px)';
+    }
+  }, {passive:true});
+  elCard.addEventListener('touchend', function(e){
+    if(!swiping) return; swiping=false;
+    var t=e.changedTouches[0];
+    var dx=t.clientX-swipeX, dy=t.clientY-swipeY;
+    var horiz = Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)*1.2;
+    if(horiz && !slideBusy){
+      swiped=true;
+      slideTo(dx<0?1:-1);
+    } else {
+      elCard.style.transition='transform .16s ease';
+      elCard.style.transform='translateX(0)';
+      setTimeout(function(){ elCard.style.transition=''; },180);
+    }
+  }, {passive:true});
+
+  function slideTo(dir){
+    var np=pos+dir;
+    if(np<0 || np>=N){                       // 到头了：回弹
+      elCard.style.transition='transform .16s ease';
+      elCard.style.transform='translateX(0)';
+      setTimeout(function(){ elCard.style.transition=''; },180);
+      return;
+    }
+    slideBusy=true;
+    elCard.style.transition='transform .16s ease, opacity .16s ease';
+    elCard.style.transform='translateX('+(dir>0?-60:60)+'px)';
+    elCard.style.opacity='0';
+    setTimeout(function(){
+      goto(np);
+      elCard.style.transition='none';
+      elCard.style.transform='translateX('+(dir>0?50:-50)+'px)';
+      elCard.style.opacity='0';
+      void elCard.offsetWidth;               // 强制回流，保证有入场动画
+      elCard.style.transition='transform .18s ease, opacity .18s ease';
+      elCard.style.transform='translateX(0)';
+      elCard.style.opacity='1';
+      setTimeout(function(){
+        elCard.style.transition=''; elCard.style.opacity=''; slideBusy=false;
+      },190);
+    },160);
+  }
 
   document.addEventListener('keydown', function(e){
     if(e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
