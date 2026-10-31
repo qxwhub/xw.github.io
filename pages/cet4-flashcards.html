@@ -62,16 +62,18 @@
   .mastered-tag.show{display:inline-flex;}
 
   .word{font-size:46px; font-weight:700; letter-spacing:.3px; line-height:1.1; word-break:break-word;}
-  .phon{margin-top:10px; display:flex; align-items:center; gap:8px; color:var(--muted); font-size:16px;}
-  .phon .ipa{font-size:15px; letter-spacing:.3px;}
+  .phon{margin-top:10px; display:flex; align-items:center; justify-content:space-between; gap:10px; color:var(--muted); font-size:16px;}
+  .phon .ipa{font-size:15px; letter-spacing:.3px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .phon-r{display:flex; align-items:center; gap:8px; flex:0 0 auto; margin-left:auto;}
   .spk{
-    width:30px; height:30px; border:1px solid var(--line); background:#fff; border-radius:50%;
+    width:44px; height:44px; border:1px solid var(--line); background:#fff; border-radius:50%;
     display:inline-flex; align-items:center; justify-content:center; cursor:pointer; color:var(--muted);
-    transition:color .12s, border-color .12s, background .12s; flex:0 0 auto;
+    transition:transform .12s, color .12s, border-color .12s, background .12s; flex:0 0 auto;
+    margin:-6px -6px -6px 0;   /* 扩大可点区域，视觉上仍贴着右边 */
   }
   .spk:hover{color:var(--blue); border-color:#b9d3fb;}
   .spk:active{transform:scale(.9); background:#e8f1fe; border-color:#b9d3fb; color:var(--blue);}
-  .spk svg{width:15px; height:15px;}
+  .spk svg{width:20px; height:20px;}
   .spk.on{color:var(--blue); background:#e8f1fe; border-color:#b9d3fb;}
   @keyframes spkPulse{0%{transform:scale(1)}45%{transform:scale(1.18)}100%{transform:scale(1)}}
   .spk.on svg{animation:spkPulse .5s ease-out;}
@@ -133,10 +135,12 @@
       <div class="word" id="word">—</div>
       <div class="phon">
         <span class="ipa" id="ipa"></span>
-        <button class="spk" id="spk" title="朗读 (发音)">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 10v4h4l5 5V5L7 10H3Zm13.5 2a4.5 4.5 0 0 0-2.5-4.03v8.06A4.5 4.5 0 0 0 16.5 12Zm-2.5 7.5a7 7 0 0 0 0-15v2.06a5 5 0 0 1 0 10.88V19.5Z"/></svg>
-        </button>
-        <span class="vtag" id="vtag"></span>
+        <span class="phon-r">
+          <span class="vtag" id="vtag"></span>
+          <button class="spk" id="spk" title="朗读 (发音)">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 10v4h4l5 5V5L7 10H3Zm13.5 2a4.5 4.5 0 0 0-2.5-4.03v8.06A4.5 4.5 0 0 0 16.5 12Zm-2.5 7.5a7 7 0 0 0 0-15v2.06a5 5 0 0 1 0 10.88V19.5Z"/></svg>
+          </button>
+        </span>
       </div>
       <div class="mean" id="mean"></div>
       <div class="reveal-hint" id="revealHint">点击卡片 / 按空格 显示释义</div>
