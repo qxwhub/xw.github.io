@@ -75,6 +75,11 @@
   .spk.on{color:var(--blue); background:#e8f1fe; border-color:#b9d3fb;}
   @keyframes spkPulse{0%{transform:scale(1)}45%{transform:scale(1.18)}100%{transform:scale(1)}}
   .spk.on svg{animation:spkPulse .5s ease-out;}
+  .vtag{
+    font-size:11px; color:var(--muted); background:#f1f5f9; border:1px solid var(--line);
+    border-radius:20px; padding:2px 8px; white-space:nowrap; flex:0 0 auto;
+  }
+  .vtag.real{color:#0e7490; background:#ecfeff; border-color:#a5f3fc;}
 
   .mean{
     margin-top:18px; font-size:17px; color:var(--ink); line-height:1.65; flex:1;
@@ -131,6 +136,7 @@
         <button class="spk" id="spk" title="朗读 (发音)">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 10v4h4l5 5V5L7 10H3Zm13.5 2a4.5 4.5 0 0 0-2.5-4.03v8.06A4.5 4.5 0 0 0 16.5 12Zm-2.5 7.5a7 7 0 0 0 0-15v2.06a5 5 0 0 1 0 10.88V19.5Z"/></svg>
         </button>
+        <span class="vtag" id="vtag"></span>
       </div>
       <div class="mean" id="mean"></div>
       <div class="reveal-hint" id="revealHint">点击卡片 / 按空格 显示释义</div>
@@ -152,6 +158,7 @@
 </div>
 
 <script src="basic-english-cet4-data.js"></script>
+<script src="audio/cet4-index.js"></script>
 <script>
 (function(){
   var DATA = (window.BE_CET4 || []).filter(function(d){ return d && d.w; });
@@ -189,6 +196,7 @@
       btnShuffle=document.getElementById('shuffleBtn'), btnHide=document.getElementById('hideBtn'),
       btnStar=document.getElementById('starBtn');
   var elShuffleLbl=document.getElementById('shuffleLbl');
+  var elVtag=document.getElementById('vtag');
 
   elTotal.textContent=N; elTotal2.textContent=N;
   btnHide.setAttribute('aria-pressed', hideMode?'true':'false');
@@ -204,6 +212,12 @@
     elIpa.textContent = d.ipa ? ('/'+d.ipa+'/') : '';
     elMean.textContent = d.zh || '';
     elCur.textContent = pos+1;
+
+    if(elVtag){
+      var hasAudio = !!AUDIO[keyOf(d.w)];
+      elVtag.textContent = hasAudio ? '真人录音' : '合成音';
+      elVtag.className = 'vtag' + (hasAudio ? ' real' : '');
+    }
 
     var isDone = !!done[d.w];
     btnStar.setAttribute('aria-pressed', isDone?'true':'false');
@@ -232,19 +246,43 @@
     render();
   }
 
-  // speech
+  // 发音：优先用仓库里的真人录音（audio/cet4），没有的词退回浏览器合成
+  var AUDIO={};
+  (function(){ var a=window.CET4_AUDIO||[]; for(var i=0;i<a.length;i++) AUDIO[a[i]]=1; })();
+  function keyOf(w){ return String(w||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,''); }
+  var audioEl=(typeof Audio!=='undefined')?new Audio():null;
+  if(audioEl){ audioEl.preload='auto'; }
+
   var utter=null;
-  function speak(){
-    if(!('speechSynthesis' in window)) return;
-    var d=curWord(); if(!d||!d.w) return;
+  function playTTS(word){
+    if(!('speechSynthesis' in window)){ elSpk.classList.remove('on'); return; }
     try{
       window.speechSynthesis.cancel();
-      utter=new SpeechSynthesisUtterance(d.w);
+      utter=new SpeechSynthesisUtterance(word);
       utter.lang='en-US'; utter.rate=0.9;
       utter.onstart=function(){ elSpk.classList.add('on'); };
       utter.onend=utter.onerror=function(){ elSpk.classList.remove('on'); };
       window.speechSynthesis.speak(utter);
-    }catch(e){}
+    }catch(e){ elSpk.classList.remove('on'); }
+  }
+
+  function speak(){
+    var d=curWord(); if(!d||!d.w) return;
+    var k=keyOf(d.w);
+    if(audioEl && AUDIO[k]){
+      try{
+        elSpk.classList.add('on');
+        audioEl.pause();
+        audioEl.src='audio/cet4/'+k+'.mp3';
+        audioEl.currentTime=0;
+        audioEl.onended=function(){ elSpk.classList.remove('on'); };
+        audioEl.onerror=function(){ elSpk.classList.remove('on'); playTTS(d.w); };
+        var p=audioEl.play();
+        if(p && p.catch){ p.catch(function(){ elSpk.classList.remove('on'); playTTS(d.w); }); }
+        return;
+      }catch(e){}
+    }
+    playTTS(d.w);
   }
 
   function updateShuffleBtn(){
