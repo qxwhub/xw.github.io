@@ -169,7 +169,7 @@
 </main>
 
 <div class="tips">
-  手机上：轻点卡片看释义，<b>左右滑动换词</b>；点话筒只朗读、不会翻页。换到新的一张会自动朗读，停着不动每隔约 2 秒再读一遍，同一张最多 20 遍，滑动或关掉就重置。电脑快捷键：<kbd>←</kbd> 上一张 · <kbd>→</kbd> 下一张 · <kbd>空格</kbd> 显示释义 · <kbd>S</kbd> 打乱顺序 · <kbd>M</kbd> 标记已掌握 · <kbd>A</kbd> 自动发音开关
+  手机上：轻点卡片看释义，<b>左右滑动换词</b>；点话筒只朗读、不会翻页。换到新的一张会自动朗读，停着不动每隔约 1.2 秒再读一遍，同一张最多 20 遍，滑动或关掉就重置。电脑快捷键：<kbd>←</kbd> 上一张 · <kbd>→</kbd> 下一张 · <kbd>空格</kbd> 显示释义 · <kbd>S</kbd> 打乱顺序 · <kbd>M</kbd> 标记已掌握 · <kbd>A</kbd> 自动发音开关
 </div>
 
 <script src="basic-english-cet4-data.js"></script>
@@ -327,8 +327,9 @@
 
   // ===== 自动朗读 =====
   // 换一张卡：等 0.5 秒（等动画完）读第一遍；
-  // 停在原地不动：读完停 1.8 秒再读，同一张卡最多 20 遍（约 45 秒），滑动或关掉就重置。
-  var AUTO_DELAY=500, AUTO_GAP=1800, AUTO_TIMES=20;
+  // 停在原地不动：读完停 1 秒再读（单词本身只有 0.2 秒左右，整体约 1.2 秒一遍），
+  // 同一张卡最多 20 遍，滑动或关掉就重置。
+  var AUTO_DELAY=500, AUTO_GAP=1000, AUTO_TIMES=20;
   var autoTimer=null, autoSeq=0, autoCount=0, autoKey='', autoUnlocked=false;
 
   function showAutoHint(){ if(autoUnlocked || !elAutoHint) return; elAutoHint.classList.add('show'); }
