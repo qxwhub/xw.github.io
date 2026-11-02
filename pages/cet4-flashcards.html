@@ -93,6 +93,11 @@
   }
   .reveal-hint.show{display:block;}
 
+  .auto-hint{
+    display:none; margin:10px 2px 0; font-size:11.5px; color:var(--blue); text-align:center;
+  }
+  .auto-hint.show{display:block;}
+
   .nav{display:flex; gap:9px; margin-top:18px;}
   .nav .tbtn{flex:1; justify-content:center; padding:11px 0; font-size:13.5px;}
   .nav .tbtn:disabled{opacity:.4; cursor:default;}
@@ -115,6 +120,10 @@
       <button class="tbtn" id="hideBtn" aria-pressed="false" title="遮盖释义自测">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
         遮盖释义
+      </button>
+      <button class="tbtn" id="autoBtn" aria-pressed="true" title="换词自动朗读 (A)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+        <span id="autoLbl">自动发音 · 开</span>
       </button>
       <span class="spacer"></span>
       <span class="stat">已掌握 <b id="doneCnt">0</b> / <span id="totalCnt">0</span></span>
@@ -146,6 +155,8 @@
       <div class="reveal-hint" id="revealHint">点击卡片 / 按空格 显示释义</div>
     </div>
 
+    <div class="auto-hint" id="autoHint">手机浏览器需要先点一下屏幕，才能自动朗读</div>
+
     <div class="nav">
       <button class="tbtn" id="prevBtn">← 上一张</button>
       <button class="tbtn star-btn" id="starBtn" aria-pressed="false" title="标记已掌握">
@@ -158,7 +169,7 @@
 </main>
 
 <div class="tips">
-  手机上：轻点卡片看释义，<b>左右滑动换词</b>；点话筒只朗读、不会翻页。电脑快捷键：<kbd>←</kbd> 上一张 · <kbd>→</kbd> 下一张 · <kbd>空格</kbd> 显示释义 · <kbd>S</kbd> 打乱顺序 · <kbd>M</kbd> 标记已掌握
+  手机上：轻点卡片看释义，<b>左右滑动换词</b>；点话筒只朗读、不会翻页。换到新的一张会自动朗读，停着不动每隔约 2 秒再读一遍，同一张最多 3 遍。电脑快捷键：<kbd>←</kbd> 上一张 · <kbd>→</kbd> 下一张 · <kbd>空格</kbd> 显示释义 · <kbd>S</kbd> 打乱顺序 · <kbd>M</kbd> 标记已掌握 · <kbd>A</kbd> 自动发音开关
 </div>
 
 <script src="basic-english-cet4-data.js"></script>
@@ -168,7 +179,7 @@
   var DATA = (window.BE_CET4 || []).filter(function(d){ return d && d.w; });
   var N = DATA.length;
 
-  var K_IDX='cet4fc_idx', K_ORD='cet4fc_order', K_DONE='cet4fc_done', K_HIDE='cet4fc_hide', K_SHUF='cet4fc_shuffled';
+  var K_IDX='cet4fc_idx', K_ORD='cet4fc_order', K_DONE='cet4fc_done', K_HIDE='cet4fc_hide', K_SHUF='cet4fc_shuffled', K_AUTO='cet4fc_auto';
   function load(k,def){ try{ var v=localStorage.getItem(k); return v==null?def:JSON.parse(v);}catch(e){return def;} }
   function save(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 
@@ -181,6 +192,7 @@
   var pos = Math.min(Math.max(load(K_IDX,0)|0,0), N-1);
   var done = load(K_DONE, {});          // {word:true}
   var hideMode = load(K_HIDE, false);
+  var autoOn = load(K_AUTO, true);        // 换词自动朗读，默认开
 
   // 是否处于乱序：优先读存档；旧数据没有标记时，按当前顺序是否等于原序推断
   var shuffled = load(K_SHUF, null);
@@ -201,10 +213,13 @@
       btnStar=document.getElementById('starBtn');
   var elShuffleLbl=document.getElementById('shuffleLbl');
   var elVtag=document.getElementById('vtag');
+  var btnAuto=document.getElementById('autoBtn'), elAutoLbl=document.getElementById('autoLbl'),
+      elAutoHint=document.getElementById('autoHint');
 
   elTotal.textContent=N; elTotal2.textContent=N;
   btnHide.setAttribute('aria-pressed', hideMode?'true':'false');
   updateShuffleBtn();
+  updateAutoBtn();
 
   var revealed=false; // for current card when hideMode on
 
@@ -212,6 +227,11 @@
 
   function render(){
     var d = curWord();
+
+    // 换到另一张卡：掐掉上一张的声音，重新排一次自动朗读
+    var _k = pos+':'+order[pos];
+    if(_k!==autoKey){ autoKey=_k; autoSeq++; stopSpeech(); scheduleAuto(); }
+
     elWord.textContent = d.w || '—';
     elIpa.textContent = d.ipa ? ('/'+d.ipa+'/') : '';
     elMean.textContent = d.zh || '';
@@ -257,37 +277,115 @@
   var audioEl=(typeof Audio!=='undefined')?new Audio():null;
   if(audioEl){ audioEl.preload='auto'; }
 
-  var utter=null;
-  function playTTS(word){
-    if(!('speechSynthesis' in window)){ elSpk.classList.remove('on'); return; }
+  var utter=null, speaking=false;
+
+  function playTTS(word, onDone){
+    if(!('speechSynthesis' in window)){ elSpk.classList.remove('on'); speaking=false; if(onDone) onDone(); return; }
     try{
       window.speechSynthesis.cancel();
       utter=new SpeechSynthesisUtterance(word);
       utter.lang='en-US'; utter.rate=0.9;
-      utter.onstart=function(){ elSpk.classList.add('on'); };
-      utter.onend=utter.onerror=function(){ elSpk.classList.remove('on'); };
+      var fin=false;
+      function done(){ if(fin) return; fin=true; speaking=false; elSpk.classList.remove('on'); if(onDone) onDone(); }
+      utter.onstart=function(){ elSpk.classList.add('on'); hideAutoHint(); };
+      utter.onend=done; utter.onerror=done;
       window.speechSynthesis.speak(utter);
-    }catch(e){ elSpk.classList.remove('on'); }
+    }catch(e){ elSpk.classList.remove('on'); speaking=false; if(onDone) onDone(); }
   }
 
-  function speak(){
-    var d=curWord(); if(!d||!d.w) return;
+  // 读当前这个单词；onDone 在读完后回调（自动模式用它排下一遍）
+  function speakWord(onDone){
+    var d=curWord(); if(!d||!d.w){ if(onDone) onDone(); return; }
     var k=keyOf(d.w);
     if(audioEl && AUDIO[k]){
       try{
+        speaking=true;
         elSpk.classList.add('on');
         audioEl.pause();
         audioEl.src='audio/cet4/'+k+'.mp3';
         audioEl.currentTime=0;
-        audioEl.onended=function(){ elSpk.classList.remove('on'); };
-        audioEl.onerror=function(){ elSpk.classList.remove('on'); playTTS(d.w); };
+        var fin=false;
+        function done(){ if(fin) return; fin=true; speaking=false; elSpk.classList.remove('on'); if(onDone) onDone(); }
+        audioEl.onended=done;
+        audioEl.onerror=function(){ if(fin) return; fin=true; elSpk.classList.remove('on'); playTTS(d.w, onDone); };
         var p=audioEl.play();
-        if(p && p.catch){ p.catch(function(){ elSpk.classList.remove('on'); playTTS(d.w); }); }
+        if(p && p.catch){
+          p.catch(function(err){
+            if(err && err.name==='NotAllowedError') showAutoHint();
+            if(fin) return; fin=true; elSpk.classList.remove('on'); playTTS(d.w, onDone);
+          });
+        }
         return;
       }catch(e){}
     }
-    playTTS(d.w);
+    speaking=true;
+    playTTS(d.w, onDone);
   }
+
+  // 手动点喇叭：只读一遍，接管自动模式
+  function speak(){ clearAuto(); speakWord(null); }
+
+  // ===== 自动朗读 =====
+  // 换一张卡：等 0.5 秒（等动画完）读第一遍；
+  // 停在原地不动：读完停 1.8 秒再读，同一张卡最多 3 遍，滑动或关掉就重置。
+  var AUTO_DELAY=500, AUTO_GAP=1800, AUTO_TIMES=3;
+  var autoTimer=null, autoSeq=0, autoCount=0, autoKey='', autoUnlocked=false;
+
+  function showAutoHint(){ if(autoUnlocked || !elAutoHint) return; elAutoHint.classList.add('show'); }
+  function hideAutoHint(){ if(elAutoHint) elAutoHint.classList.remove('show'); }
+
+  function stopSpeech(){
+    if(audioEl){ try{ audioEl.onended=null; audioEl.onerror=null; audioEl.pause(); }catch(e){} }
+    try{ if('speechSynthesis' in window) window.speechSynthesis.cancel(); }catch(e){}
+    speaking=false; elSpk.classList.remove('on');
+  }
+
+  function clearAuto(){ if(autoTimer){ clearTimeout(autoTimer); autoTimer=null; } }
+
+  function scheduleAuto(){
+    clearAuto(); autoCount=0;
+    if(!autoOn || document.hidden) return;
+    autoTimer=setTimeout(function(){ autoTimer=null; autoPlay(); }, AUTO_DELAY);
+  }
+
+  function autoPlay(){
+    if(!autoOn || document.hidden || speaking) return;
+    if(autoCount>=AUTO_TIMES) return;
+    autoCount++;
+    var mySeq=autoSeq;
+    speakWord(function(){
+      if(mySeq!==autoSeq || !autoOn || document.hidden) return;
+      if(autoCount>=AUTO_TIMES) return;
+      autoTimer=setTimeout(function(){ autoTimer=null; autoPlay(); }, AUTO_GAP);
+    });
+  }
+
+  function toggleAuto(){
+    autoOn=!autoOn; save(K_AUTO, autoOn);
+    updateAutoBtn();
+    if(autoOn){ scheduleAuto(); } else { clearAuto(); stopSpeech(); }
+  }
+
+  function updateAutoBtn(){
+    btnAuto.setAttribute('aria-pressed', autoOn?'true':'false');
+    btnAuto.title = autoOn ? '自动发音：开 · 换词自动朗读，点一下关 (A)' : '自动发音：关 · 点一下开 (A)';
+    if(elAutoLbl) elAutoLbl.textContent = autoOn ? '自动发音 · 开' : '自动发音 · 关';
+  }
+
+  // 手机浏览器禁止「没碰过页面就自动出声」：第一次点击/触摸/按键后才能自动读
+  function unlockAudio(){
+    if(autoUnlocked) return;
+    autoUnlocked=true; hideAutoHint();
+    if(autoOn && !document.hidden && !speaking) scheduleAuto();
+  }
+  ['pointerdown','touchstart','keydown'].forEach(function(t){
+    document.addEventListener(t, unlockAudio, {passive:true});
+  });
+
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden){ clearAuto(); stopSpeech(); }
+    else if(autoOn){ scheduleAuto(); }
+  });
 
   function updateShuffleBtn(){
     btnShuffle.setAttribute('aria-pressed', shuffled?'true':'false');
@@ -346,6 +444,7 @@
   btnNext.onclick=function(){ goto(pos+1); };
   btnShuffle.onclick=toggleShuffle;
   btnHide.onclick=toggleHide;
+  btnAuto.onclick=toggleAuto;
   btnStar.onclick=toggleStar;
 
   // 发音按钮：事件不冒泡到卡片，只有话筒自己有反馈
@@ -425,6 +524,7 @@
     else if(e.key===' '){ e.preventDefault(); reveal(); }
     else if(e.key==='s'||e.key==='S'){ toggleShuffle(); }
     else if(e.key==='m'||e.key==='M'){ toggleStar(); }
+    else if(e.key==='a'||e.key==='A'){ toggleAuto(); }
   });
 
   render();
