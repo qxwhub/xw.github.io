@@ -121,9 +121,9 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
         遮盖释义
       </button>
-      <button class="tbtn" id="autoBtn" aria-pressed="true" title="换词自动朗读 (A)">
+      <button class="tbtn" id="autoBtn" aria-pressed="false" title="自动发音：关 · 点一下开 (A)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
-        <span id="autoLbl">自动发音 · 开</span>
+        <span id="autoLbl">自动发音 · 关</span>
       </button>
       <span class="spacer"></span>
       <span class="stat">已掌握 <b id="doneCnt">0</b> / <span id="totalCnt">0</span></span>
@@ -192,7 +192,7 @@
   var pos = Math.min(Math.max(load(K_IDX,0)|0,0), N-1);
   var done = load(K_DONE, {});          // {word:true}
   var hideMode = load(K_HIDE, false);
-  var autoOn = load(K_AUTO, true);        // 换词自动朗读，默认开
+  var autoOn = load(K_AUTO, false);       // 换词自动朗读，默认关（要用自己打开）
 
   // 是否处于乱序：优先读存档；旧数据没有标记时，按当前顺序是否等于原序推断
   var shuffled = load(K_SHUF, null);
