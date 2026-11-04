@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>四级单词卡片 · 乱序记忆</title>
+<title>四六级单词卡片 · 乱序记忆</title>
 <link rel="icon" href="data:,">
 <style>
   :root{
@@ -110,7 +110,7 @@
 <body>
 <header>
   <div class="wrap">
-    <h1>四级单词卡片 <small>乱序记忆 · 点卡片看释义</small></h1>
+    <h1>四六级单词卡片 <small>5500+ 词 · 含常用词组 · 点卡片看释义</small></h1>
     <div class="bar">
       <button class="tbtn" id="shuffleBtn" aria-pressed="false" title="打乱顺序 (S)">
         <svg class="ico-shuffle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/></svg>
@@ -185,9 +185,11 @@
 
   // order: array of indices into DATA
   var order = load(K_ORD, null);
+  var rebuilt = false;
   if(!order || order.length!==N){
     order = DATA.map(function(_,i){return i;});
     save(K_ORD, order);
+    rebuilt = true;
   }
   var pos = Math.min(Math.max(load(K_IDX,0)|0,0), N-1);
   var done = load(K_DONE, {});          // {word:true}
@@ -196,7 +198,9 @@
 
   // 是否处于乱序：优先读存档；旧数据没有标记时，按当前顺序是否等于原序推断
   var shuffled = load(K_SHUF, null);
-  if(shuffled===null){
+  if(rebuilt){
+    shuffled=false; save(K_SHUF,false);
+  }else if(shuffled===null){
     shuffled=false;
     for(var _i=0;_i<order.length;_i++){ if(order[_i]!==_i){ shuffled=true; break; } }
   }
@@ -233,7 +237,14 @@
     if(_k!==autoKey){ autoKey=_k; autoSeq++; stopSpeech(); scheduleAuto(); }
 
     elWord.textContent = d.w || '—';
-    elIpa.textContent = d.ipa ? ('/'+d.ipa+'/') : '';
+    if((d.w||'').indexOf(' ')>-1){
+      var _l = d.w.length;
+      elWord.style.fontSize = _l<=18 ? '30px' : (_l<=26 ? '24px' : '20px');
+      elWord.style.lineHeight = '1.25';
+    }else{
+      elWord.style.fontSize = ''; elWord.style.lineHeight = '';
+    }
+    elIpa.textContent = d.ipa ? ('/'+d.ipa+'/') : ((d.w||'').indexOf(' ')>-1 ? 'phr.' : '');
     elMean.textContent = d.zh || '';
     elCur.textContent = pos+1;
 
