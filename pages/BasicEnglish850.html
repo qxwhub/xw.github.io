@@ -2413,7 +2413,8 @@
     el.star.onclick = toggleStar;
     el.prev.onclick = function(){ goto(pos - 1); };
     el.next.onclick = function(){ goto(pos + 1); };
-    el.spk.onclick = function(e){ e.stopPropagation(); clearAuto(); reveal(); speakWord(null); };
+    // 点喇叭只发音，不揭晓释义（揭晓只由点卡片/空格触发）
+    el.spk.onclick = function(e){ e.stopPropagation(); clearAuto(); speakWord(null); };
     ['touchstart','touchmove','touchend','pointerdown','pointerup'].forEach(function(t){
       el.spk.addEventListener(t, function(e){ e.stopPropagation(); }, {passive:true});
     });
