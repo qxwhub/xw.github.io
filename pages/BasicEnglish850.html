@@ -65,6 +65,11 @@
     font-size:12px; color:var(--muted); background:#eef0f3;
     border-radius:20px; padding:2px 10px; white-space:nowrap;
   }
+  .cet4-hint{
+    font-size:12px; color:#6b7280; margin:2px 0 8px; padding:6px 10px;
+    background:#f5f3ff; border:1px solid #ede9fe; border-radius:6px;
+  }
+  .cet4-hint:empty{display:none;}
   .grid{
     display:grid; gap:8px;
     grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
@@ -1227,6 +1232,7 @@
     <div class="sec-head" style="border-left-color:#7c3aed">
       <h2>四六级补充词汇 · CET-4 / CET-6</h2><span class="sub">四六级大纲词汇 + 常用词组（与上面 850 词不重复），按 A–Z 排列；释义音标整理自公开词表，仅供学习参考</span><span class="cnt">5573 词</span>
     </div>
+    <div class="cet4-hint" id="cet4Hint"></div>
     <div class="grid" id="cet4-grid"></div>
   </section>
 </main>
@@ -1248,46 +1254,79 @@
   var q = document.getElementById('q');
   var empty = document.getElementById('empty');
 
-  // ---------- 四级补充词汇：由数据文件渲染 ----------
+  // ---------- 四六级词汇：按字母渲染（一次只放一个字母，手机才不卡） ----------
   (function renderCet4(){
     var data = window.BE_CET4;
     var grid = document.getElementById('cet4-grid');
     if (!data || !grid) return;
-    var EYE = '<span class="i-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></span>'
-      + '<span class="i-off"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M1 1l22 22"/></svg></span>';
-    var STAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
-    var SPK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
-    var esc = function(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
-    var buf = [], curLetter = '';
-    // 850 核心词里已有的，不再重复出现在四六级区
+    var esc = function(v){ return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
+
+    // 850 区已有的词，四六级区不再重复显示
     var haveCore = {};
     Array.prototype.forEach.call(document.querySelectorAll('main section:not(#cet4-section) .w'), function(el2){
       haveCore[el2.dataset.w] = 1;
     });
+
+    var byLetter = {}, letters = [], LIST = [];
     for (var i = 0; i < data.length; i++) {
       var r = data[i];
-      if (haveCore[String(r.w).toLowerCase()]) continue;
-      var L = (r.w[0] || '#').toUpperCase();
-      if (L !== curLetter) {
-        curLetter = L;
-        buf.push('<div class="az-head" id="az-' + esc(L) + '">' + esc(L) + '</div>');
-      }
-      buf.push('<div class="w" data-w="' + esc(r.w.toLowerCase()) + '" data-zh="' + esc(r.zh) + '">'
+      var key = String(r.w).toLowerCase();
+      if (haveCore[key]) continue;
+      LIST.push(r);
+      var L = (String(r.w)[0] || '#').toUpperCase();
+      if (!byLetter[L]) { byLetter[L] = []; letters.push(L); }
+      byLetter[L].push(r);
+    }
+
+    function cardHtml(r){
+      return '<div class="w" data-w="' + esc(String(r.w).toLowerCase()) + '" data-zh="' + esc(r.zh) + '">'
         + '<div class="w-top"><span class="en">' + esc(r.w) + '</span><span class="w-act">'
         + '<button class="spk" type="button" aria-label="朗读" title="朗读发音"></button>'
         + '<button class="eye" type="button" aria-label="显示/隐藏释义" title="显示/隐藏释义"></button>'
         + '<button class="star" type="button" aria-label="标记已记住" title="标记为已记住"></button>'
         + '</span></div>'
         + (r.ipa ? '<span class="ipa">/' + esc(r.ipa) + '/</span>' : '')
-        + '<span class="zh">' + esc(r.zh) + '</span></div>');
+        + '<span class="zh">' + esc(r.zh) + '</span></div>';
     }
-    grid.innerHTML = buf.join('');
 
-    // 850 区是硬编码 HTML，把里面的内联图标一并清掉，统一走 CSS 图标（省 2500+ 个 SVG 节点）
-    Array.prototype.forEach.call(
-      document.querySelectorAll('.w .w-act svg, .w .w-act .i-on, .w .w-act .i-off'),
-      function(n){ n.parentNode.removeChild(n); }
-    );
+    function fill(list){
+      var buf = [];
+      for (var i = 0; i < list.length; i++) buf.push(cardHtml(list[i]));
+      grid.innerHTML = buf.join('');
+      if (window.__afterRenderGrid) window.__afterRenderGrid();
+    }
+
+    var curLetter = null;
+    function renderLetter(L){
+      if (!byLetter[L]) L = letters[0];
+      curLetter = L;
+      fill(byLetter[L] || []);
+      var cntEl = document.querySelector('#cet4-section .cnt');
+      if (cntEl) cntEl.textContent = (byLetter[L] || []).length + ' 词';
+      var hint = document.getElementById('cet4Hint');
+      if (hint) hint.textContent = '当前显示 ' + L + ' 开头 · 共 ' + LIST.length + ' 词，点右侧字母切换';
+      Array.prototype.forEach.call(document.querySelectorAll('#azRail button[data-l]'), function(b){
+        b.classList.toggle('cur', b.dataset.l === L);
+      });
+    }
+
+    function renderHits(list, total){
+      fill(list);
+      var cntEl = document.querySelector('#cet4-section .cnt');
+      if (cntEl) cntEl.textContent = total + ' 词';
+      var hint = document.getElementById('cet4Hint');
+      if (hint) hint.textContent = total > list.length
+        ? ('匹配 ' + total + ' 个，只显示前 ' + list.length + ' 个，多输几个字缩小范围')
+        : ('匹配 ' + total + ' 个');
+    }
+
+    window.__cet4 = {
+      list: LIST,
+      byLetter: byLetter,
+      renderLetter: renderLetter,
+      renderHits: renderHits,
+      curLetter: function(){ return curLetter; }
+    };
 
     // ---------- 右侧 A–Z 跳转栏 ----------
     var rail = document.getElementById('azRail');
@@ -1296,20 +1335,12 @@
     top.addEventListener('click', function(){ window.scrollTo({ top: 0, behavior: 'smooth' }); });
     rail.appendChild(top);
 
-    var present = {};
-    for (var j = 0; j < data.length; j++) present[(data[j].w[0] || '#').toUpperCase()] = 1;
-
     'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(function(ch){
       var b = document.createElement('button');
-      b.type = 'button'; b.textContent = ch;
-      if (present[ch]) {
-        b.title = '跳到 ' + ch;
-        b.addEventListener('click', function(){
-          var t = document.getElementById('az-' + ch);
-          if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          rail.querySelectorAll('button').forEach(function(x){ x.style.background=''; x.style.color=''; });
-          b.style.background = '#111827'; b.style.color = '#fff';
-        });
+      b.type = 'button'; b.textContent = ch; b.dataset.l = ch;
+      if (byLetter[ch]) {
+        b.title = '显示 ' + ch + ' 开头（' + byLetter[ch].length + ' 词）';
+        b.addEventListener('click', function(){ renderLetter(ch); });
       } else {
         b.className = 'no'; b.title = '此表中无 ' + ch + ' 开头词';
       }
@@ -1318,22 +1349,85 @@
   })();
 
   var secs = Array.prototype.slice.call(document.querySelectorAll('section'));
-  var words = Array.prototype.slice.call(document.querySelectorAll('.w'));
+
+  // 850 区是硬编码的，四六级区按字母动态渲染
+  var coreCards = Array.prototype.slice.call(document.querySelectorAll('main section:not(#cet4-section) .w'));
+  var words = coreCards.slice();          // 当前页面上实际存在的词卡
+
+  // 全量词条（850 + 四六级去重），进度统计 / 导出都用它，跟 DOM 无关
+  var ALL_ENTRIES = (function(){
+    var out = [], seen = {};
+    coreCards.forEach(function(el){
+      var w = el.dataset.w;
+      if (!w || seen[w]) return;
+      seen[w] = 1;
+      var en0 = el.querySelector('.en'), ip0 = el.querySelector('.ipa');
+      out.push({
+        w: w,
+        show: en0 ? en0.textContent : w,
+        ipa: ip0 ? ip0.textContent.replace(/\//g, '') : '',
+        zh: el.dataset.zh || ''
+      });
+    });
+    var d = window.BE_CET4 || [];
+    for (var i = 0; i < d.length; i++) {
+      var w2 = String(d[i].w).toLowerCase();
+      if (seen[w2]) continue;
+      seen[w2] = 1;
+      out.push({ w: w2, show: d[i].w, ipa: d[i].ipa || '', zh: d[i].zh || '' });
+    }
+    return out;
+  })();
+  var TOTAL = ALL_ENTRIES.length;
+  var KNOWN = {};
+  ALL_ENTRIES.forEach(function(e){ KNOWN[e.w] = 1; });
+
+  function refreshWords(){
+    words = coreCards.concat(Array.prototype.slice.call(document.getElementById('cet4-grid').querySelectorAll('.w')));
+  }
+
   function run(){
     var v = q.value.trim().toLowerCase();
-    var any = false;
-    words.forEach(function(el){
-      var hit = !v || el.dataset.w.indexOf(v) > -1 || (el.dataset.zh||'').indexOf(v) > -1;
+    var C = window.__cet4;
+
+    // 850 区：常驻 DOM，直接过滤显示
+    for (var i = 0; i < coreCards.length; i++) {
+      var el = coreCards[i];
+      var hit = !v || el.dataset.w.indexOf(v) > -1 || (el.dataset.zh || '').indexOf(v) > -1;
       el.style.display = hit ? '' : 'none';
-      if(hit) any = true;
-    });
-    secs.forEach(function(sec){
-      var list = Array.prototype.slice.call(sec.querySelectorAll('.w'));
-      var n = list.filter(function(e){ return e.style.display !== 'none'; }).length;
-      sec.querySelector('.cnt').textContent = n + ' 词';
-      sec.style.display = n ? '' : 'none';
-    });
-    empty.style.display = any ? 'none' : 'block';
+    }
+
+    var total = 0;
+    for (var k = 0; k < coreCards.length; k++) if (coreCards[k].style.display !== 'none') total++;
+
+    if (!v) {
+      // 清空搜索：四六级区回到上次看的字母
+      if (C) C.renderLetter(C.curLetter() || 'A');
+      if (C) total += (C.byLetter[C.curLetter()] || []).length;
+    } else {
+      // 搜索：搜全量数据，只渲染命中的前 300 条
+      var hits = [], list = C ? C.list : [];
+      for (var m = 0; m < list.length; m++) {
+        var r = list[m];
+        if (String(r.w).toLowerCase().indexOf(v) > -1 || String(r.zh || '').indexOf(v) > -1) hits.push(r);
+      }
+      if (C) C.renderHits(hits.slice(0, 300), hits.length);
+      total += hits.length;
+    }
+
+    var cet4sec = document.getElementById('cet4-section');
+    for (var n = 0; n < secs.length; n++) {
+      var sec = secs[n];
+      if (sec === cet4sec) { sec.style.display = ''; continue; }
+      var cards = sec.querySelectorAll('.w');
+      var cnt = 0;
+      for (var q2 = 0; q2 < cards.length; q2++) if (cards[q2].style.display !== 'none') cnt++;
+      sec.querySelector('.cnt').textContent = cnt + ' 词';
+      sec.style.display = cnt ? '' : 'none';
+    }
+    empty.style.display = total ? 'none' : 'block';
+    refreshWords();
+    if (window.__afterRenderGrid) window.__afterRenderGrid();
   }
   var qTimer = null;
   q.addEventListener('input', function(){
@@ -1368,14 +1462,16 @@
   q.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ q.value=''; run(); } });
 
   // ---------- 词根反查：给命中的单词卡片挂「根/缀」小标签，点开跳回词根速查表 ----------
-  (function tagRoots(){
+  function tagRootsIn(scope){
     try {
       var map = window.ROOT_MAP;
-      if (!map || !words.length) return;
-      words.forEach(function(el){
-        if (el.querySelector('.root-tags')) return;       // 防止重复挂
+      if (!map) return;
+      var els = (scope || document).querySelectorAll('.w');
+      for (var i = 0; i < els.length; i++) {
+        var el = els[i];
+        if (el.querySelector('.root-tags')) continue;       // 防止重复挂
         var list = map[el.dataset.w];
-        if (!list || !list.length) return;
+        if (!list || !list.length) continue;
         var box = document.createElement('span');
         box.className = 'root-tags';
         list.forEach(function(e){
@@ -1389,15 +1485,18 @@
           box.appendChild(a);
         });
         el.appendChild(box);
-      });
+      }
     } catch(e){}
-  })();
+  }
+  tagRootsIn(document);
 
   // ---------- 长单词自适应字号（不换行，只缩字号） ----------
-  function fitLongWords(){
-    var ens = document.querySelectorAll('.w .en');
+  function fitLongWords(scope){
+    var ens = (scope || document).querySelectorAll('.w .en');
     for (var i = 0; i < ens.length; i++) {
       var el = ens[i];
+      // 短词不可能溢出，直接跳过：以前每个词都读 scrollWidth，6223 个词等于上万次强制重排
+      if (el.textContent.length <= 11) continue;
       el.style.fontSize = '';                 // 先复位，再按实际溢出情况缩
       var fs = parseFloat(getComputedStyle(el).fontSize) || 13;
       var min = 9.5;
@@ -1410,7 +1509,7 @@
   }
   fitLongWords();
   window.addEventListener('resize', function(){ clearTimeout(window.__fitT); window.__fitT = setTimeout(fitLongWords, 150); });
-  window.addEventListener('load', fitLongWords);
+  window.addEventListener('load', function(){ fitLongWords(); });
 
   // ---------- 释义显隐 ----------
   var KEY_HIDE = 'be850_hidezh_v1';
@@ -1456,13 +1555,15 @@
   var done = {};
   var delSet = STORE.get(KEY_DEL, {}) || {};
   var raw = STORE.get(KEY, {});
-  for (var i = 0; i < words.length; i++) {
-    var w = words[i].dataset.w;
+  // 只认词表里有的词；上色交给 __afterRenderGrid（页面上的卡片随字母切换在变）
+  Object.keys(raw).forEach(function(k){
+    var w = String(k).toLowerCase();
+    if (!KNOWN[w]) return;
     // 值语义：0/缺失=无记录；1=旧格式「已标记」；>1=毫秒时间戳
     var dts = (typeof raw[w] === 'number' && raw[w] >= 1) ? raw[w] : 0;
     var xts = (typeof delSet[w] === 'number' && delSet[w] >= 1) ? delSet[w] : 0;
-    if (dts >= xts && dts > 0) { done[w] = dts; words[i].classList.add('done'); }
-  }
+    if (dts >= xts && dts > 0) done[w] = dts;
+  });
 
   var doneN = document.getElementById('doneN');
   var doneT = document.getElementById('doneT');
@@ -1471,7 +1572,7 @@
   var progLeft = document.getElementById('progLeft');
   function syncDone(){
     var n = Object.keys(done).length;
-    var t = words.length;
+    var t = TOTAL;
     var pct = t ? Math.round(n / t * 100) : 0;
     doneN.textContent = n;
     doneT.textContent = t;
@@ -1481,6 +1582,34 @@
     STORE.set(KEY, done);
   }
   syncDone();
+
+  // ---------- 每次列表重绘后统一收尾（上色 / 词根标签 / 长词字号） ----------
+  window.__afterRenderGrid = function(){
+    var els = document.querySelectorAll('.w');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      if (done[el.dataset.w]) el.classList.add('done'); else el.classList.remove('done');
+    }
+    tagRootsIn(document.getElementById('cet4-grid'));
+    fitLongWords(document.getElementById('cet4-grid'));
+  };
+
+  // 首次：850 区上色/挂标签/调字号，四六级区渲染默认字母 A
+  (function initList(){
+    // 850 区是硬编码 HTML，内联图标统一清掉（图标已由 CSS 提供，省 3400 个 SVG 节点）
+    Array.prototype.forEach.call(
+      document.querySelectorAll('.w .w-act svg, .w .w-act .i-on, .w .w-act .i-off'),
+      function(n){ n.parentNode.removeChild(n); }
+    );
+    var core = document.querySelectorAll('main section:not(#cet4-section) .w');
+    for (var i = 0; i < core.length; i++) {
+      if (done[core[i].dataset.w]) core[i].classList.add('done');
+    }
+    tagRootsIn(document.querySelector('main'));
+    fitLongWords(document);
+    if (window.__cet4) window.__cet4.renderLetter('A');
+    refreshWords();
+  })();
 
   // 已记住（事件委托）
   document.addEventListener('click', function(ev){
@@ -1521,7 +1650,7 @@
     var ts = Date.now();
     Object.keys(done).forEach(function(k){ delSet[k] = ts; });   // 全部写入取消时间戳
     done = {};
-    words.forEach(function(el){ el.classList.remove('done'); });
+    Array.prototype.forEach.call(document.querySelectorAll('.w'), function(el){ el.classList.remove('done'); });
     STORE.set(KEY_DEL, delSet);
     syncDone();
     schedulePush();
@@ -1531,26 +1660,29 @@
 
   // ---------- 导出「还没记住」的词 ----------
   function notRemembered(){
-    return words.filter(function(el){ return !done[el.dataset.w]; });
+    var out = [];
+    for (var i = 0; i < ALL_ENTRIES.length; i++) {
+      if (!done[ALL_ENTRIES[i].w]) out.push(ALL_ENTRIES[i]);
+    }
+    return out;
   }
   function buildText(fmt){
     var list = notRemembered();
     if (!list.length) return null;
     if (fmt === 'word') {
-      return list.map(function(el){ return el.dataset.w; }).join('\r\n');
+      return list.map(function(e){ return e.w; }).join('\r\n');
     }
     if (fmt === 'csv') {
-      return list.map(function(el){
-        var zh = (el.dataset.zh || '').replace(/"/g, '""');
-        return el.dataset.w + ',"' + zh + '"';
+      return list.map(function(e){
+        var zh = String(e.zh || '').replace(/"/g, '""');
+        return e.w + ',"' + zh + '"';
       }).join('\r\n');
     }
     // md：音标 + 释义的文本卡片
-    return list.map(function(el, i){
-      var en = el.querySelector('.en'), ip = el.querySelector('.ipa');
-      return (i + 1) + '. ' + (en ? en.textContent : el.dataset.w)
-        + (ip ? '  ' + ip.textContent : '')
-        + '\r\n   ' + (el.dataset.zh || '');
+    return list.map(function(e, i){
+      return (i + 1) + '. ' + (e.show || e.w)
+        + (e.ipa ? '  /' + e.ipa + '/' : '')
+        + '\r\n   ' + (e.zh || '');
     }).join('\r\n\r\n');
   }
   function exportNotDone(fmt){
@@ -1605,7 +1737,7 @@
       app: 'BasicEnglish850',
       ver: 1,
       savedAt: new Date().toISOString(),
-      total: words.length,
+      total: TOTAL,
       doneCount: n,
       done: Object.keys(done)
     };
@@ -1641,11 +1773,8 @@
     delSet = mergedDel;
     STORE.set(KEY_DONE, done);
     STORE.set(KEY_DEL, delSet);
-    var hit = 0;
-    words.forEach(function(el){
-      if (done[el.dataset.w]) { el.classList.add('done'); hit++; }
-      else { el.classList.remove('done'); }
-    });
+    var hit = Object.keys(done).length;
+    if (window.__afterRenderGrid) window.__afterRenderGrid();
     syncDone();
     if (window.__cfRefresh) window.__cfRefresh();
     return hit;
@@ -1684,10 +1813,8 @@
         done = nd; delSet = ndel;
         STORE.set(KEY_DONE, done); STORE.set(KEY_DEL, delSet);
         var hit = 0;
-        words.forEach(function(el){
-          if (done[el.dataset.w]) { el.classList.add('done'); hit++; }
-          else { el.classList.remove('done'); }
-        });
+        Object.keys(inBackup).forEach(function(w){ if (KNOWN[w]) hit++; });
+        if (window.__afterRenderGrid) window.__afterRenderGrid();
         syncDone();
         schedulePush();
         alert('恢复完成：备份里 ' + list.length + ' 个词，本表中匹配上 ' + hit + ' 个。\n'
@@ -2156,7 +2283,7 @@
       var on = !done[d.w], ts = Date.now();
       if(on){ done[d.w] = ts; delSet[d.w] = 0; } else { delete done[d.w]; delSet[d.w] = ts; }
       STORE.set(KEY, done); STORE.set(KEY_DEL, delSet);
-      var wEl = wordElMap[d.w];
+      var wEl = document.querySelector('.w[data-w="' + String(d.w).replace(/"/g, '') + '"]');
       if(wEl) wEl.classList.toggle('done', on);
       syncDone(); schedulePush(); render();
     }
@@ -2387,9 +2514,6 @@
       }catch(e){}
     })();
 
-    // 词 -> 列表元素，供卡片标记时同步高亮
-    var wordElMap = {};
-    words.forEach(function(el2){ wordElMap[el2.dataset.w] = el2; });
 
     if(new URLSearchParams(location.search).get('mode') === 'card') setTimeout(open, 60);
 
