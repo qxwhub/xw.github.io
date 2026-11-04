@@ -269,7 +269,7 @@
       <button class="hd-toggle" id="hdToggle" type="button" title="折叠/展开工具栏">收起 ▴</button>
     </div>
     <div class="hd-body">
-    <div class="meta"><b>Basic English 850</b> ＝ 操作词 <b>100</b> ＋ 通用名词 <b>400</b> ＋ 具体名词 <b>200</b> ＋ 性质词 <b>100</b> ＋ 反义性质词 <b>50</b>（Ogden 原表，依据 Wiktionary “Basic English word list” 核校）　＋　四六级补充 <b>5573</b> 词（含 200 词与 850 表重叠，已去重）　｜　共 <b>6223</b> 个不重复词</div>
+    <div class="meta"><b>850</b> 核心词 ＋ 四六级补充 ｜ 共 <b>6223</b> 词 · 按 A–Z 排列，点右侧字母切换</div>
     <div class="bar">
       <button class="eyeall" id="eyeAll" type="button" aria-pressed="false">
         <span class="i-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></span>
@@ -2025,7 +2025,7 @@
     var hideMode = STORE.get(K_HIDE, false);
     var autoOn = STORE.get(K_AUTO, false);
     var srs = STORE.get(K_SRS, {}) || {};
-    var reviewMode = STORE.get(K_REVIEW, false);
+    var reviewMode = false;   // 记忆模式已下线（与遮盖重复），旧记录不再生效
     var q = [];
     var opened = false, revealed = false;
 
@@ -2101,7 +2101,6 @@
       + '    <select class="cfx-sel" id="cfxSrc">'
       + '      <option value="all">全部</option><option value="core">850 核心</option><option value="cet4">四六级</option>'
       + '    </select>'
-      + '    <button class="cfx-t" id="cfxReview" aria-pressed="false">记忆模式</button>'
       + '    <span class="cfx-spacer"></span>'
       + '    <button class="cfx-t" id="cfxShuffle" aria-pressed="false">打乱顺序</button>'
       + '    <button class="cfx-t" id="cfxHide" aria-pressed="false">遮盖释义</button>'
@@ -2333,7 +2332,6 @@
       el.hide.setAttribute('aria-pressed', hideMode ? 'true' : 'false');
       el.auto.setAttribute('aria-pressed', autoOn ? 'true' : 'false');
       el.auto.textContent = autoOn ? '自动发音 · 开' : '自动发音 · 关';
-      el.review.setAttribute('aria-pressed', reviewMode ? 'true' : 'false');
     }
     function toggleShuffle(){
       if(reviewMode) return;
@@ -2396,7 +2394,6 @@
       opened = true; el.root.hidden = false;
       document.body.style.overflow = 'hidden';
       loadOrder(); updateBtns(); updateSyncBtn();
-      if(reviewMode){ buildQueue(); pos = 0; }
       render();
     }
     function close(){
@@ -2412,7 +2409,7 @@
     el.shuffle.onclick = toggleShuffle;
     el.hide.onclick = toggleHide;
     el.auto.onclick = toggleAuto;
-    el.review.onclick = toggleReview;
+    if (el.review) el.review.onclick = toggleReview;
     el.star.onclick = toggleStar;
     el.prev.onclick = function(){ goto(pos - 1); };
     el.next.onclick = function(){ goto(pos + 1); };
