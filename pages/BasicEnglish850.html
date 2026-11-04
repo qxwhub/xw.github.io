@@ -72,9 +72,11 @@
   .w{
     background:var(--card); border:1px solid var(--line); border-radius:8px;
     padding:5px 6px 5px 8px; display:flex; flex-direction:column; gap:1px;
-    transition:border-color .12s, transform .12s, background .15s;
   }
-  .w:hover{border-color:#c9ced6; transform:translateY(-1px);}
+  @media (hover:hover){
+    .w{transition:border-color .12s, transform .12s, background .15s;}
+    .w:hover{border-color:#c9ced6; transform:translateY(-1px);}
+  }
   .w .w-top{display:flex; align-items:center; gap:4px;}
   .w .en{
     font-size:13px; font-weight:600; letter-spacing:.2px; flex:1 1 auto; min-width:0;
@@ -89,6 +91,16 @@
   }
   .w .w-act button:hover{background:#f0f1f4;}
   .w .w-act svg{width:12px; height:12px;}
+  .w .w-act button::before{
+    content:''; display:block; width:12px; height:12px; background:currentColor;
+    -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+    -webkit-mask-position:center; mask-position:center;
+    -webkit-mask-size:contain; mask-size:contain;
+  }
+  .w .spk::before{-webkit-mask-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='11 5 6 9 2 9 2 15 6 15 11 19 11 5'/><path d='M15.54 8.46a5 5 0 0 1 0 7.07'/><path d='M19.07 4.93a10 10 0 0 1 0 14.14'/></svg>"); mask-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='11 5 6 9 2 9 2 15 6 15 11 19 11 5'/><path d='M15.54 8.46a5 5 0 0 1 0 7.07'/><path d='M19.07 4.93a10 10 0 0 1 0 14.14'/></svg>");}
+  .w .eye::before{-webkit-mask-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z'/><circle cx='12' cy='12' r='3'/></svg>"); mask-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z'/><circle cx='12' cy='12' r='3'/></svg>");}
+  .w.hide-zh .eye::before{-webkit-mask-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94'/><path d='M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19'/><path d='M1 1l22 22'/></svg>"); mask-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94'/><path d='M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19'/><path d='M1 1l22 22'/></svg>");}
+  .w .star::before{-webkit-mask-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>"); mask-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>");}
   .w .spk:hover{color:#2563eb;}
   .w .spk.on{color:#2563eb; background:#e8f1fe;}
   @keyframes spkPulse{0%{transform:scale(1)}45%{transform:scale(1.22)}100%{transform:scale(1)}}
@@ -1262,14 +1274,20 @@
       }
       buf.push('<div class="w" data-w="' + esc(r.w.toLowerCase()) + '" data-zh="' + esc(r.zh) + '">'
         + '<div class="w-top"><span class="en">' + esc(r.w) + '</span><span class="w-act">'
-        + '<button class="spk" type="button" aria-label="朗读" title="朗读发音">' + SPK + '</button>'
-        + '<button class="eye" type="button" aria-label="显示/隐藏释义" title="显示/隐藏释义">' + EYE + '</button>'
-        + '<button class="star" type="button" aria-label="标记已记住" title="标记为已记住">' + STAR + '</button>'
+        + '<button class="spk" type="button" aria-label="朗读" title="朗读发音"></button>'
+        + '<button class="eye" type="button" aria-label="显示/隐藏释义" title="显示/隐藏释义"></button>'
+        + '<button class="star" type="button" aria-label="标记已记住" title="标记为已记住"></button>'
         + '</span></div>'
         + (r.ipa ? '<span class="ipa">/' + esc(r.ipa) + '/</span>' : '')
         + '<span class="zh">' + esc(r.zh) + '</span></div>');
     }
     grid.innerHTML = buf.join('');
+
+    // 850 区是硬编码 HTML，把里面的内联图标一并清掉，统一走 CSS 图标（省 2500+ 个 SVG 节点）
+    Array.prototype.forEach.call(
+      document.querySelectorAll('.w .w-act svg, .w .w-act .i-on, .w .w-act .i-off'),
+      function(n){ n.parentNode.removeChild(n); }
+    );
 
     // ---------- 右侧 A–Z 跳转栏 ----------
     var rail = document.getElementById('azRail');
@@ -1317,7 +1335,11 @@
     });
     empty.style.display = any ? 'none' : 'block';
   }
-  q.addEventListener('input', run);
+  var qTimer = null;
+  q.addEventListener('input', function(){
+    if (qTimer) clearTimeout(qTimer);
+    qTimer = setTimeout(function(){ qTimer = null; run(); }, 120);
+  });
 
   // ---------- 词根速查联动：从词根表跳过来时，自动按词素筛选 ----------
   (function(){
@@ -1417,12 +1439,13 @@
     syncEyeAll();
   });
 
-  // 单个词的眼睛
-  words.forEach(function(el){
-    el.querySelector('.eye').addEventListener('click', function(ev){
-      ev.stopPropagation();
-      el.classList.toggle('hide-zh');
-    });
+  // 单个词的眼睛（事件委托：6000+ 张卡片不再各挂一个监听）
+  document.addEventListener('click', function(ev){
+    var b = ev.target.closest ? ev.target.closest('.w .eye') : null;
+    if (!b) return;
+    ev.stopPropagation();
+    var card = b.closest('.w');
+    if (card) card.classList.toggle('hide-zh');
   });
 
   // ---------- 已记住 ----------
@@ -1459,22 +1482,25 @@
   }
   syncDone();
 
-  words.forEach(function(el){
-    el.querySelector('.star').addEventListener('click', function(ev){
-      ev.stopPropagation();
-      var w = el.dataset.w;
-      var ts = Date.now();
-      if (el.classList.toggle('done')) {
-        done[w] = ts;              // 标记时间
-        delSet[w] = 0;             // 撤销此前删除（按时间戳规则：标记更新即删除失效）
-      } else {
-        delete done[w];
-        delSet[w] = ts;            // 取消时间（比标记新 → 保持删除）
-      }
-      STORE.set(KEY_DEL, delSet);
-      syncDone();
-      schedulePush();
-    });
+  // 已记住（事件委托）
+  document.addEventListener('click', function(ev){
+    var b = ev.target.closest ? ev.target.closest('.w .star') : null;
+    if (!b) return;
+    ev.stopPropagation();
+    var el = b.closest('.w');
+    if (!el) return;
+    var w = el.dataset.w;
+    var ts = Date.now();
+    if (el.classList.toggle('done')) {
+      done[w] = ts;              // 标记时间
+      delSet[w] = 0;             // 撤销此前删除（按时间戳规则：标记更新即删除失效）
+    } else {
+      delete done[w];
+      delSet[w] = ts;            // 取消时间（比标记新 → 保持删除）
+    }
+    STORE.set(KEY_DEL, delSet);
+    syncDone();
+    schedulePush();
   });
 
   // 隐藏已记住
