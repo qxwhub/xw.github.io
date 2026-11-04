@@ -269,7 +269,7 @@
       <button class="hd-toggle" id="hdToggle" type="button" title="折叠/展开工具栏">收起 ▴</button>
     </div>
     <div class="hd-body">
-    <div class="meta"><b>850</b> 核心词 ＋ 四六级补充 ｜ 共 <b>6223</b> 词 · 按 A–Z 排列，点右侧字母切换</div>
+    <div class="meta"><b>850</b> 核心词 ＋ 四六级补充 ｜ 共 <b>6204</b> 词 · 按 A–Z 排列，点右侧字母切换</div>
     <div class="bar">
       <button class="eyeall" id="eyeAll" type="button" aria-pressed="false">
         <span class="i-on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg></span>
@@ -1230,7 +1230,7 @@
 
   <section data-i="5" id="cet4-section">
     <div class="sec-head" style="border-left-color:#7c3aed">
-      <h2>四六级补充词汇 · CET-4 / CET-6</h2><span class="sub">四六级大纲词汇 + 常用词组（与上面 850 词不重复），按 A–Z 排列；释义音标整理自公开词表，仅供学习参考</span><span class="cnt">5573 词</span>
+      <h2>四六级补充词汇 · CET-4 / CET-6</h2><span class="sub">四六级大纲词汇 + 常用词组（与上面 850 词不重复），按 A–Z 排列；释义音标整理自公开词表，仅供学习参考</span><span class="cnt">5554 词</span>
     </div>
     <div class="cet4-hint" id="cet4Hint"></div>
     <div class="grid" id="cet4-grid"></div>
@@ -1495,7 +1495,7 @@
     var ens = (scope || document).querySelectorAll('.w .en');
     for (var i = 0; i < ens.length; i++) {
       var el = ens[i];
-      // 短词不可能溢出，直接跳过：以前每个词都读 scrollWidth，6223 个词等于上万次强制重排
+      // 短词不可能溢出，直接跳过：以前每个词都读 scrollWidth，六千个词等于上万次强制重排
       if (el.textContent.length <= 11) continue;
       el.style.fontSize = '';                 // 先复位，再按实际溢出情况缩
       var fs = parseFloat(getComputedStyle(el).fontSize) || 13;
