@@ -1382,6 +1382,13 @@
   var KNOWN = {};
   ALL_ENTRIES.forEach(function(e){ KNOWN[e.w] = 1; });
 
+  // 进度只统计当前词库里仍存在的词；已删除词条的历史标记不计入
+  function countDone(){
+    var n = 0;
+    for (var w in done) { if (KNOWN[w] === 1 && done[w]) n++; }
+    return n;
+  }
+
   function refreshWords(){
     words = coreCards.concat(Array.prototype.slice.call(document.getElementById('cet4-grid').querySelectorAll('.w')));
   }
@@ -1571,7 +1578,7 @@
   var progPct = document.getElementById('progPct');
   var progLeft = document.getElementById('progLeft');
   function syncDone(){
-    var n = Object.keys(done).length;
+    var n = countDone();
     var t = TOTAL;
     var pct = t ? Math.round(n / t * 100) : 0;
     doneN.textContent = n;
@@ -1731,7 +1738,7 @@
     return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate());
   }
   function saveProgress(){
-    var n = Object.keys(done).length;
+    var n = countDone();
     if (!n) { alert('当前还没有标记任何「已记住」的词。'); return; }
     var pack = {
       app: 'BasicEnglish850',
@@ -1773,7 +1780,7 @@
     delSet = mergedDel;
     STORE.set(KEY_DONE, done);
     STORE.set(KEY_DEL, delSet);
-    var hit = Object.keys(done).length;
+    var hit = countDone();
     if (window.__afterRenderGrid) window.__afterRenderGrid();
     syncDone();
     if (window.__cfRefresh) window.__cfRefresh();
@@ -1800,7 +1807,7 @@
         catch(err){ alert('这不是有效的进度备份文件。'); return; }
         var list = pack && (Array.isArray(pack) ? pack : pack.done);
         if (!Array.isArray(list)) { alert('备份文件格式不对，读不出「已记住」记录。'); return; }
-        var cur = Object.keys(done).length;
+        var cur = countDone();
         if (cur && !confirm('恢复将用备份里的记录覆盖当前进度（当前 ' + cur + ' 个），继续？')) return;
         // 恢复＝以备份为准：备份里的词写标记时间，备份里没有的词写取消时间（覆盖当前）
         var ts = Date.now();
