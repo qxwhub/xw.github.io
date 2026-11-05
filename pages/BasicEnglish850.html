@@ -1567,6 +1567,7 @@
     var w = String(k).toLowerCase();
     if (KNOWN[w]) delSet[w] = rawDel[k];
   });
+  STORE.set(KEY_DEL, delSet);   // 写回过滤结果，清掉词库外的历史取消记录
   var raw = STORE.get(KEY, {});
   // 只认词表里有的词；上色交给 __afterRenderGrid（页面上的卡片随字母切换在变）
   Object.keys(raw).forEach(function(k){
