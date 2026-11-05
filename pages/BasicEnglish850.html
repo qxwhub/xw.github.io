@@ -1383,11 +1383,12 @@
   ALL_ENTRIES.forEach(function(e){ KNOWN[e.w] = 1; });
 
   // 进度只统计当前词库里仍存在的词；已删除词条的历史标记不计入
-  function countDone(){
-    var n = 0;
-    for (var w in done) { if (KNOWN[w] === 1 && done[w]) n++; }
-    return n;
+  function doneKeys(){
+    var out = [];
+    for (var w in done) { if (KNOWN[w] === 1 && done[w]) out.push(w); }
+    return out;
   }
+  function countDone(){ return doneKeys().length; }
 
   function refreshWords(){
     words = coreCards.concat(Array.prototype.slice.call(document.getElementById('cet4-grid').querySelectorAll('.w')));
@@ -1560,14 +1561,19 @@
   var KEY = KEY_DONE;
   var KEY_DEL = 'be850_del_v1';
   var done = {};
-  var delSet = STORE.get(KEY_DEL, {}) || {};
+  var delSet = {};
+  var rawDel = STORE.get(KEY_DEL, {}) || {};
+  Object.keys(rawDel).forEach(function(k){
+    var w = String(k).toLowerCase();
+    if (KNOWN[w]) delSet[w] = rawDel[k];
+  });
   var raw = STORE.get(KEY, {});
   // 只认词表里有的词；上色交给 __afterRenderGrid（页面上的卡片随字母切换在变）
   Object.keys(raw).forEach(function(k){
     var w = String(k).toLowerCase();
     if (!KNOWN[w]) return;
     // 值语义：0/缺失=无记录；1=旧格式「已标记」；>1=毫秒时间戳
-    var dts = (typeof raw[w] === 'number' && raw[w] >= 1) ? raw[w] : 0;
+    var dts = (typeof raw[k] === 'number' && raw[k] >= 1) ? raw[k] : 0;
     var xts = (typeof delSet[w] === 'number' && delSet[w] >= 1) ? delSet[w] : 0;
     if (dts >= xts && dts > 0) done[w] = dts;
   });
@@ -1652,10 +1658,12 @@
   hideDone.addEventListener('click', function(){ hideDoneOn = !hideDoneOn; applyHideDone(); });
 
   function doReset(){
-    if (!Object.keys(done).length) return;
+    if (!Object.keys(done).length && !Object.keys(delSet).length) return;
     if (!confirm('清空全部「已记住」标记？')) return;
-    var ts = Date.now();
-    Object.keys(done).forEach(function(k){ delSet[k] = ts; });   // 全部写入取消时间戳
+    var ts = Date.now(), nd = {};
+    Object.keys(done).forEach(function(k){ if (KNOWN[k] === 1) nd[k] = ts; });
+    Object.keys(delSet).forEach(function(k){ if (KNOWN[k] === 1 && !nd[k]) nd[k] = delSet[k]; });
+    delSet = nd;   // 只保留词库内的取消记录
     done = {};
     Array.prototype.forEach.call(document.querySelectorAll('.w'), function(el){ el.classList.remove('done'); });
     STORE.set(KEY_DEL, delSet);
@@ -1746,7 +1754,7 @@
       savedAt: new Date().toISOString(),
       total: TOTAL,
       doneCount: n,
-      done: Object.keys(done)
+      done: doneKeys()
     };
     var blob = new Blob([JSON.stringify(pack, null, 2)], {type:'application/json;charset=utf-8'});
     var a = document.createElement('a');
@@ -1763,18 +1771,23 @@
   function applyProgress(raw, serverDel){
     raw = raw || {};
     serverDel = serverDel || {};
-    var merged = {}, mergedDel = {};
-    // 收集所有出现过的词
-    var allW = {};
-    [raw, serverDel, done, delSet].forEach(function(obj){
-      Object.keys(obj || {}).forEach(function(k){ allW[k] = 1; });
+    // 统一按小写词键归并，词库外的旧标记一律丢弃（云端历史幽灵不再回灌本地）
+    var bag = {};
+    [raw, serverDel, done, delSet].forEach(function(obj, idx){
+      Object.keys(obj || {}).forEach(function(k){
+        var w = String(k).toLowerCase();
+        if (!KNOWN[w]) return;
+        if (!bag[w]) bag[w] = { d: 0, x: 0 };
+        var ts = numTs(obj[k]);
+        if (idx === 0 || idx === 2) { if (ts > bag[w].d) bag[w].d = ts; }
+        else { if (ts > bag[w].x) bag[w].x = ts; }
+      });
     });
-    Object.keys(allW).forEach(function(w){
-      var tsDone = numTs(raw[w], done[w]);      // 云端标记时间 / 本地标记时间
-      var tsDel  = numTs(serverDel[w], delSet[w]); // 云端取消时间 / 本地取消时间
+    var merged = {}, mergedDel = {};
+    Object.keys(bag).forEach(function(w){
       // 标记时间 vs 取消时间，取较大者决定最终状态（>= 时标记胜，避免同刻误删）
-      if (tsDone >= tsDel && tsDone > 0) { merged[w] = tsDone; }
-      else if (tsDel > 0) { mergedDel[w] = tsDel; }
+      if (bag[w].d >= bag[w].x && bag[w].d > 0) { merged[w] = bag[w].d; }
+      else if (bag[w].x > 0) { mergedDel[w] = bag[w].x; }
     });
     done = merged;
     delSet = mergedDel;
@@ -1812,15 +1825,17 @@
         // 恢复＝以备份为准：备份里的词写标记时间，备份里没有的词写取消时间（覆盖当前）
         var ts = Date.now();
         var inBackup = {};
-        list.forEach(function(w){ if (w) inBackup[String(w).toLowerCase()] = 1; });
+        list.forEach(function(w){
+          var k = String(w || '').toLowerCase();
+          if (KNOWN[k]) inBackup[k] = 1;
+        });
         var nd = {}, ndel = {};
         Object.keys(inBackup).forEach(function(w){ nd[w] = ts; });
         // 当前已标记但备份里没有 → 视为取消
         Object.keys(done).forEach(function(w){ if (!inBackup[w]) ndel[w] = ts; });
         done = nd; delSet = ndel;
         STORE.set(KEY_DONE, done); STORE.set(KEY_DEL, delSet);
-        var hit = 0;
-        Object.keys(inBackup).forEach(function(w){ if (KNOWN[w]) hit++; });
+        var hit = Object.keys(inBackup).length;
         if (window.__afterRenderGrid) window.__afterRenderGrid();
         syncDone();
         schedulePush();
@@ -1949,11 +1964,14 @@
   function pushSync(){
     if (!syncCred || !syncCred.user){ setStatus('未登录', false); return; }
     setStatus('同步中…');
+    var dOnly = {}, xOnly = {};
+    doneKeys().forEach(function(w){ dOnly[w] = done[w]; });
+    Object.keys(delSet).forEach(function(w){ if (KNOWN[w] === 1 && delSet[w]) xOnly[w] = delSet[w]; });
     syncBtn.disabled = true; syncLogin.disabled = true;
     fetch(SYNC_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user: syncCred.user, pass: syncCred.pass, done: done, del: delSet })
+      body: JSON.stringify({ user: syncCred.user, pass: syncCred.pass, done: dOnly, del: xOnly })
     }).then(function(r){
       return r.json().then(function(j){ return { ok: r.ok, j: j }; });
     }).then(function(res){
@@ -1963,8 +1981,8 @@
       }
       // 云端回传已合并结果（done/del 均为 {word:ts}）→ 本地按 LWW 再合并一次
       if (res.j.done && typeof res.j.done === 'object'){
-        applyProgress(res.j.done, res.j.del);
-        setStatus('已同步 · 云端 ' + Object.keys(res.j.done).length + ' 个标记', true);
+        var hit = applyProgress(res.j.done, res.j.del);
+        setStatus('已同步 · 已记住 ' + hit + ' 个', true);
       } else { setStatus('已同步', true); }
     }).catch(function(){
       setStatus('同步失败（网络错误）', false);
@@ -2591,7 +2609,7 @@
         var n = 0;
         Object.keys(old).forEach(function(k){
           var w = String(k).toLowerCase();
-          if(old[k] && !done[w] && !(delSet[w] >= 1)){ done[w] = 1; n++; }
+          if(KNOWN[w] && old[k] && !done[w] && !(delSet[w] >= 1)){ done[w] = 1; n++; }
         });
         if(n){ STORE.set(KEY, done); syncDone(); }
       }catch(e){}
