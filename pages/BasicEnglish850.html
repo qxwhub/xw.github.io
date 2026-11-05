@@ -1304,7 +1304,8 @@
       var cntEl = document.querySelector('#cet4-section .cnt');
       if (cntEl) cntEl.textContent = (byLetter[L] || []).length + ' 词';
       var hint = document.getElementById('cet4Hint');
-      if (hint) hint.textContent = '当前显示 ' + L + ' 开头 · 共 ' + LIST.length + ' 词，点右侧字母切换';
+      if (hint) hint.textContent = '当前只显示 ' + L + ' 开头的 ' + (byLetter[L] || []).length
+        + ' 词；四六级补充共 ' + LIST.length + ' 词，按字母分段，点右侧字母切换';
       Array.prototype.forEach.call(document.querySelectorAll('#azRail button[data-l]'), function(b){
         b.classList.toggle('cur', b.dataset.l === L);
       });
@@ -1340,10 +1341,21 @@
       b.type = 'button'; b.textContent = ch; b.dataset.l = ch;
       if (byLetter[ch]) {
         b.title = '显示 ' + ch + ' 开头（' + byLetter[ch].length + ' 词）';
-        b.addEventListener('click', function(){ renderLetter(ch); });
       } else {
-        b.className = 'no'; b.title = '此表中无 ' + ch + ' 开头词';
+        b.className = 'no'; b.title = '四六级补充词里无 ' + ch + ' 开头词';
       }
+      b.addEventListener('click', function(){
+        if (byLetter[ch]) renderLetter(ch);
+        var hint = document.getElementById('cet4Hint');
+        if (!byLetter[ch] && hint) hint.textContent = '四六级补充词里没有 ' + ch + ' 开头的词';
+        // 结果在页面下方，点完要滚过去，否则在上面看起来像「没反应」
+        var sec = document.getElementById('cet4-section');
+        if (!sec) return;
+        var r = sec.getBoundingClientRect();
+        if (r.top > window.innerHeight * 0.5 || r.bottom < 120) {
+          window.scrollTo(0, r.top + window.scrollY - 100);
+        }
+      });
       rail.appendChild(b);
     });
   })();
