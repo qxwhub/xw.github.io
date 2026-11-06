@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>分组刷词 · 全部 6030 词</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#f6f7f9;color:#1a1d21;font:15px/1.55 -apple-system,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:14px 14px 40px}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
+.back{font-size:13px;color:#2563eb;text-decoration:none;border:1px solid #dbeafe;background:#eff6ff;border-radius:999px;padding:6px 12px}
+h1{font-size:19px;margin:0;flex:1;white-space:nowrap}
+h1 small{font-size:12px;color:#6b7280;font-weight:400;margin-left:6px}
+.prog{font-size:13px;color:#6b7280;white-space:nowrap}
+.prog b{font-size:17px;color:#16a34a}
+.acts{display:flex;gap:8px;flex-wrap:wrap;width:100%}
+.btn,.letters button,.gbar button,.pop-nav button{font:inherit;font-size:13px;border:1px solid #e5e7eb;background:#fff;color:#475569;border-radius:999px;padding:7px 14px;cursor:pointer}
+.btn:hover,.letters button:hover,.gbar button:hover,.pop-nav button:hover{border-color:#c9ced6;background:#fafbfc}
+.btn[aria-pressed="true"]{background:#2563eb;border-color:#2563eb;color:#fff;font-weight:600}
+.letters{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.letters button{padding:5px 10px;font-size:12px;min-width:32px}
+.letters button.on{background:#2563eb;border-color:#2563eb;color:#fff;font-weight:600}
+.gbar{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.gbar span{flex:1;text-align:center;font-size:12.5px;color:#6b7280;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gbar button{flex:0 0 auto}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px}
+.chip{font:inherit;font-size:13.5px;text-align:left;border:1px solid #e5e7eb;background:#fff;border-radius:10px;padding:9px 11px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:0 2px 6px rgba(17,24,39,.04)}
+.chip:hover{border-color:#93c5fd;background:#f8fbff}
+.chip.done{color:#94a3b8;text-decoration:line-through;background:#f1f5f9;border-color:#e2e8f0}
+.empty{grid-column:1/-1;text-align:center;color:#94a3b8;font-size:13px;padding:30px 0}
+.foot{margin-top:22px;font-size:11.5px;color:#94a3b8;text-align:center;line-height:1.8}
+.pop{position:fixed;inset:0;z-index:99;background:rgba(15,23,42,.45);display:flex;align-items:center;justify-content:center;padding:16px}
+.pop[hidden]{display:none}
+.pop-box{position:relative;width:100%;max-width:520px;max-height:88vh;overflow:auto;background:#fff;border-radius:18px;padding:22px 20px 18px;box-shadow:0 20px 60px rgba(15,23,42,.25)}
+.pop-x{position:absolute;top:10px;right:12px;border:0;background:#f1f5f9;color:#64748b;width:32px;height:32px;border-radius:50%;font-size:20px;line-height:1;cursor:pointer}
+.pop-word{font-size:34px;font-weight:700;word-break:break-word;line-height:1.2;padding-right:34px}
+.pop-ipa{display:flex;align-items:center;gap:9px;margin-top:8px;color:#6b7280;font-size:15px;flex-wrap:wrap}
+.tag{font-size:11px;background:#eef2ff;color:#4f46e5;border-radius:20px;padding:2px 9px}
+.spk{margin-left:auto;font:inherit;font-size:12px;border:1px solid #e5e7eb;background:#fff;border-radius:999px;padding:5px 12px;cursor:pointer;color:#2563eb}
+.pop-zh{margin-top:14px;font-size:17px;line-height:1.65;border-top:1px dashed #e5e7eb;padding-top:12px}
+.pop-ex{margin-top:12px;background:#f8fafc;border:1px solid #e5e7eb;border-left:3px solid #93c5fd;border-radius:10px;padding:10px 12px;font-size:13.5px;line-height:1.55}
+.ex-line+.ex-line{margin-top:7px;padding-top:7px;border-top:1px dashed #e5e7eb}
+.pop-src{margin-top:6px;font-size:10.5px;color:#94a3b8;text-align:right}
+.pop-nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.pop-nav button{flex:1;min-width:88px}
+.pop-nav button[aria-pressed="true"]{background:#eafaf0;border-color:#b6e6c8;color:#16a34a;font-weight:600}
+@media(max-width:520px){.wrap{padding:10px 10px 30px}h1{font-size:17px}.pop-word{font-size:29px}.chips{grid-template-columns:repeat(auto-fill,minmax(102px,1fr))}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="back" href="BasicEnglish850.html">← 词表</a>
+    <h1>分组刷词 <small>全部 6030 词 · 73 组</small></h1>
+    <div class="prog">已记住 <b id="doneN">0</b> / <span id="totalN">6030</span></div>
+    <div class="acts">
+      <button class="btn" id="randGroup" type="button">随机一组</button>
+      <button class="btn" id="randWord" type="button">随机一词</button>
+      <button class="btn" id="hideDone" type="button" aria-pressed="false">隐藏已记住</button>
+    </div>
+  </div>
+  <div class="letters" id="letters"></div>
+  <div class="gbar">
+    <button id="prevG" type="button">← 上一组</button>
+    <span id="gLabel">加载中…</span>
+    <button id="nextG" type="button">下一组 →</button>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="foot">全部 6030 词按首字母分组，一组一屏；点词看音标、释义、例句、发音，顺手标「已记住」。<br>进度与词表、卡片共用一份 ｜ 例句来自 Tatoeba · CC BY 2.0 FR</div>
+</div>
+
+<div class="pop" id="pop" hidden>
+  <div class="pop-box" id="popBox">
+    <button class="pop-x" id="popX" type="button" aria-label="关闭">×</button>
+    <div class="pop-word" id="pWord"></div>
+    <div class="pop-ipa"><span id="pIpa"></span><span class="tag" id="pTag"></span>
+      <button class="spk" id="pSpk" type="button">朗读</button></div>
+    <div class="pop-zh" id="pZh"></div>
+    <div class="pop-ex" id="pEx"></div>
+    <div class="pop-src">例句来自 Tatoeba · CC BY 2.0 FR</div>
+    <div class="pop-nav">
+      <button id="pPrev" type="button">← 上一个</button>
+      <button id="pStar" type="button" aria-pressed="false">已记住</button>
+      <button id="pRand" type="button">换一个</button>
+      <button id="pNext" type="button">下一个 →</button>
+    </div>
+  </div>
+</div>
+
+<script src="audio/cet4-index.js"></script>
+<script>
+(function(){
+  var KEY='be850_done_v1', KEY_DEL='be850_del_v1';
+  var G=null, EX=null, ALL=[], MAP={}, GIDX={}, KNOWN={}, AUDIO={};
+  var done={}, delSet={}, gi=0, curW=null, hideDone=false, opened=false;
+  var $ = function(id){ return document.getElementById(id); };
+  function read(k,d){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+  function write(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+  done=read(KEY,{}); delSet=read(KEY_DEL,{});
+  (window.CET4_AUDIO||[]).forEach(function(k){ AUDIO[k]=1; });
+  function keyOf(w){ return String(w||'').toLowerCase().trim().replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,''); }
+  function tts(w){ try{ speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(w); u.lang='en-US'; speechSynthesis.speak(u); }catch(e){} }
+  function speak(w){
+    var k=keyOf(w);
+    if(!AUDIO[k]){ tts(w); return; }
+    var a=new Audio();
+    a.src='audio/cet4/'+k+'.mp3';
+    a.onerror=function(){ tts(w); };
+    var p=a.play(); if(p&&p.catch) p.catch(function(){ tts(w); });
+  }
+  function loadScript(src,cb){
+    var s=document.createElement('script'); s.src=src;
+    s.onload=cb;
+    s.onerror=function(){ $('gLabel').textContent='数据加载失败，请刷新重试'; };
+    document.head.appendChild(s);
+  }
+  var left=2;
+  function step(){ if(--left===0) init(); }
+  loadScript('word-groups.js',step);
+  loadScript('card-examples.js',step);
+
+  function init(){
+    G=window.WORD_GROUPS||[]; EX=window.CARD_EXAMPLES||{};
+    if(!G.length){ $('gLabel').textContent='分组数据为空'; return; }
+    for(var i=0;i<G.length;i++){
+      for(var j=0;j<G[i].words.length;j++){
+        var w=G[i].words[j][0];
+        if(!KNOWN[w]){ KNOWN[w]=1; ALL.push(w); MAP[w]=G[i].words[j]; GIDX[w]=i; }
+      }
+    }
+    for(var k in done) if(!KNOWN[k]) delete done[k];
+    $('totalN').textContent=ALL.length;
+    $('randGroup').onclick=function(){ goGroup(Math.floor(Math.random()*G.length)); };
+    $('randWord').onclick=randomWord;
+    $('hideDone').onclick=function(){
+      hideDone=!hideDone;
+      this.setAttribute('aria-pressed',hideDone?'true':'false');
+      this.textContent=hideDone?'隐藏已记住 · 开':'隐藏已记住';
+      renderChips();
+    };
+    $('prevG').onclick=function(){ goGroup(gi-1); };
+    $('nextG').onclick=function(){ goGroup(gi+1); };
+    $('letters').onclick=function(e){
+      var b=e.target.closest('button[data-i]'); if(!b) return;
+      goGroup(parseInt(b.getAttribute('data-i'),10));
+      window.scrollTo(0,0);
+    };
+    $('chips').onclick=function(e){
+      var b=e.target.closest('.chip'); if(!b) return;
+      openWord(b.getAttribute('data-w'));
+    };
+    $('popX').onclick=closePop;
+    $('pop').onclick=function(e){ if(e.target===$('pop')) closePop(); };
+    $('pSpk').onclick=function(){ if(curW) speak(curW); };
+    $('pStar').onclick=function(){ if(curW){ mark(curW); syncBtn(); } };
+    $('pRand').onclick=randomWord;
+    $('pPrev').onclick=function(){ stepWord(-1); };
+    $('pNext').onclick=function(){ stepWord(1); };
+    document.addEventListener('keydown',function(e){
+      if(!opened) return;
+      if(e.key==='Escape') closePop();
+      else if(e.key==='ArrowLeft') stepWord(-1);
+      else if(e.key==='ArrowRight') stepWord(1);
+    });
+    buildLetters(); goGroup(0); updateProg();
+  }
+
+  function buildLetters(){
+    var seen={},out=[];
+    for(var i=0;i<G.length;i++){
+      var L=G[i].letter;
+      if(seen[L]) continue; seen[L]=1;
+      out.push('<button type="button" data-i="'+i+'" data-l="'+L+'">'+L+'</button>');
+    }
+    $('letters').innerHTML=out.join('');
+  }
+  function updateProg(){
+    var n=0; for(var w in KNOWN) if(done[w]) n++;
+    $('doneN').textContent=n;
+  }
+  function mark(w){
+    var ts=Date.now();
+    if(done[w]){ delete done[w]; delSet[w]=ts; }
+    else { done[w]=ts; delSet[w]=0; }
+    write(KEY,done); write(KEY_DEL,delSet);
+    updateProg();
+    if(hideDone) renderChips();
+    else {
+      var c=$('chips').querySelector('.chip[data-w="'+w.replace(/"/g,'')+'"]');
+      if(c) c.classList.toggle('done',!!done[w]);
+    }
+  }
+  function goGroup(i){
+    gi=Math.max(0,Math.min(i,G.length-1));
+    var g=G[gi], a=g.words;
+    $('gLabel').textContent=g.label+' · '+a.length+' 词 · '+a[0][0]+' ~ '+a[a.length-1][0];
+    $('prevG').disabled=(gi<=0); $('nextG').disabled=(gi>=G.length-1);
+    Array.prototype.forEach.call($('letters').querySelectorAll('button'),function(b){
+      b.classList.toggle('on',b.getAttribute('data-l')===g.letter);
+    });
+    renderChips();
+  }
+  function renderChips(){
+    var a=G[gi].words,out=[];
+    for(var j=0;j<a.length;j++){
+      var w=a[j][0];
+      if(hideDone&&done[w]) continue;
+      out.push('<button class="chip'+(done[w]?' done':'')+'" type="button" data-w="'+esc(w)+'">'+esc(w)+'</button>');
+    }
+    $('chips').innerHTML=out.length?out.join(''):'<div class="empty">这一组都标成已记住了，点上方「隐藏已记住」关掉可再看。</div>';
+  }
+  function syncBtn(){
+    var on=!!(curW&&done[curW]);
+    $('pStar').setAttribute('aria-pressed',on?'true':'false');
+    $('pStar').textContent=on?'已记住 ✓':'已记住';
+  }
+  function openWord(w){
+    var e=MAP[w]; if(!e) return;
+    curW=w; opened=true;
+    $('pWord').textContent=w;
+    $('pIpa').textContent=e[1]?('/'+e[1]+'/'):(w.indexOf(' ')>-1?'phr.':'');
+    $('pTag').textContent=e[3]?'850 核心':'四六级';
+    $('pZh').textContent=e[2]||'';
+    var arr=EX[w],box=$('pEx');
+    box.textContent='';
+    if(arr&&arr.length){
+      arr.forEach(function(s){ var d=document.createElement('div'); d.className='ex-line'; d.textContent=s; box.appendChild(d); });
+    } else { box.textContent='这个词暂无例句'; }
+    syncBtn();
+    $('pop').hidden=false;
+  }
+  function closePop(){ opened=false; $('pop').hidden=true; }
+  function stepWord(dir){
+    var a=G[gi].words,idx=-1;
+    for(var j=0;j<a.length;j++) if(a[j][0]===curW){ idx=j; break; }
+    if(idx<0) return;
+    var n=idx+dir;
+    if(n>=0&&n<a.length){ openWord(a[n][0]); return; }
+    var ng=gi+dir;
+    if(ng<0||ng>=G.length) return;
+    goGroup(ng);
+    openWord(G[gi].words[dir>0?0:G[gi].words.length-1][0]);
+  }
+  function randomWord(){
+    if(!ALL.length) return;
+    var w=ALL[Math.floor(Math.random()*ALL.length)];
+    if(GIDX[w]!==gi) goGroup(GIDX[w]);
+    openWord(w);
+  }
+})();
+</script>
+</body>
+</html>
