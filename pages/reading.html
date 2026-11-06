@@ -77,6 +77,16 @@
   .ptip{font-size:11.5px;color:#94a3b8;margin-top:10px;text-align:center;}
   .vtag{font-size:11px;color:#6b7280;background:#f1f5f9;border:1px solid #e5e7eb;border-radius:20px;padding:2px 8px;}
   .vtag.real{color:#0e7490;background:#ecfeff;border-color:#a5f3fc;}
+  .tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+  .tab{font:inherit;font-size:13.5px;padding:9px 18px;border-radius:999px;border:1px solid #e5e7eb;
+    background:#fff;color:#475569;cursor:pointer;box-shadow:0 2px 8px rgba(17,24,39,.05);}
+  .tab span{font-size:11px;opacity:.75;margin-left:3px;}
+  .tab.on{background:#2563eb;border-color:#2563eb;color:#fff;font-weight:600;}
+  .gex{margin-top:10px;padding:10px 12px;background:#f6f8fb;border-left:3px solid #b9d3fb;
+    border-radius:0 8px 8px 0;font-size:14px;line-height:1.7;color:#334155;}
+  .gex b{display:block;font-size:11px;color:#94a3b8;font-weight:600;margin-bottom:3px;}
+  .credit{font-size:11.5px;color:#94a3b8;text-align:center;margin:26px 0 0;line-height:1.8;}
+  .credit a{color:#64748b;}
   @media(max-width:560px){
     h1{font-size:16px;}
     .grid{grid-template-columns:1fr;}
@@ -90,7 +100,7 @@
 </head>
 <body>
 <header><div class="wrap hd">
-  <h1>短文阅读 <small>用 850 核心 + 四六级词库里值得记的词写的 8 篇小短文</small></h1>
+  <h1>短文阅读 <small>12 篇原创精读短文 ＋ 全词库分组刷词，进度与词表、卡片互通</small></h1>
   <div class="hact">
     <button class="btn" id="randTop" type="button">随机开读</button>
     <a class="btn" href="BasicEnglish850.html">← 返回词表</a>
@@ -98,6 +108,10 @@
 </div></header>
 
 <main class="wrap">
+  <div class="tabs">
+    <button class="tab on" id="tabRead" type="button">精读短文 <span id="tabReadN"></span></button>
+    <button class="tab" id="tabGroup" type="button">分组刷词 <span id="tabGroupN"></span></button>
+  </div>
   <section id="home">
     <div class="lead">每篇 160–230 词，句子简单。<b>淡蓝底</b>的词可以点开看音标、释义、发音，顺手标「已记住」——和词表、卡片共用同一份进度。语法词和 the / is / go 这类极常见的词不标，省得刷一堆没意义的。</div>
     <div class="grid" id="grid"></div>
@@ -129,6 +143,25 @@
       <div class="chips" id="rWords"></div>
     </div>
   </section>
+
+  <section id="groupView" hidden>
+    <div class="lead">把词库里「值得刷」的 <b>5641</b> 个词按字母分组，一组一屏。<b>点词</b>看音标、释义、真人例句、发音，顺手标「已记住」——进度和短文、词表、卡片全互通。划掉的是已记住的。</div>
+    <div class="rbar">
+      <button class="btn" id="gPrev" type="button">← 上一组</button>
+      <span class="rmeta" id="gLabel">加载中…</span>
+      <button class="btn primary" id="gRand" type="button">随机一组</button>
+      <button class="btn" id="gNext" type="button">下一组 →</button>
+    </div>
+    <div class="rstat">
+      <span>本组已记住 <b id="gDone">0</b> / <b id="gTotal">0</b></span>
+      <div class="track"><i id="gFill" style="width:0"></i></div>
+    </div>
+    <div class="wordbox">
+      <h3>本组词表 <small>点词看释义与例句</small></h3>
+      <div class="chips" id="gChips"></div>
+    </div>
+  </section>
+  <p class="credit">例句来自 <a href="https://tatoeba.org" target="_blank" rel="noopener">Tatoeba</a>，文本语料以 CC BY 2.0 FR 授权；短文与中文译文为本站原创。</p>
 </main>
 
 <div class="mask" id="mask" hidden></div>
@@ -142,6 +175,7 @@
       <button class="pclose" id="pClose" type="button" aria-label="关闭">×</button>
     </div>
     <div class="pzh" id="pZh"></div>
+    <div class="gex" id="pEx" hidden><b>例句 · Tatoeba</b><span id="pExText"></span></div>
     <div class="pact">
       <button class="btn" id="pSpk" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 10v4h4l5 5V5L7 10H3Zm13.5 2a4.5 4.5 0 0 0-2.5-4.03v8.06A4.5 4.5 0 0 0 16.5 12Zm-2.5 7.5a7 7 0 0 0 0-15v2.06a5 5 0 0 1 0 10.88V19.5Z"/></svg> 发音</button>
       <button class="btn" id="pStar" type="button">标记已记住</button>
@@ -280,6 +314,7 @@
   }
   function indexOf(a){ for(var i=0;i<A.length;i++) if(A[i] === a) return i; return 0; }
   function route(){
+    if(tab === 'group') return;
     var a = findById(location.hash.replace(/^#/,''));
     if(a){
       $('home').hidden = true; $('read').hidden = false;
@@ -299,26 +334,28 @@
   }
 
   // ---- 点词弹卡 ----
-  var popForm = null;
-  function openPop(f){
-    var e = W[f]; if(!e) return;
-    popForm = f;
+  var popEntry = null;
+  function showPop(e, form, ex){
+    popEntry = e;
     $('pWord').textContent = e.w;
     $('pIpa').textContent = e.ipa ? '/' + e.ipa + '/' : '';
-    $('pForm').textContent = (f !== e.w ? '文中形式：' + f + ' · ' : '') + (e.src === 'core' ? '850 核心' : '四六级补充');
+    $('pForm').textContent = (form && form !== e.w ? '文中形式：' + form + ' · ' : '') + (e.src === 'core' ? '850 核心' : '四六级补充');
     $('pZh').textContent = e.zh || '（暂无释义）';
+    $('pEx').hidden = !ex;
+    $('pExText').textContent = ex || '';
     var k = keyOf(e.w);
     $('pTip').innerHTML = AUDIO[k] ? '<span class="vtag real">真人发音</span>' : '<span class="vtag">浏览器合成音</span>';
     updateStar();
     $('mask').hidden = false; $('pop').hidden = false;
   }
+  function openPop(f){ var e = W[f]; if(e) showPop(e, f, ''); }
   function updateStar(){
-    if(!popForm) return;
-    var e = W[popForm], on = isDone(e.w);
+    if(!popEntry) return;
+    var on = isDone(popEntry.w);
     $('pStar').textContent = on ? '✓ 已记住（点此取消）' : '标记已记住';
     $('pStar').classList.toggle('on', on);
   }
-  function closePop(){ popForm = null; $('mask').hidden = true; $('pop').hidden = true; }
+  function closePop(){ popEntry = null; $('mask').hidden = true; $('pop').hidden = true; }
 
   // ---- 事件 ----
   $('grid').addEventListener('click', function(ev){
@@ -344,11 +381,12 @@
   $('randTop').onclick = function(){ go(randomA()); };
   $('pClose').onclick = closePop;
   $('mask').onclick = closePop;
-  $('pSpk').onclick = function(){ if(popForm) speak(W[popForm].w); };
+  $('pSpk').onclick = function(){ if(popEntry) speak(popEntry.w); };
   $('pStar').onclick = function(){
-    if(!popForm) return;
-    toggleDone(W[popForm].w);
-    if(cur) renderArticle(cur);
+    if(!popEntry) return;
+    toggleDone(popEntry.w);
+    if(cur && tab === 'read') renderArticle(cur);
+    if(tab === 'group') renderGroup();
     updateStar();
   };
   document.addEventListener('keydown', function(e){
@@ -358,6 +396,57 @@
       else if(e.key === 'ArrowRight') go(A[(indexOf(cur) + 1) % A.length]);
     }
   });
+  // ---- 分组刷词：懒加载全部词库，按字母一组一屏 ----
+  var tab = 'read', GROUPS = null, groupCur = 0;
+  function ensureGroups(cb){
+    if(GROUPS){ cb(); return; }
+    var sc = document.createElement('script');
+    sc.src = 'reading-groups.js';
+    sc.onload = function(){ GROUPS = window.READING_GROUPS || []; cb(); };
+    sc.onerror = function(){ $('gLabel').textContent = '分组数据加载失败'; };
+    document.head.appendChild(sc);
+  }
+  function renderGroup(){
+    if(!GROUPS || !GROUPS.length) return;
+    var grp = GROUPS[groupCur], dn = 0;
+    grp.words.forEach(function(a){ if(isDone(a[0])) dn++; });
+    $('gLabel').textContent = grp.label + ' · ' + grp.words.length + ' 词（' + (groupCur+1) + '/' + GROUPS.length + '）';
+    $('gDone').textContent = dn;
+    $('gTotal').textContent = grp.words.length;
+    $('gFill').style.width = Math.round(dn / grp.words.length * 100) + '%';
+    $('gChips').innerHTML = grp.words.map(function(a, i){
+      return '<button class="chip' + (isDone(a[0]) ? ' done' : '') + '" type="button" data-i="' + i + '">' + esc(a[0]) + '</button>';
+    }).join('');
+  }
+  function goGroup(i){
+    if(!GROUPS || !GROUPS.length) return;
+    groupCur = (i + GROUPS.length) % GROUPS.length;
+    renderGroup(); window.scrollTo(0,0);
+  }
+  function setTab(t){
+    tab = t;
+    $('tabRead').classList.toggle('on', t === 'read');
+    $('tabGroup').classList.toggle('on', t === 'group');
+    if(t === 'group'){
+      $('home').hidden = true; $('read').hidden = true; $('groupView').hidden = false;
+      ensureGroups(function(){ $('tabGroupN').textContent = GROUPS.length + ' 组'; renderGroup(); });
+    } else {
+      $('groupView').hidden = true;
+      route();
+    }
+  }
+  $('tabRead').onclick = function(){ setTab('read'); };
+  $('tabGroup').onclick = function(){ setTab('group'); };
+  $('gPrev').onclick = function(){ goGroup(groupCur - 1); };
+  $('gNext').onclick = function(){ goGroup(groupCur + 1); };
+  $('gRand').onclick = function(){ if(GROUPS) goGroup(Math.floor(Math.random()*GROUPS.length)); };
+  $('gChips').addEventListener('click', function(ev){
+    var c = ev.target.closest ? ev.target.closest('.chip') : null;
+    if(!c || !GROUPS) return;
+    var i = +c.getAttribute('data-i'), a = GROUPS[groupCur].words[i];
+    showPop({ w:a[0], ipa:a[1], zh:a[2], src:a[3] ? 'core' : 'cet4' }, '', a[4] || '');
+  });
+  $('tabReadN').textContent = A.length + ' 篇';
   window.addEventListener('hashchange', route);
   route();
 })();
