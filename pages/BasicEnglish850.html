@@ -283,7 +283,6 @@
       <button class="tbtn" id="hideDone" type="button" aria-pressed="false">隐藏已记住</button>
       <button class="tbtn" id="resetDone" type="button">清空记录</button>
       <button class="tbtn" id="cardModeBtn" type="button" style="font-weight:600;color:#7c3aed;border-color:#ddd6fe;background:#f5f3ff;" title="卡片模式：一张一张背，可与列表互相标记">卡片模式 ▸</button>
-      <a class="tbtn" href="reading.html" style="text-decoration:none;font-weight:600;color:#0369a1;border-color:#bae6fd;background:#f0f9ff;" title="12 篇短文精读 ＋ 按字母分组刷词，点词查释义、发音、标已记住">短文阅读 ↗</a>
     </div>
     <div class="prog" id="progBar">
       <div class="prog-main">
@@ -2033,7 +2032,7 @@
   var CFX = (function(){
     var K_SRC='becard_src_v1', K_ORD='becard_order_v1', K_POS='becard_pos_v1',
         K_SHUF='becard_shuf_v1', K_HIDE='becard_hide_v1', K_AUTO='becard_auto_v1', K_TIMER='becard_timer_v1',
-        K_SRS='cet4fc_srs', K_REVIEW='becard_review_v1', K_SKIP='becard_skip_v1';
+        K_SRS='cet4fc_srs', K_REVIEW='becard_review_v1', K_SKIP='becard_skip_v1', K_EX='becard_ex_v1';
 
     // ---- 词库：850 核心（取自列表 DOM）+ 四六级数据文件 ----
     var BOOK = { all: [], core: [], cet4: [] };
@@ -2066,6 +2065,8 @@
     var view = null;                           // 过滤后的索引列表（null = 用 order 全量）
     var autoOn = STORE.get(K_AUTO, false);
     var timerOn = STORE.get(K_TIMER, false);
+    var exOn = STORE.get(K_EX, false);
+    var EX = null, exLoading = false;
     var srs = STORE.get(K_SRS, {}) || {};
     var reviewMode = false;   // 记忆模式已下线（与遮盖重复），旧记录不再生效
     var q = [];
@@ -2138,10 +2139,15 @@
       + '.cfx-spk svg{width:20px;height:20px;}'
       + '.cfx-spk:active,.cfx-spk.on{color:#2563eb;background:#e8f1fe;border-color:#b9d3fb;}'
       + '.cfx-mini{font-size:11px;padding:4px 10px;box-shadow:none;}'
-      + '.cfx-ctrl{display:flex;gap:9px;justify-content:center;margin-top:14px;}'
+      + '.cfx-ctrl{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:14px;}'
       + '.cfx-ctrl .cfx-t{font-size:11.5px;padding:5px 14px;}'
       + '.cfx-mean{margin-top:16px;font-size:17px;line-height:1.65;flex:1;border-top:1px dashed #e5e7eb;padding-top:14px;}'
       + '.cfx-mean.masked{filter:blur(6px);opacity:.35;user-select:none;}'
+      + '.cfx-ex{margin-top:12px;background:#f8fafc;border:1px solid #e5e7eb;border-left:3px solid #93c5fd;border-radius:10px;padding:10px 12px;}'
+      + '.cfx-ex[hidden]{display:none;}'
+      + '.cfx-ex.masked{filter:blur(6px);opacity:.35;user-select:none;}'
+      + '.cfx-ex-en{font-size:14px;line-height:1.6;color:#1a1d21;}'
+      + '.cfx-ex-src{margin-top:6px;font-size:10.5px;color:#94a3b8;}'
       + '.cfx-hint{margin-top:12px;font-size:12px;color:#6b7280;display:none;text-align:center;}'
       + '.cfx-hint.show{display:block;}'
       + '.cfx-grade{display:none;gap:9px;margin-top:14px;}'
@@ -2181,9 +2187,12 @@
       + '        <span class="cfx-pr"><span class="cfx-vtag" id="cfxVtag"></span>'
       + '          <button class="cfx-spk" id="cfxSpk" title="朗读">' + SPK_SVG + '</button></span></div>'
       + '      <div class="cfx-mean" id="cfxMean"></div>'
+      + '      <div class="cfx-ex" id="cfxExBox" hidden><div class="cfx-ex-en" id="cfxExText"></div>'
+      + '        <div class="cfx-ex-src">例句来自 Tatoeba · CC BY 2.0 FR</div></div>'
       + '      <div class="cfx-ctrl">'
       + '        <button class="cfx-t cfx-mini" id="cfxTimer" aria-pressed="false" title="每 10 秒自动翻到下一张">自动播放</button>'
       + '        <button class="cfx-t cfx-mini" id="cfxAuto" aria-pressed="false" title="发音：亮起时每张自动朗读">发音</button>'
+      + '        <button class="cfx-t cfx-mini" id="cfxEx" aria-pressed="false" title="显示这个词的真人例句">例句</button>'
       + '      </div>'
       + '      <div class="cfx-hint" id="cfxHint">点卡片 / 空格 显示释义</div>'
       + '      <div class="cfx-grade" id="cfxGrade">'
@@ -2216,7 +2225,9 @@
       hide: document.getElementById('cfxHide'),
       skip: document.getElementById('cfxSkip'),
       timer: document.getElementById('cfxTimer'),
-      auto: document.getElementById('cfxAuto'), review: document.getElementById('cfxReview'),
+      auto: document.getElementById('cfxAuto'), ex: document.getElementById('cfxEx'),
+      exBox: document.getElementById('cfxExBox'), exText: document.getElementById('cfxExText'),
+      review: document.getElementById('cfxReview'),
       autoHint: document.getElementById('cfxAutoHint'), close: document.getElementById('cfxClose'), sync: document.getElementById('cfxSync')
     };
     el.src.value = src;
@@ -2224,6 +2235,17 @@
       el.src.options[0].textContent = '全部 ' + BOOK.all.length;
       el.src.options[1].textContent = '850 核心 ' + BOOK.core.length;
       el.src.options[2].textContent = '四六级 ' + BOOK.cet4.length;
+    }
+
+    // ---- 例句：首次开启才加载，不拖慢首屏 ----
+    function ensureExamples(){
+      if(EX || exLoading) return;
+      exLoading = true;
+      var sc = document.createElement('script');
+      sc.src = 'card-examples.js';
+      sc.onload = function(){ EX = window.CARD_EXAMPLES || {}; exLoading = false; render(); };
+      sc.onerror = function(){ EX = {}; exLoading = false; render(); };
+      document.head.appendChild(sc);
     }
 
     // ---- 发音 ----
@@ -2323,6 +2345,7 @@
         el.idx.textContent = '0'; el.tot.textContent = '0';
         el.prev.disabled = true; el.next.disabled = true;
         el.grade.classList.remove('show'); el.mean.classList.remove('masked'); el.hint.classList.remove('show');
+        el.exBox.hidden = true;
         return;
       }
       if(skipDone && view && view.length === 0){
@@ -2336,6 +2359,7 @@
         el.star.setAttribute('aria-pressed', 'false');
         el.doneTag.classList.remove('show');
         el.vtag.textContent = ''; el.vtag.className = 'cfx-vtag';
+        el.exBox.hidden = true;
         clearAuto(); stopSpeech(); autoKey = '';
         return;
       }
@@ -2363,10 +2387,15 @@
       el.doneTag.classList.toggle('show', isDone);
 
       var hide = hideMode || reviewMode;
-      if(hide){
-        el.mean.classList.add('masked'); el.hint.classList.add('show');
-        if(revealed) el.mean.classList.remove('masked');
-      } else { el.mean.classList.remove('masked'); el.hint.classList.remove('show'); }
+      var masked = hide && !revealed;
+      el.mean.classList.toggle('masked', masked);
+      el.hint.classList.toggle('show', hide);
+      if(exOn){
+        el.exBox.hidden = false;
+        el.exBox.classList.toggle('masked', masked);
+        el.exText.textContent = !EX ? (exLoading ? '例句加载中…' : '例句加载失败')
+                                   : (EX[d.w] || '这个词暂无例句');
+      } else { el.exBox.hidden = true; }
 
       el.prev.disabled = (pos <= 0);
       el.next.disabled = (pos >= total - 1);
@@ -2391,7 +2420,7 @@
     }
     function reveal(){
       var hide = hideMode || reviewMode;
-      if(hide && !revealed){ revealed = true; el.mean.classList.remove('masked'); el.grade.classList.toggle('show', reviewMode); }
+      if(hide && !revealed){ revealed = true; el.mean.classList.remove('masked'); el.exBox.classList.remove('masked'); el.grade.classList.toggle('show', reviewMode); }
     }
 
     // ---- 记忆模式（SM-2） ----
@@ -2439,6 +2468,10 @@
       }
       el.auto.setAttribute('aria-pressed', autoOn ? 'true' : 'false');
       if(el.timer) el.timer.setAttribute('aria-pressed', timerOn ? 'true' : 'false');
+      if(el.ex){
+        el.ex.setAttribute('aria-pressed', exOn ? 'true' : 'false');
+        el.ex.textContent = exOn ? '例句 · 开' : '例句';
+      }
     }
     function setOrder(rand){
       if(reviewMode) return;
@@ -2471,6 +2504,11 @@
     function toggleTimer(){
       timerOn = !timerOn; STORE.set(K_TIMER, timerOn); updateBtns();
       if(timerOn) armSlide(); else stopSlide();
+    }
+    function toggleEx(){
+      exOn = !exOn; STORE.set(K_EX, exOn);
+      if(exOn) ensureExamples();
+      updateBtns(); render();
     }
     function toggleReview(){
       reviewMode = !reviewMode; STORE.set(K_REVIEW, reviewMode);
@@ -2510,6 +2548,7 @@
       opened = true; el.root.hidden = false;
       document.body.style.overflow = 'hidden';
       loadOrder(); buildView(); updateBtns(); updateSyncBtn();
+      if(exOn) ensureExamples();
       render(); if(timerOn) armSlide();
     }
     function close(){
@@ -2527,13 +2566,14 @@
     if(el.skip) el.skip.onclick = toggleSkip;
     if(el.timer) el.timer.onclick = function(e){ e.stopPropagation(); toggleTimer(); };
     el.auto.onclick = function(e){ e.stopPropagation(); toggleAuto(); };
+    if(el.ex) el.ex.onclick = function(e){ e.stopPropagation(); toggleEx(); };
     if (el.review) el.review.onclick = toggleReview;
     el.star.onclick = toggleStar;
     el.prev.onclick = function(){ goto(pos - 1); };
     el.next.onclick = function(){ goto(pos + 1); };
     // 点喇叭只发音，不揭晓释义（揭晓只由点卡片/空格触发）
     el.spk.onclick = function(e){ e.stopPropagation(); clearAuto(); speakWord(null); };
-    [el.spk, el.auto, el.timer].forEach(function(btn){
+    [el.spk, el.auto, el.timer, el.ex].forEach(function(btn){
       if(!btn) return;
       ['touchstart','touchmove','touchend','pointerdown','pointerup'].forEach(function(t){
         btn.addEventListener(t, function(e){ e.stopPropagation(); }, {passive:true});
