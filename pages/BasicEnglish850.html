@@ -2136,7 +2136,9 @@
       + 'justify-content:center;cursor:pointer;color:#6b7280;margin:-6px -6px -6px 0;flex:0 0 auto;}'
       + '.cfx-spk svg{width:20px;height:20px;}'
       + '.cfx-spk:active,.cfx-spk.on{color:#2563eb;background:#e8f1fe;border-color:#b9d3fb;}'
-      + '.cfx-auto{font-size:11px;padding:4px 10px;box-shadow:none;}'
+      + '.cfx-mini{font-size:11px;padding:4px 10px;box-shadow:none;}'
+      + '.cfx-ctrl{display:flex;gap:9px;justify-content:center;margin-top:14px;}'
+      + '.cfx-ctrl .cfx-t{font-size:11.5px;padding:5px 14px;}'
       + '.cfx-mean{margin-top:16px;font-size:17px;line-height:1.65;flex:1;border-top:1px dashed #e5e7eb;padding-top:14px;}'
       + '.cfx-mean.masked{filter:blur(6px);opacity:.35;user-select:none;}'
       + '.cfx-hint{margin-top:12px;font-size:12px;color:#6b7280;display:none;text-align:center;}'
@@ -2153,7 +2155,7 @@
       + '.cfx-star[aria-pressed="true"]{background:#eafaf0;border-color:#b6e6c8;color:#16a34a;font-weight:600;}'
       + '.cfx-autohint{display:none;margin:10px 2px 0;font-size:11.5px;color:#2563eb;text-align:center;}'
       + '.cfx-autohint.show{display:block;}'
-      + '@media(max-width:520px){.cfx-word{font-size:38px;} .cfx-top{padding:10px 12px;gap:7px;} .cfx-t{padding:6px 12px;font-size:12px;} .cfx-auto{padding:4px 9px;font-size:10.5px;}}'
+      + '@media(max-width:520px){.cfx-word{font-size:38px;} .cfx-top{padding:10px 12px;gap:7px;} .cfx-t{padding:6px 12px;font-size:12px;} .cfx-ctrl .cfx-t{font-size:11px;padding:5px 12px;}}'
       + '@media(max-width:560px){#cfxSync,#cfxSrc,.cfx-spacer{display:none!important;} .cfx-top{justify-content:center;}}';
 
     var HTML = ''
@@ -2165,9 +2167,7 @@
       + '      <option value="all">全部</option><option value="core">850 核心</option><option value="cet4">四六级</option>'
       + '    </select>'
       + '    <span class="cfx-spacer"></span>'
-      + '    <button class="cfx-t" id="cfxOrder" aria-pressed="true" title="按 A–Z 正序">正序</button>'
-      + '    <button class="cfx-t" id="cfxShuffle" aria-pressed="false" title="打乱顺序">乱序</button>'
-      + '    <button class="cfx-t" id="cfxTimer" aria-pressed="false" title="每 10 秒自动翻到下一张">自动播放</button>'
+      + '    <button class="cfx-t" id="cfxOrder" aria-pressed="false" title="切换正序 / 乱序">正序</button>'
       + '    <button class="cfx-t" id="cfxHide" aria-pressed="false">遮盖释义</button>'
       + '    <button class="cfx-t" id="cfxSkip" aria-pressed="false" title="跳过已标记「已掌握」的词">隐藏已掌握</button>'
       + '  </div>'
@@ -2178,9 +2178,12 @@
       + '      <div class="cfx-word" id="cfxWord">—</div>'
       + '      <div class="cfx-phon"><span class="cfx-ipa" id="cfxIpa"></span>'
       + '        <span class="cfx-pr"><span class="cfx-vtag" id="cfxVtag"></span>'
-      + '          <button class="cfx-t cfx-auto" id="cfxAuto" aria-pressed="false" title="发音：亮起时每张自动朗读">发音</button>'
       + '          <button class="cfx-spk" id="cfxSpk" title="朗读">' + SPK_SVG + '</button></span></div>'
       + '      <div class="cfx-mean" id="cfxMean"></div>'
+      + '      <div class="cfx-ctrl">'
+      + '        <button class="cfx-t cfx-mini" id="cfxTimer" aria-pressed="false" title="每 10 秒自动翻到下一张">自动播放</button>'
+      + '        <button class="cfx-t cfx-mini" id="cfxAuto" aria-pressed="false" title="发音：亮起时每张自动朗读">发音</button>'
+      + '      </div>'
       + '      <div class="cfx-hint" id="cfxHint">点卡片 / 空格 显示释义</div>'
       + '      <div class="cfx-grade" id="cfxGrade">'
       + '        <button data-q="0">不认识</button><button data-q="3">模糊</button><button data-q="5">认识</button>'
@@ -2208,7 +2211,7 @@
       doneTag: document.getElementById('cfxDoneTag'), hint: document.getElementById('cfxHint'),
       grade: document.getElementById('cfxGrade'), prev: document.getElementById('cfxPrev'),
       next: document.getElementById('cfxNext'), star: document.getElementById('cfxStar'),
-      order: document.getElementById('cfxOrder'), shuffle: document.getElementById('cfxShuffle'),
+      order: document.getElementById('cfxOrder'),
       hide: document.getElementById('cfxHide'),
       skip: document.getElementById('cfxSkip'),
       timer: document.getElementById('cfxTimer'),
@@ -2426,8 +2429,8 @@
 
     // ---- 状态按钮 ----
     function updateBtns(){
-      if(el.order) el.order.setAttribute('aria-pressed', shuffled ? 'false' : 'true');
-      el.shuffle.setAttribute('aria-pressed', shuffled ? 'true' : 'false');
+      el.order.setAttribute('aria-pressed', shuffled ? 'true' : 'false');
+      el.order.textContent = shuffled ? '乱序' : '正序';
       el.hide.setAttribute('aria-pressed', hideMode ? 'true' : 'false');
       if(el.skip){
         el.skip.setAttribute('aria-pressed', skipDone ? 'true' : 'false');
@@ -2518,11 +2521,10 @@
     // ---- 事件 ----
     el.close.onclick = close;
     el.src.onchange = switchSrc;
-    if(el.order) el.order.onclick = function(){ setOrder(false); };
-    el.shuffle.onclick = function(){ setOrder(true); };
+    el.order.onclick = function(){ setOrder(!shuffled); };
     el.hide.onclick = toggleHide;
     if(el.skip) el.skip.onclick = toggleSkip;
-    if(el.timer) el.timer.onclick = toggleTimer;
+    if(el.timer) el.timer.onclick = function(e){ e.stopPropagation(); toggleTimer(); };
     el.auto.onclick = function(e){ e.stopPropagation(); toggleAuto(); };
     if (el.review) el.review.onclick = toggleReview;
     el.star.onclick = toggleStar;
@@ -2530,7 +2532,8 @@
     el.next.onclick = function(){ goto(pos + 1); };
     // 点喇叭只发音，不揭晓释义（揭晓只由点卡片/空格触发）
     el.spk.onclick = function(e){ e.stopPropagation(); clearAuto(); speakWord(null); };
-    [el.spk, el.auto].forEach(function(btn){
+    [el.spk, el.auto, el.timer].forEach(function(btn){
+      if(!btn) return;
       ['touchstart','touchmove','touchend','pointerdown','pointerup'].forEach(function(t){
         btn.addEventListener(t, function(e){ e.stopPropagation(); }, {passive:true});
       });
