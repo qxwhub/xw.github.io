@@ -2146,7 +2146,8 @@
       + '.cfx-ex{margin-top:12px;background:#f8fafc;border:1px solid #e5e7eb;border-left:3px solid #93c5fd;border-radius:10px;padding:10px 12px;}'
       + '.cfx-ex[hidden]{display:none;}'
       + '.cfx-ex.masked{filter:blur(6px);opacity:.35;user-select:none;}'
-      + '.cfx-ex-en{font-size:14px;line-height:1.6;color:#1a1d21;}'
+      + '.cfx-ex-en{font-size:13.5px;line-height:1.55;color:#1a1d21;}'
+      + '.cfx-ex-line + .cfx-ex-line{margin-top:7px;padding-top:7px;border-top:1px dashed #e5e7eb;}'
       + '.cfx-ex-src{margin-top:6px;font-size:10.5px;color:#94a3b8;}'
       + '.cfx-hint{margin-top:12px;font-size:12px;color:#6b7280;display:none;text-align:center;}'
       + '.cfx-hint.show{display:block;}'
@@ -2393,8 +2394,16 @@
       if(exOn){
         el.exBox.hidden = false;
         el.exBox.classList.toggle('masked', masked);
-        el.exText.textContent = !EX ? (exLoading ? '例句加载中…' : '例句加载失败')
-                                   : (EX[d.w] || '这个词暂无例句');
+        var lines = !EX ? [exLoading ? '例句加载中…' : '例句加载失败']
+                        : (EX[d.w] || ['这个词暂无例句']);
+        if(!Array.isArray(lines)) lines = [lines];
+        el.exText.textContent = '';
+        for(var li = 0; li < lines.length; li++){
+          var row = document.createElement('div');
+          row.className = 'cfx-ex-line';
+          row.textContent = lines[li];
+          el.exText.appendChild(row);
+        }
       } else { el.exBox.hidden = true; }
 
       el.prev.disabled = (pos <= 0);
