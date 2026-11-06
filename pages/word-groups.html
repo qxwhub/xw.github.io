@@ -56,6 +56,7 @@ h1 small{font-size:12px;color:#6b7280;font-weight:400;margin-left:6px}
     <div class="prog">已记住 <b id="doneN">0</b> / <span id="totalN">6030</span></div>
     <div class="acts">
       <button class="btn" id="randGroup" type="button">随机一组</button>
+      <button class="btn" id="mixGroup" type="button" title="从全部 6030 词里随机抽 100 个，不按字母分组">随机混一组</button>
       <button class="btn" id="randWord" type="button">随机一词</button>
       <button class="btn" id="hideDone" type="button" aria-pressed="false">隐藏已记住</button>
     </div>
@@ -67,7 +68,7 @@ h1 small{font-size:12px;color:#6b7280;font-weight:400;margin-left:6px}
     <button id="nextG" type="button">下一组 →</button>
   </div>
   <div class="chips" id="chips"></div>
-  <div class="foot">全部 6030 词按首字母分组，一组一屏；点词看音标、释义、例句、发音，顺手标「已记住」。<br>进度与词表、卡片共用一份 ｜ 例句来自 Tatoeba · CC BY 2.0 FR</div>
+  <div class="foot">全部 6030 词按首字母分组，一组一屏；「随机混一组」不按字母，从全库抽 100 个混着刷。<br>点词看音标、释义、例句、发音，顺手标「已记住」。<br>进度与词表、卡片共用一份 ｜ 例句来自 Tatoeba · CC BY 2.0 FR</div>
 </div>
 
 <div class="pop" id="pop" hidden>
@@ -93,7 +94,7 @@ h1 small{font-size:12px;color:#6b7280;font-weight:400;margin-left:6px}
 (function(){
   var KEY='be850_done_v1', KEY_DEL='be850_del_v1';
   var G=null, EX=null, ALL=[], MAP={}, GIDX={}, KNOWN={}, AUDIO={};
-  var done={}, delSet={}, gi=0, curW=null, hideDone=false, opened=false;
+  var done={}, delSet={}, gi=0, curW=null, hideDone=false, opened=false, mix=null;
   var $ = function(id){ return document.getElementById(id); };
   function read(k,d){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
   function write(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
@@ -133,6 +134,7 @@ h1 small{font-size:12px;color:#6b7280;font-weight:400;margin-left:6px}
     for(var k in done) if(!KNOWN[k]) delete done[k];
     $('totalN').textContent=ALL.length;
     $('randGroup').onclick=function(){ goGroup(Math.floor(Math.random()*G.length)); };
+    $('mixGroup').onclick=goMix;
     $('randWord').onclick=randomWord;
     $('hideDone').onclick=function(){
       hideDone=!hideDone;
@@ -192,7 +194,9 @@ h1 small{font-size:12px;color:#6b7280;font-weight:400;margin-left:6px}
       if(c) c.classList.toggle('done',!!done[w]);
     }
   }
+  function curList(){ return mix || G[gi].words; }
   function goGroup(i){
+    mix=null;
     gi=Math.max(0,Math.min(i,G.length-1));
     var g=G[gi], a=g.words;
     $('gLabel').textContent=g.label+' · '+a.length+' 词 · '+a[0][0]+' ~ '+a[a.length-1][0];
@@ -202,8 +206,22 @@ h1 small{font-size:12px;color:#6b7280;font-weight:400;margin-left:6px}
     });
     renderChips();
   }
+  function goMix(){
+    var pool=ALL.slice(), n=Math.min(100,pool.length), out=[];
+    for(var i=0;i<n;i++){
+      var j=i+Math.floor(Math.random()*(pool.length-i));
+      var t=pool[i]; pool[i]=pool[j]; pool[j]=t;
+      out.push(MAP[pool[i]]);
+    }
+    mix=out;
+    $('gLabel').textContent='混合随机 · '+n+' 词 · 不按字母，点「随机混一组」再换一批';
+    $('prevG').disabled=false; $('nextG').disabled=false;
+    Array.prototype.forEach.call($('letters').querySelectorAll('button'),function(b){ b.classList.remove('on'); });
+    renderChips();
+    window.scrollTo(0,0);
+  }
   function renderChips(){
-    var a=G[gi].words,out=[];
+    var a=curList(),out=[];
     for(var j=0;j<a.length;j++){
       var w=a[j][0];
       if(hideDone&&done[w]) continue;
@@ -233,11 +251,12 @@ h1 small{font-size:12px;color:#6b7280;font-weight:400;margin-left:6px}
   }
   function closePop(){ opened=false; $('pop').hidden=true; }
   function stepWord(dir){
-    var a=G[gi].words,idx=-1;
+    var a=curList(),idx=-1;
     for(var j=0;j<a.length;j++) if(a[j][0]===curW){ idx=j; break; }
     if(idx<0) return;
     var n=idx+dir;
     if(n>=0&&n<a.length){ openWord(a[n][0]); return; }
+    if(mix) return;
     var ng=gi+dir;
     if(ng<0||ng>=G.length) return;
     goGroup(ng);
@@ -245,6 +264,7 @@ h1 small{font-size:12px;color:#6b7280;font-weight:400;margin-left:6px}
   }
   function randomWord(){
     if(!ALL.length) return;
+    if(mix){ openWord(mix[Math.floor(Math.random()*mix.length)][0]); return; }
     var w=ALL[Math.floor(Math.random()*ALL.length)];
     if(GIDX[w]!==gi) goGroup(GIDX[w]);
     openWord(w);
