@@ -2033,7 +2033,8 @@
   var CFX = (function(){
     var K_SRC='becard_src_v1', K_ORD='becard_order_v1', K_POS='becard_pos_v1',
         K_SHUF='becard_shuf_v1', K_HIDE='becard_hide_v1', K_AUTO='becard_auto_v1', K_TIMER='becard_timer_v1',
-        K_SRS='cet4fc_srs', K_REVIEW='becard_review_v1', K_SKIP='becard_skip_v1', K_EX='becard_ex_v1';
+        K_SRS='cet4fc_srs', K_REVIEW='becard_review_v1', K_SKIP='becard_skip_v1', K_EX='becard_ex_v1',
+        K_ONLY='becard_onlydone_v1';
 
     // ---- 词库：850 核心（取自列表 DOM）+ 四六级数据文件 ----
     var BOOK = { all: [], core: [], cet4: [] };
@@ -2063,6 +2064,8 @@
     var order = null, pos = 0, shuffled = false;
     var hideMode = STORE.get(K_HIDE, false);
     var skipDone = STORE.get(K_SKIP, false);   // 隐藏已掌握
+    var onlyDone = STORE.get(K_ONLY, false);   // 只看已记住（复习），与 skipDone 互斥
+    if(onlyDone && skipDone){ skipDone = false; STORE.set(K_SKIP, false); }  // 防脏状态
     var view = null;                           // 过滤后的索引列表（null = 用 order 全量）
     var autoOn = STORE.get(K_AUTO, false);
     var timerOn = STORE.get(K_TIMER, false);
@@ -2086,13 +2089,15 @@
       pos = Math.min(Math.max(STORE.get(K_POS, 0) | 0, 0), Math.max(0, DATA.length - 1));
     }
     function save(k, v){ STORE.set(k, v); }
-    // 当前可见的索引列表：开启「隐藏已掌握」时去掉已标记的词
+    // 当前可见的索引列表：隐藏已掌握 / 只看已记住，两种筛选互斥
     function buildView(){
-      if(!skipDone){ view = null; return; }
+      if(!skipDone && !onlyDone){ view = null; return; }
       var a = [];
       for(var i=0;i<order.length;i++){
         var d = DATA[order[i]];
-        if(d && !done[d.w]) a.push(order[i]);
+        if(!d) continue;
+        var isDone = !!done[d.w];
+        if(onlyDone ? isDone : !isDone) a.push(order[i]);
       }
       view = a;
       clampPos();
@@ -2140,6 +2145,8 @@
       + '.cfx-spk svg{width:20px;height:20px;}'
       + '.cfx-spk:active,.cfx-spk.on{color:#2563eb;background:#e8f1fe;border-color:#b9d3fb;}'
       + '.cfx-mini{font-size:11px;padding:4px 10px;box-shadow:none;}'
+      + '.cfx-f{font-size:11.5px;padding:6px 10px;}'
+      + '#cfxFilter[data-f="done"][aria-pressed="true"]{background:#16a34a;border-color:#16a34a;box-shadow:0 3px 10px rgba(22,163,74,.22);}'
       + '.cfx-ctrl{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:14px;}'
       + '.cfx-ctrl .cfx-t{font-size:11.5px;padding:5px 14px;}'
       + '.cfx-mean{margin-top:16px;font-size:17px;line-height:1.65;flex:1;border-top:1px dashed #e5e7eb;padding-top:14px;}'
@@ -2164,7 +2171,7 @@
       + '.cfx-star[aria-pressed="true"]{background:#eafaf0;border-color:#b6e6c8;color:#16a34a;font-weight:600;}'
       + '.cfx-autohint{display:none;margin:10px 2px 0;font-size:11.5px;color:#2563eb;text-align:center;}'
       + '.cfx-autohint.show{display:block;}'
-      + '@media(max-width:520px){.cfx-word{font-size:38px;} .cfx-top{padding:10px 12px;gap:7px;} .cfx-t{padding:6px 12px;font-size:12px;} .cfx-ctrl .cfx-t{font-size:11px;padding:5px 12px;}}'
+      + '@media(max-width:520px){.cfx-word{font-size:38px;} .cfx-top{padding:10px 12px;gap:7px;} .cfx-t{padding:6px 12px;font-size:12px;} .cfx-f{padding:5px 9px;font-size:11px;} .cfx-ctrl .cfx-t{font-size:11px;padding:5px 12px;}}'
       + '@media(max-width:560px){#cfxSync,#cfxSrc,.cfx-spacer{display:none!important;} .cfx-top{justify-content:center;}}';
 
     var HTML = ''
@@ -2178,7 +2185,7 @@
       + '    <span class="cfx-spacer"></span>'
       + '    <button class="cfx-t" id="cfxOrder" aria-pressed="false" title="切换正序 / 乱序">正序</button>'
       + '    <button class="cfx-t" id="cfxHide" aria-pressed="false">遮盖释义</button>'
-      + '    <button class="cfx-t" id="cfxSkip" aria-pressed="false" title="跳过已标记「已掌握」的词">隐藏已掌握</button>'
+      + '    <button class="cfx-t cfx-f" id="cfxFilter" aria-pressed="false" data-f="all" title="点一下切换：已掌握 / 未记住 / 全部">全部</button>'
       + '  </div>'
       + '  <div class="cfx-main"><div class="cfx-stage">'
       + '    <div class="cfx-card" id="cfxCard">'
@@ -2225,7 +2232,7 @@
       next: document.getElementById('cfxNext'), star: document.getElementById('cfxStar'),
       order: document.getElementById('cfxOrder'),
       hide: document.getElementById('cfxHide'),
-      skip: document.getElementById('cfxSkip'),
+      filter: document.getElementById('cfxFilter'),
       timer: document.getElementById('cfxTimer'),
       auto: document.getElementById('cfxAuto'), ex: document.getElementById('cfxEx'),
       exBox: document.getElementById('cfxExBox'), exText: document.getElementById('cfxExText'),
@@ -2350,11 +2357,13 @@
         el.exBox.hidden = true;
         return;
       }
-      if(skipDone && view && view.length === 0){
-        el.word.textContent = '全部已掌握';
+      if((skipDone || onlyDone) && view && view.length === 0){
+        el.word.textContent = onlyDone ? '还没有已掌握的词' : '全部已掌握';
         el.word.style.fontSize = ''; el.word.style.lineHeight = '';
         el.ipa.textContent = '';
-        el.mean.textContent = '当前范围的词都标成已掌握了。点上方「隐藏已掌握」关掉，可以再看一遍。';
+        el.mean.textContent = onlyDone
+          ? '先在卡片或列表里点「已掌握」标记几个词，再回来复习。点上方筛选按钮切回「全部」。'
+          : '当前范围的词都标成已掌握了。点上方筛选按钮切回「全部」，可以再看一遍。';
         el.mean.classList.remove('masked'); el.hint.classList.remove('show');
         el.idx.textContent = '0'; el.tot.textContent = '0';
         el.prev.disabled = true; el.next.disabled = true;
@@ -2362,7 +2371,7 @@
         el.doneTag.classList.remove('show');
         el.vtag.textContent = ''; el.vtag.className = 'cfx-vtag';
         el.exBox.hidden = true;
-        clearAuto(); stopSpeech(); autoKey = '';
+        clearAuto(); stopSpeech(); stopSlide(); autoKey = '';
         return;
       }
       var d = curData(); if(!d) return;
@@ -2472,9 +2481,11 @@
       el.order.setAttribute('aria-pressed', shuffled ? 'true' : 'false');
       el.order.textContent = shuffled ? '乱序' : '正序';
       el.hide.setAttribute('aria-pressed', hideMode ? 'true' : 'false');
-      if(el.skip){
-        el.skip.setAttribute('aria-pressed', skipDone ? 'true' : 'false');
-        el.skip.textContent = skipDone ? '隐藏已掌握 · 开' : '隐藏已掌握';
+      if(el.filter){
+        var f = onlyDone ? 'done' : (skipDone ? 'todo' : 'all');
+        el.filter.setAttribute('data-f', f);
+        el.filter.setAttribute('aria-pressed', f === 'all' ? 'false' : 'true');
+        el.filter.textContent = onlyDone ? '已掌握' : (skipDone ? '未记住' : '全部');
       }
       el.auto.setAttribute('aria-pressed', autoOn ? 'true' : 'false');
       if(el.timer) el.timer.setAttribute('aria-pressed', timerOn ? 'true' : 'false');
@@ -2498,10 +2509,15 @@
       STORE.set(K_ORD, order); STORE.set(K_SHUF, shuffled); STORE.set(K_POS, pos);
       revealed = false; updateBtns(); render();
     }
-    function toggleSkip(){
-      skipDone = !skipDone;
-      STORE.set(K_SKIP, skipDone);
-      revealed = false; buildView(); updateBtns(); render();
+    // 一个按钮三态循环：全部 → 已掌握 → 未记住 → 全部（点三次回到全部）
+    function cycleFilter(){
+      if(!skipDone && !onlyDone){ onlyDone = true; }
+      else if(onlyDone){ onlyDone = false; skipDone = true; }
+      else { skipDone = false; }
+      STORE.set(K_SKIP, skipDone); STORE.set(K_ONLY, onlyDone);
+      pos = 0; revealed = false;
+      buildView(); updateBtns(); render();
+      if(timerOn) armSlide();
     }
     function toggleHide(){
       hideMode = !hideMode; revealed = false;
@@ -2573,7 +2589,7 @@
     el.src.onchange = switchSrc;
     el.order.onclick = function(){ setOrder(!shuffled); };
     el.hide.onclick = toggleHide;
-    if(el.skip) el.skip.onclick = toggleSkip;
+    if(el.filter) el.filter.onclick = cycleFilter;
     if(el.timer) el.timer.onclick = function(e){ e.stopPropagation(); toggleTimer(); };
     el.auto.onclick = function(e){ e.stopPropagation(); toggleAuto(); };
     if(el.ex) el.ex.onclick = function(e){ e.stopPropagation(); toggleEx(); };
