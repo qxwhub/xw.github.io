@@ -2163,7 +2163,8 @@
       + '.cfx-grade button[data-q="3"]{border:1px solid #fcd34d;color:#d97706;}'
       + '.cfx-grade button[data-q="5"]{border:1px solid #86efac;color:#16a34a;}'
       + '.cfx-nav{display:flex;gap:9px;margin-top:16px;}'
-      + '.cfx-nav .cfx-t{flex:1;justify-content:center;padding:11px 0;font-size:13.5px;}'
+      + '.cfx-nav .cfx-t{flex:1;justify-content:center;padding:11px 0;font-size:13.5px;'
+      + 'user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;}'
       + '.cfx-nav .cfx-t:disabled{opacity:.4;cursor:default;}'
       + '.cfx-star[aria-pressed="true"]{background:#eafaf0;border-color:#b6e6c8;color:#16a34a;font-weight:600;}'
       + '.cfx-autohint{display:none;margin:10px 2px 0;font-size:11.5px;color:#2563eb;text-align:center;}'
@@ -2592,8 +2593,41 @@
     if(el.ex) el.ex.onclick = function(e){ e.stopPropagation(); toggleEx(); };
     if (el.review) el.review.onclick = toggleReview;
     el.star.onclick = toggleStar;
-    el.prev.onclick = function(){ goto(pos - 1); };
-    el.next.onclick = function(){ goto(pos + 1); };
+    var holdUntil = 0; // 长按结束后短暂忽略那一次 click，避免多翻一张
+    el.prev.onclick = function(){ if(Date.now() < holdUntil) return; goto(pos - 1); };
+    el.next.onclick = function(){ if(Date.now() < holdUntil) return; goto(pos + 1); };
+    // 长按「上一张 / 下一张」连续翻页：按住约 400ms 开始，之后每 140ms 翻一张
+    (function(){
+      var delay = null, timer = null;
+      function stop(){
+        if(delay){ clearTimeout(delay); delay = null; }
+        if(timer){ clearInterval(timer); timer = null; }
+      }
+      function bind(btn, step){
+        if(!btn) return;
+        btn.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+        btn.addEventListener('pointerdown', function(e){
+          if(e.pointerType === 'mouse' && e.button !== 0) return;
+          stop();
+          delay = setTimeout(function(){
+            delay = null;
+            timer = setInterval(function(){
+              holdUntil = Date.now() + 600;
+              if(btn.disabled || !opened){ stop(); return; }
+              goto(pos + step);
+            }, 140);
+          }, 400);
+        });
+        ['pointerup','pointercancel','pointerleave'].forEach(function(t){
+          btn.addEventListener(t, stop);
+        });
+      }
+      bind(el.prev, -1); bind(el.next, 1);
+      window.addEventListener('pointerup', stop);
+      window.addEventListener('pointercancel', stop);
+      window.addEventListener('blur', stop);
+      document.addEventListener('visibilitychange', function(){ if(document.hidden) stop(); });
+    })();
     // 点喇叭只发音，不揭晓释义（揭晓只由点卡片/空格触发）
     el.spk.onclick = function(e){ e.stopPropagation(); clearAuto(); speakWord(null); };
     [el.spk, el.auto, el.timer, el.ex].forEach(function(btn){
