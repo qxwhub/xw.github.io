@@ -2068,7 +2068,10 @@
     if(onlyDone && skipDone){ skipDone = false; STORE.set(K_SKIP, false); }  // 防脏状态
     var view = null;                           // 过滤后的索引列表（null = 用 order 全量）
     var autoOn = STORE.get(K_AUTO, false);
-    var timerOn = STORE.get(K_TIMER, false);
+    // 自动播放方向：0=关，1=正序（下一张），-1=倒序（上一张）
+    var timerDir = STORE.get(K_TIMER, 0);
+    if(timerDir === true) timerDir = 1;                       // 兼容旧版存的 true/false
+    if(timerDir !== 1 && timerDir !== -1) timerDir = 0;
     var exOn = STORE.get(K_EX, false);
     var EX = null, exLoading = false;
     var srs = STORE.get(K_SRS, {}) || {};
@@ -2197,7 +2200,7 @@
       + '      <div class="cfx-ex" id="cfxExBox" hidden><div class="cfx-ex-en" id="cfxExText"></div>'
       + '        <div class="cfx-ex-src">例句来自 Tatoeba · CC BY 2.0 FR</div></div>'
       + '      <div class="cfx-ctrl">'
-      + '        <button class="cfx-t cfx-mini" id="cfxTimer" aria-pressed="false" title="每 10 秒自动翻到下一张">自动播放</button>'
+      + '        <button class="cfx-t cfx-mini" id="cfxTimer" aria-pressed="false" title="点一下正序播放，再点倒序播放，第三下关闭">自动播放</button>'
       + '        <button class="cfx-t cfx-mini" id="cfxAuto" aria-pressed="false" title="发音：亮起时每张自动朗读">发音</button>'
       + '        <button class="cfx-t cfx-mini" id="cfxEx" aria-pressed="false" title="显示这个词的真人例句">例句</button>'
       + '      </div>'
@@ -2318,11 +2321,17 @@
     function stopSlide(){ if(slideTimer){ clearTimeout(slideTimer); slideTimer = null; } }
     function armSlide(){
       stopSlide();
-      if(!timerOn || !opened) return;
+      if(!timerDir || !opened) return;
       slideTimer = setTimeout(function(){
         slideTimer = null;
-        if(!timerOn || !opened) return;
-        goto(pos + 1);
+        if(!timerDir || !opened) return;
+        var total = reviewMode ? q.length : listLen();
+        var np = pos + timerDir;
+        if(np < 0 || np >= total){                 // 播到头就自动停
+          timerDir = 0; STORE.set(K_TIMER, 0); updateBtns();
+          return;
+        }
+        goto(np);
         armSlide();
       }, TIMER_GAP);
     }
@@ -2486,7 +2495,13 @@
         el.filter.textContent = onlyDone ? '已掌握' : (skipDone ? '未记住' : '全部');
       }
       el.auto.setAttribute('aria-pressed', autoOn ? 'true' : 'false');
-      if(el.timer) el.timer.setAttribute('aria-pressed', timerOn ? 'true' : 'false');
+      if(el.timer){
+        el.timer.setAttribute('aria-pressed', timerDir ? 'true' : 'false');
+        el.timer.textContent = timerDir === 1 ? '正序播放 ▸' : (timerDir === -1 ? '倒序播放 ◂' : '自动播放');
+        el.timer.title = timerDir === 1 ? '每 10 秒翻下一张 · 再点切倒序'
+                       : (timerDir === -1 ? '每 10 秒翻上一张 · 再点关闭'
+                                          : '点一下正序播放，再点倒序播放，第三下关闭');
+      }
       if(el.ex){
         el.ex.setAttribute('aria-pressed', exOn ? 'true' : 'false');
         el.ex.textContent = exOn ? '例句 · 开' : '例句';
@@ -2515,7 +2530,7 @@
       STORE.set(K_SKIP, skipDone); STORE.set(K_ONLY, onlyDone);
       pos = 0; revealed = false;
       buildView(); updateBtns(); render();
-      if(timerOn) armSlide();
+      if(timerDir) armSlide();
     }
     function toggleHide(){
       hideMode = !hideMode; revealed = false;
@@ -2525,9 +2540,11 @@
       autoOn = !autoOn; STORE.set(K_AUTO, autoOn); updateBtns();
       if(autoOn) scheduleAuto(); else { clearAuto(); stopSpeech(); }
     }
+    // 关 → 正序 → 倒序 → 关
     function toggleTimer(){
-      timerOn = !timerOn; STORE.set(K_TIMER, timerOn); updateBtns();
-      if(timerOn) armSlide(); else stopSlide();
+      timerDir = timerDir === 0 ? 1 : (timerDir === 1 ? -1 : 0);
+      STORE.set(K_TIMER, timerDir); updateBtns();
+      if(timerDir) armSlide(); else stopSlide();
     }
     function toggleEx(){
       exOn = !exOn; STORE.set(K_EX, exOn);
@@ -2573,7 +2590,7 @@
       document.body.style.overflow = 'hidden';
       loadOrder(); buildView(); updateBtns(); updateSyncBtn();
       if(exOn) ensureExamples();
-      render(); if(timerOn) armSlide();
+      render(); if(timerDir) armSlide();
     }
     function close(){
       if(!opened) return;
