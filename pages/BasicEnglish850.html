@@ -1272,6 +1272,7 @@
     for (var i = 0; i < data.length; i++) {
       var r = data[i];
       var key = String(r.w).toLowerCase();
+      if (/\s/.test(key)) continue;          // 取消短语（带空格的词组），只留单词
       if (haveCore[key]) continue;
       LIST.push(r);
       var L = (String(r.w)[0] || '#').toUpperCase();
@@ -2049,7 +2050,7 @@
       var s2 = {};
       (window.BE_CET4 || []).forEach(function(d){
         var w = String(d.w||'').toLowerCase().trim();
-        if(!w || s2[w]) return; s2[w] = 1;
+        if(!w || /\s/.test(w) || s2[w]) return; s2[w] = 1;   // 取消短语，只留单词
         BOOK.cet4.push({ w: w, ipa: d.ipa || '', zh: d.zh || '' });
       });
       var s3 = {};
