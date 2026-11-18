@@ -2036,7 +2036,7 @@
     var K_SRC='becard_src_v1', K_ORD='becard_order_v1', K_POS='becard_pos_v1',
         K_SHUF='becard_shuf_v1', K_HIDE='becard_hide_v1', K_AUTO='becard_auto_v1', K_TIMER='becard_timer_v1',
         K_SRS='cet4fc_srs', K_REVIEW='becard_review_v1', K_SKIP='becard_skip_v1', K_EX='becard_ex_v1',
-        K_ONLY='becard_onlydone_v1';
+        K_ONLY='becard_onlydone_v1', K_SPEED='becard_speed_v1';
 
     // ---- 词库：850 核心（取自列表 DOM）+ 四六级数据文件 ----
     var BOOK = { all: [], core: [], cet4: [] };
@@ -2074,6 +2074,8 @@
     var timerDir = STORE.get(K_TIMER, 0);
     if(timerDir === true) timerDir = 1;                       // 兼容旧版存的 true/false
     if(timerDir !== 1 && timerDir !== -1) timerDir = 0;
+    var speed = parseInt(STORE.get(K_SPEED, 10), 10);          // 自动播放间隔，秒
+    if([2,4,6,8,10].indexOf(speed) < 0) speed = 10;
     var exOn = STORE.get(K_EX, false);
     var EX = null, exLoading = false;
     var srs = STORE.get(K_SRS, {}) || {};
@@ -2151,6 +2153,7 @@
       + '.cfx-spk:active,.cfx-spk.on{color:#2563eb;background:#e8f1fe;border-color:#b9d3fb;}'
       + '#cfxFilter[data-f="done"][aria-pressed="true"]{background:#16a34a;border-color:#16a34a;box-shadow:0 3px 10px rgba(22,163,74,.22);}'
       + '.cfx-ctrl{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:14px;}'
+      + '.cfx-speed{font:inherit;font-size:12px;padding:6px 10px;border:1px solid #e5e7eb;border-radius:999px;background:#fff;color:#475569;cursor:pointer;box-shadow:0 2px 8px rgba(17,24,39,.05);}'
       + '.cfx-mean{margin-top:16px;font-size:17px;line-height:1.65;flex:1;border-top:1px dashed #e5e7eb;padding-top:14px;}'
       + '.cfx-mean.masked{filter:blur(6px);opacity:.35;user-select:none;}'
       + '.cfx-ex{margin-top:12px;background:#f8fafc;border:1px solid #e5e7eb;border-left:3px solid #93c5fd;border-radius:10px;padding:10px 12px;}'
@@ -2203,6 +2206,10 @@
       + '        <div class="cfx-ex-src">例句来自 Tatoeba · CC BY 2.0 FR</div></div>'
       + '      <div class="cfx-ctrl">'
       + '        <button class="cfx-t cfx-mini" id="cfxTimer" aria-pressed="false" title="点一下正序播放，再点倒序播放，第三下关闭">自动播放</button>'
+      + '        <select class="cfx-speed" id="cfxSpeed" title="自动播放间隔（秒）">'
+      + '          <option value="2">2 秒</option><option value="4">4 秒</option><option value="6">6 秒</option>'
+      + '          <option value="8">8 秒</option><option value="10">10 秒</option>'
+      + '        </select>'
       + '        <button class="cfx-t cfx-mini" id="cfxAuto" aria-pressed="false" title="发音：亮起时每张自动朗读">发音</button>'
       + '        <button class="cfx-t cfx-mini" id="cfxEx" aria-pressed="false" title="显示这个词的真人例句">例句</button>'
       + '      </div>'
@@ -2236,7 +2243,7 @@
       order: document.getElementById('cfxOrder'),
       hide: document.getElementById('cfxHide'),
       filter: document.getElementById('cfxFilter'),
-      timer: document.getElementById('cfxTimer'),
+      timer: document.getElementById('cfxTimer'), speed: document.getElementById('cfxSpeed'),
       auto: document.getElementById('cfxAuto'), ex: document.getElementById('cfxEx'),
       exBox: document.getElementById('cfxExBox'), exText: document.getElementById('cfxExText'),
       review: document.getElementById('cfxReview'),
@@ -2318,8 +2325,8 @@
     var autoTimer=null, autoSeq=0, autoCount=0, autoKey='';
     function clearAuto(){ if(autoTimer){ clearTimeout(autoTimer); autoTimer=null; } }
 
-    // ---- 自动切换（默认 10 秒一张）----
-    var TIMER_GAP = 10000, slideTimer = null;
+    // ---- 自动切换（间隔由速度下拉框决定，默认 10 秒）----
+    var slideTimer = null;
     function stopSlide(){ if(slideTimer){ clearTimeout(slideTimer); slideTimer = null; } }
     function armSlide(){
       stopSlide();
@@ -2335,7 +2342,7 @@
         }
         goto(np);
         armSlide();
-      }, TIMER_GAP);
+      }, speed * 1000);
     }
     function scheduleAuto(){
       clearAuto(); autoCount = 0;
@@ -2500,10 +2507,11 @@
       if(el.timer){
         el.timer.setAttribute('aria-pressed', timerDir ? 'true' : 'false');
         el.timer.textContent = timerDir === 1 ? '正序播放 ▸' : (timerDir === -1 ? '倒序播放 ◂' : '自动播放');
-        el.timer.title = timerDir === 1 ? '每 10 秒翻下一张 · 再点切倒序'
-                       : (timerDir === -1 ? '每 10 秒翻上一张 · 再点关闭'
+        el.timer.title = timerDir === 1 ? ('每 ' + speed + ' 秒翻下一张 · 再点切倒序')
+                       : (timerDir === -1 ? ('每 ' + speed + ' 秒翻上一张 · 再点关闭')
                                           : '点一下正序播放，再点倒序播放，第三下关闭');
       }
+      if(el.speed) el.speed.value = speed;
       if(el.ex){
         el.ex.setAttribute('aria-pressed', exOn ? 'true' : 'false');
         el.ex.textContent = exOn ? '例句 · 开' : '例句';
@@ -2608,6 +2616,14 @@
     el.hide.onclick = toggleHide;
     if(el.filter) el.filter.onclick = cycleFilter;
     if(el.timer) el.timer.onclick = function(e){ e.stopPropagation(); toggleTimer(); };
+    if(el.speed) el.speed.onclick = function(e){ e.stopPropagation(); };  // 点下拉框不揭晓释义
+    if(el.speed) el.speed.onchange = function(e){
+      e.stopPropagation();
+      speed = parseInt(this.value, 10) || 10;
+      STORE.set(K_SPEED, speed);
+      if(timerDir) armSlide();   // 正在播放则按新速度重新计时
+      updateBtns();
+    };
     el.auto.onclick = function(e){ e.stopPropagation(); toggleAuto(); };
     if(el.ex) el.ex.onclick = function(e){ e.stopPropagation(); toggleEx(); };
     if (el.review) el.review.onclick = toggleReview;
@@ -2649,7 +2665,7 @@
     })();
     // 点喇叭只发音，不揭晓释义（揭晓只由点卡片/空格触发）
     el.spk.onclick = function(e){ e.stopPropagation(); clearAuto(); speakWord(null); };
-    [el.spk, el.auto, el.timer, el.ex].forEach(function(btn){
+    [el.spk, el.auto, el.timer, el.ex, el.speed].forEach(function(btn){
       if(!btn) return;
       ['touchstart','touchmove','touchend','pointerdown','pointerup'].forEach(function(t){
         btn.addEventListener(t, function(e){ e.stopPropagation(); }, {passive:true});
